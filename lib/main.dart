@@ -1,52 +1,25 @@
-import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'logInScreen/login_screen.dart';
+import 'logInScreen/bloc/login_bloc.dart';  // Make sure this file contains your LoginBloc
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => MyAppState(),
+    return BlocProvider(
+      create: (context) => LoginBloc(),
       child: MaterialApp(
-        title: 'Namer App',
+        title: 'Flutter Login',
         theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
+          primarySwatch: Colors.blue,
         ),
-        home: MyHomePage(),
-      ),
-    );
-  }
-}
-
-class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
-}
-
-class MyHomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-
-    return Scaffold(
-      body: Column(
-        children: [
-          Text('A random awesome idea:'),
-          Text(appState.current.asLowerCase),
-          // ↓ Add this.
-          ElevatedButton(
-            onPressed: () {
-              print('button pressed!');
-            },
-            child: Text('Next'),
-          ),
-        ],
+        home: const LoginScreen(),
       ),
     );
   }
