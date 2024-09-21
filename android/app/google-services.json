@@ -41,6 +41,42 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:799045641014:android:af7c522d1f7f7c64378997",
+        "android_client_info": {
+          "package_name": "com.swappy.pin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "799045641014-lvds42ll87p593sf3edpc716q7hfc26s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAYC_HcLErLatf73c02qyVpoKDied2gL8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "799045641014-lvds42ll87p593sf3edpc716q7hfc26s.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "799045641014-4737tvbii1k1id1a3kfpa8kc17hhudgp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.etsinf.pin"
+              }
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"
