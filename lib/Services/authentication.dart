@@ -20,7 +20,7 @@ class AuthMethod {
           email: email,
           password: password,
         );
-        // add user to your  firestore database
+        // add user to your firestore database
         print(cred.user!.uid);
         await _firestore.collection("users").doc(cred.user!.uid).set({
           'uid': cred.user!.uid,
@@ -58,8 +58,8 @@ class AuthMethod {
     return res;
   }
 
-  // for sighout
+  // for sign out
   signOut() async {
-    // await _auth.signOut();
+    await _auth.signOut();
   }
 }
