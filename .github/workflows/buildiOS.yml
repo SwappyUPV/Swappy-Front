@@ -1,4 +1,4 @@
-name: Build Flutter iOS App
+name: Build Flutter iOS App for Simulator
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - main  # Trigger on pull requests as well
 
 jobs:
-  build_ios:
+  build_ios_simulator:
     runs-on: macos-latest  # iOS builds require macOS
 
     steps:
@@ -22,21 +22,25 @@ jobs:
           flutter-version: 'master'  # Use Flutter master channel as preferred
           channel: 'master'          # Set the channel to master
 
+      # Precache iOS engine artifacts
+      - name: Precache iOS artifacts
+        run: flutter precache --ios
+
       # Install Flutter dependencies
       - run: flutter pub get
 
-      # Set up CocoaPods dependencies
+      # Install CocoaPods dependencies
       - name: Install CocoaPods dependencies
         run: |
           cd ios
           pod install
           
-      # Build iOS app
-      - run: flutter build ios --release
+      # Build iOS app for simulator (no code signing required)
+      - run: flutter build ios --simulator
 
-      # Upload iOS artifact to GitHub (optional)
-      - name: Upload IPA
+      # Upload iOS build artifact (optional)
+      - name: Upload App Bundle
         uses: actions/upload-artifact@v3
         with:
-          name: ios-ipa
-          path: build/ios/ipa/*.ipa  # Assuming you generate an IPA file
+          name: ios-app
+          path: build/ios/**/*.app  # The simulator build is in .app format
