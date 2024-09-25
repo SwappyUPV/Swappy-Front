@@ -1,19 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
@@ -33,6 +20,27 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
+
+<script>
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDpaf-MLgf4Maa2S8ptTBF_WZaJhrcb5oE",
+    authDomain: "swappy-pin.firebaseapp.com",
+    databaseURL: "https://swappy-pin-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "swappy-pin",
+    storageBucket: "swappy-pin.appspot.com",
+    messagingSenderId: "799045641014",
+    appId: "1:799045641014:web:af8379f1aa6b7a4f378997",
+    measurementId: "G-H92NZEGF3Q"
+  };
+
+  // Initialize Firebase
+  const app = firebase.initializeApp(firebaseConfig);
+</script>
+
+<script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
