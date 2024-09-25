@@ -15,7 +15,8 @@ jobs:
       # Set up Flutter
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.5.3'  # Set your desired Flutter version here
+          flutter-version: 'master'  # Use the latest Flutter master channel for Dart 3.5.3
+          channel: 'master'           # Alternatively, use 'beta' if that's stable enough
 
       # Install Flutter dependencies
       - run: flutter pub get
