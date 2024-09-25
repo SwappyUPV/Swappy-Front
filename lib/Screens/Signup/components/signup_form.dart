@@ -8,7 +8,7 @@ import '../../Login/login_screen.dart';
 import '/Services/authentication.dart'; // Import your AuthMethod class
 
 class SignUpForm extends StatefulWidget {
-  const SignUpForm({Key? key}) : super(key: key);
+  const SignUpForm({super.key});
 
   @override
   _SignUpFormState createState() => _SignUpFormState();
