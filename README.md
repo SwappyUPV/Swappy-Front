@@ -58,6 +58,8 @@ Here are some commonly used Flutter commands to help manage your project:
 **Build app for iOS**:
 ```bash
   flutter build ios --release
+  flutter build ios --simulator (USE THIS! since our app isn't signed, can look for that if you want people to download it)
+
 ```
 **Build for the Web:**
 ```bash
