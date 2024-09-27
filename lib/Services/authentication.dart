@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthMethod {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -58,8 +59,32 @@ class AuthMethod {
     return res;
   }
 
-  // for sign out
-  signOut() async {
-    await _auth.signOut();
+
+  Future<dynamic> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      final GoogleSignInAuthentication? googleAuth =
+      await googleUser?.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      return await FirebaseAuth.instance.signInWithCredential(credential);
+    } on Exception catch (e) {
+      // TODO
+      print('exception->$e');
+    }
+  }
+
+  Future<bool> signOut() async {
+    try {
+      await _auth.signOut();
+      return true;
+    } on Exception catch (_) {
+      return false;
+    }
   }
 }
