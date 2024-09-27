@@ -72,7 +72,7 @@ class AuthMethod {
         idToken: googleAuth?.idToken,
       );
 
-      return await FirebaseAuth.instance.signInWithCredential(credential);
+      return await _auth.signInWithCredential(credential);
     } on Exception catch (e) {
       // TODO
       print('exception->$e');

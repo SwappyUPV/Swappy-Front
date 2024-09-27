@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:pin/Services/authentication.dart'; // Ensure the path to your AuthMethod class is correct
+import 'package:flutter_svg/flutter_svg.dart'; // Import for handling SVG images
+import 'package:pin/Services/authentication.dart'; // Your AuthMethod class
 import '../../../components/already_have_an_account_acheck.dart';
 import '../../../constants.dart';
 import '../../Signup/signup_screen.dart';
-import '../../Home/home_screen.dart'; // Assuming you have this HomeScreen created
+import '../../Home/home_screen.dart';
 
 class LoginForm extends StatefulWidget {
-  const LoginForm({
-    super.key,
-  });
+  const LoginForm({super.key});
 
   @override
   _LoginFormState createState() => _LoginFormState();
@@ -22,6 +21,7 @@ class _LoginFormState extends State<LoginForm> {
 
   final AuthMethod _authMethod = AuthMethod();
 
+  // Email/Password Login Method
   void loginUser() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
@@ -38,13 +38,11 @@ class _LoginFormState extends State<LoginForm> {
       });
 
       if (res == 'success') {
-        // Navigate to HomeScreen on successful login
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const HomeScreen()),
         );
       } else {
-        // Show error message if login failed
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(res),
@@ -52,6 +50,22 @@ class _LoginFormState extends State<LoginForm> {
           ),
         );
       }
+    }
+  }
+
+  // Google Sign-In Method
+  void signInWithGoogle() async {
+    try {
+      var userCredential = await _authMethod.signInWithGoogle();
+      if (userCredential != null) {
+        // If sign-in is successful, navigate to HomeScreen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      }
+    } catch (e) {
+      print('exception->$e');
     }
   }
 
@@ -68,6 +82,7 @@ class _LoginFormState extends State<LoginForm> {
       key: _formKey,
       child: Column(
         children: [
+          // Email Input Field
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
@@ -87,6 +102,7 @@ class _LoginFormState extends State<LoginForm> {
               ),
             ),
           ),
+          // Password Input Field
           Padding(
             padding: const EdgeInsets.symmetric(vertical: defaultPadding),
             child: TextFormField(
@@ -110,6 +126,8 @@ class _LoginFormState extends State<LoginForm> {
             ),
           ),
           const SizedBox(height: defaultPadding),
+
+          // Login Button
           _isLoading
               ? const CircularProgressIndicator()
               : ElevatedButton(
@@ -119,6 +137,8 @@ class _LoginFormState extends State<LoginForm> {
             ),
           ),
           const SizedBox(height: defaultPadding),
+
+          // Already Have an Account
           AlreadyHaveAnAccountCheck(
             press: () {
               Navigator.push(
@@ -130,6 +150,26 @@ class _LoginFormState extends State<LoginForm> {
                 ),
               );
             },
+          ),
+          const SizedBox(height: defaultPadding),
+
+          // Google Sign-In Button
+          Center(
+            child: Card(
+              elevation: 5,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: IconButton(
+                iconSize: 40,
+                icon: SvgPicture.asset(
+                  'assets/icons/icons-google.svg', // Google icon from assets
+                  width: 40,
+                  height: 40,
+                ),
+                onPressed: signInWithGoogle,
+              ),
+            ),
           ),
         ],
       ),
