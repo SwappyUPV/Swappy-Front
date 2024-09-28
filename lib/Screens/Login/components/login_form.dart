@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart'; // Import for handling SVG images
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pin/Services/authentication.dart'; // Your AuthMethod class
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../components/already_have_an_account_acheck.dart';
 import '../../../constants.dart';
 import '../../Signup/signup_screen.dart';
@@ -20,6 +22,14 @@ class _LoginFormState extends State<LoginForm> {
   bool _isLoading = false;
 
   final AuthMethod _authMethod = AuthMethod();
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+
+  @override
+  void initState() {
+    super.initState();
+    _signInSilently();  // Try to sign in silently when the app starts
+  }
 
   // Email/Password Login Method
   void loginUser() async {
@@ -38,9 +48,14 @@ class _LoginFormState extends State<LoginForm> {
       });
 
       if (res == 'success') {
-        Navigator.pushReplacement(
+        // Clear the loggedOut flag after successful login
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('loggedOut', false);
+
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const HomeScreen()),
+              (route) => false, // This removes all previous routes
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -53,21 +68,57 @@ class _LoginFormState extends State<LoginForm> {
     }
   }
 
-  // Google Sign-In Method
+  // Google Sign-In Silently Method (in case previously signed in)
+  void _signInSilently() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool loggedOut = prefs.getBool('loggedOut') ?? false; // Default is false (not logged out)
+
+    // Only try silent sign-in if the user has not explicitly logged out
+    if (!loggedOut) {
+      try {
+        var userCredential = await _authMethod.signInWithGoogleSilently();
+        if (userCredential != null) {
+          // Navigate to the HomeScreen if the user is already signed in
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+                (route) => false, // This removes all previous routes
+          );
+        }
+      } catch (e) {
+        print('Silent sign-in failed: $e');
+      }
+    } else {
+      print('User has logged out, skipping silent sign-in.');
+    }
+  }
+
+  // Manual Google Sign-In Method (if the user is not already signed in)
   void signInWithGoogle() async {
     try {
+      // Disconnect to clear any cached Google account
+      await _googleSignIn.disconnect();
+
+      // Proceed with Google sign-in after disconnecting
       var userCredential = await _authMethod.signInWithGoogle();
       if (userCredential != null) {
+        // Clear the loggedOut flag after successful login
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('loggedOut', false);
+
         // If sign-in is successful, navigate to HomeScreen
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const HomeScreen()),
+              (route) => false, // This removes all previous routes
         );
       }
     } catch (e) {
-      print('exception->$e');
+      print('Manual sign-in failed: $e');
     }
   }
+
+
 
   @override
   void dispose() {
@@ -167,7 +218,7 @@ class _LoginFormState extends State<LoginForm> {
                   width: 40,
                   height: 40,
                 ),
-                onPressed: signInWithGoogle,
+                onPressed: signInWithGoogle,  // Manual sign-in button press
               ),
             ),
           ),

@@ -1,10 +1,20 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthMethod {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  Future<GoogleSignInAccount?> signInWithGoogleSilently() async {
+    return await _googleSignIn.signInSilently();
+  }
+
+  Future<GoogleSignInAccount?> signInWithGoogle() async {
+    return await _googleSignIn.signIn();
+  }
 
   // SignUp User
 
@@ -59,32 +69,35 @@ class AuthMethod {
     return res;
   }
 
-
-  Future<dynamic> signInWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-
-      final GoogleSignInAuthentication? googleAuth =
-      await googleUser?.authentication;
-
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken,
-      );
-
-      return await _auth.signInWithCredential(credential);
-    } on Exception catch (e) {
-      // TODO
-      print('exception->$e');
-    }
-  }
-
   Future<bool> signOut() async {
     try {
-      await _auth.signOut();
+      // Get the current Firebase user
+      User? user = _auth.currentUser;
+
+      if (user != null) {
+        // Loop through providerData to check how the user signed in
+        for (var provider in user.providerData) {
+          if (provider.providerId == 'google.com') {
+            // Sign out from Google if the user signed in with Google
+            await _googleSignIn.signOut();
+            await _googleSignIn.disconnect();
+            break;
+          }
+        }
+
+        // Sign out from Firebase
+        await _auth.signOut();
+      }
+
+      // Set the logout flag to true in SharedPreferences (this avoids google sign in silently when loggingOut)
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('loggedOut', true);
+
       return true;
-    } on Exception catch (_) {
+    } on Exception catch (e) {
+      print("Error signing out: $e");
       return false;
     }
   }
+
 }

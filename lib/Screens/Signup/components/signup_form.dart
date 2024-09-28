@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../components/already_have_an_account_acheck.dart';
 import '../../../constants.dart';
+import '../../Home/home_screen.dart';
 import '../../Login/login_screen.dart';
 import '/Services/authentication.dart'; // Import your AuthMethod class
 
@@ -31,29 +30,12 @@ class _SignUpFormState extends State<SignUpForm> {
 
       if (res == "success") {
         // Show success dialog
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text("Success"),
-              content: const Text("Successfully Signed Up!"),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Close the dialog
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginScreen(),
-                      ),
-                    ); // Navigate to LoginScreen
-                  },
-                  child: const Text("OK"),
-                ),
-              ],
-            );
-          },
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+              (route) => false, // This removes all previous routes
         );
+
       } else {
         // Show error dialog
         showDialog(

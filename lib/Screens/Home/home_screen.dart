@@ -1,8 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../Services/authentication.dart';
-import '../Login/login_screen.dart';
+import '../Welcome/welcome_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -19,9 +18,10 @@ class HomeScreen extends StatelessWidget {
               // Logout user
               AuthMethod().signOut();
               // Navigate to LoginScreen on logout
-              Navigator.pushReplacement(
+              Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
+                MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+                    (route) => false, // This removes all previous routes
               );
             },
           ),
