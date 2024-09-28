@@ -1,7 +1,11 @@
 # Swappy
-
+DISABLED: Due to workflow limited free quota on actions at 75% currently.
+\
+\
 [![Deploy Flutter Web to Firebase Hosting on merge](https://github.com/11Arnau46/pin/actions/workflows/firebase-hosting-merge.yml/badge.svg)](https://github.com/11Arnau46/pin/actions/workflows/firebase-hosting-merge.yml)
-
+[![Build Flutter Android APK](https://github.com/11Arnau46/pin/actions/workflows/buildAPK.yml/badge.svg)](https://github.com/11Arnau46/pin/actions/workflows/buildAPK.yml)
+[![Build Flutter iOS App for Simulator](https://github.com/11Arnau46/pin/actions/workflows/buildiOS.yml/badge.svg)](https://github.com/11Arnau46/pin/actions/workflows/buildiOS.yml) \
+\
 Swappy is a cross-platform Flutter app that allows users to exchange clothes. Available on iOS, Android, and the Web, Swappy makes it easy to swap fashion items with people in your community or around the world. Whether you want to update your wardrobe or give a new life to pre-loved clothes, Swappy is the go-to app for sustainable fashion.
 
 ## Features
@@ -58,13 +62,23 @@ Here are some commonly used Flutter commands to help manage your project:
 **Build app for iOS**:
 ```bash
   flutter build ios --release
-  flutter build ios --simulator (USE THIS! since our app isn't signed, can look for that if you want people to download it)
-
+  flutter build ios --simulator 
 ```
+(SECOND ONE since our app isn't signed with an apple developer certificate $$) \
+\
 **Build for the Web:**
 ```bash
   flutter build web --release
 ```
+### How to run
+**Run the app on a specific device (chrome...)**
+```bash
+  flutter run -d <device_id>
+  flutter run - d chrome port 8080
+```
+It must run on a specific port in localhost or address for googleSignIn to work.
+Authorized addresses https://localhost:8080 && https://swappy-pin.web.app.
+The default command opens a different port each time, so googleSignIn won't work.
 
 ### Mix
 **Analyze flutter**
@@ -79,11 +93,7 @@ Here are some commonly used Flutter commands to help manage your project:
 ```bash
   flutter clean
 ```
-**Run the app on a specific device (chrome...)**
-```bash
-  flutter run -d <device_id>
-  flutter run - d chrome
-```
+
 **Get flutter version**
 ```bash
   flutter --version
@@ -93,7 +103,14 @@ Here are some commonly used Flutter commands to help manage your project:
   flutter doctor
 ```
 
-  
+
+## TODO
+Final readme.md file for the project must have
+- [ ] Add app screenshots/Designs
+- [ ] Update features (more detailed project specifications)
+- [ ] Add right platforms supported (see in the end, macOS, windows, linux)
+- [ ] Translate to Spanish (app and readme.md supports 3 languages)
+- [ ] Add installation instructions
 
 
 
