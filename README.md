@@ -80,6 +80,16 @@ It must run on a specific port in localhost or address for googleSignIn to work.
 Authorized addresses https://localhost:8080 && https://swappy-pin.web.app.
 The default command opens a different port each time, so googleSignIn won't work.
 
+### Firebase
+**Log in:**
+```bash
+  firebase login
+```
+**Deploy website**
+```bash
+  firebase deploy --only hosting
+```
+
 ### Mix
 **Analyze flutter**
 ```bash
