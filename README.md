@@ -89,6 +89,8 @@ The default command opens a different port each time, so googleSignIn won't work
 ```bash
   firebase deploy --only hosting
 ```
+Technically, pushing to main and passing the workflow Firebase deploy to the web and hosting will deploy the website.
+However all workflows are disabled now so website deployment must be done executing this command.
 
 ### Mix
 **Analyze flutter**
