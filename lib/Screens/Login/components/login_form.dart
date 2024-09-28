@@ -28,9 +28,12 @@ class _LoginFormState extends State<LoginForm> {
   @override
   void initState() {
     super.initState();
-    _signInSilently();  // Try to sign in silently when the app starts
+    _signInSilently(); // Attempt silent sign-in on app start
   }
 
+  /*
+  LOG IN METHODS
+   */
   // Email/Password Login Method
   void loginUser() async {
     if (_formKey.currentState!.validate()) {
@@ -71,7 +74,8 @@ class _LoginFormState extends State<LoginForm> {
   // Google Sign-In Silently Method (in case previously signed in)
   void _signInSilently() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool loggedOut = prefs.getBool('loggedOut') ?? false; // Default is false (not logged out)
+    bool loggedOut = prefs.getBool('loggedOut') ??
+        false; // Default is false (not logged out)
 
     // Only try silent sign-in if the user has not explicitly logged out
     if (!loggedOut) {
@@ -96,21 +100,24 @@ class _LoginFormState extends State<LoginForm> {
   // Manual Google Sign-In Method (if the user is not already signed in)
   void signInWithGoogle() async {
     try {
-      // Disconnect to clear any cached Google account
-      await _googleSignIn.disconnect();
+      // Check if already signed in
+      if (await _googleSignIn.isSignedIn()) {
+        // If already signed in, we can proceed directly or log out if desired
+        print('User already signed in, proceeding to home screen...');
+        await _googleSignIn.disconnect();
 
-      // Proceed with Google sign-in after disconnecting
+      }
+
+      // Proceed with Google sign-in
       var userCredential = await _authMethod.signInWithGoogle();
       if (userCredential != null) {
-        // Clear the loggedOut flag after successful login
+        // Handle successful sign-in
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setBool('loggedOut', false);
-
-        // If sign-in is successful, navigate to HomeScreen
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const HomeScreen()),
-              (route) => false, // This removes all previous routes
+              (route) => false,
         );
       }
     } catch (e) {
@@ -119,7 +126,29 @@ class _LoginFormState extends State<LoginForm> {
   }
 
 
+  // Anonymous Sign-In Method
+  void signInAnonymously() async {
+    try {
+      var user = await _authMethod.signInAnonymously();
+      if (user != null) {
+        // Clear the loggedOut flag after successful login
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('loggedOut', false);
 
+        // Navigate to HomeScreen if sign-in is successful
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+              (route) => false, // This removes all previous routes
+        );
+      }
+    } catch (e) {
+      print('Anonymous sign-in failed: $e');
+    }
+  }
+
+
+  //RESET TEXT FIELDS
   @override
   void dispose() {
     _emailController.dispose();
@@ -127,6 +156,7 @@ class _LoginFormState extends State<LoginForm> {
     super.dispose();
   }
 
+  //BUILD LAYOUT
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -204,23 +234,44 @@ class _LoginFormState extends State<LoginForm> {
           ),
           const SizedBox(height: defaultPadding),
 
-          // Google Sign-In Button
-          Center(
-            child: Card(
-              elevation: 5,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: IconButton(
-                iconSize: 40,
-                icon: SvgPicture.asset(
-                  'assets/icons/icons-google.svg', // Google icon from assets
-                  width: 40,
-                  height: 40,
+          // Google and Anonymous Sign-In Buttons Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center, // Center horizontally
+            crossAxisAlignment: CrossAxisAlignment.center, // Center vertically
+            children: [
+              // Google Sign-In Button
+              Card(
+                elevation: 5,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                onPressed: signInWithGoogle,  // Manual sign-in button press
+                child: IconButton(
+                  iconSize: 40,
+                  icon: SvgPicture.asset(
+                    'assets/icons/icons-google.svg', // Google icon from assets
+                    width: 40,
+                    height: 40,
+                  ),
+                  onPressed: signInWithGoogle, // Manual sign-in button press
+                ),
               ),
-            ),
+              const SizedBox(width: 10), // Small horizontal separation
+              // Anonymous Sign-In Button
+              Card(
+                elevation: 5,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: IconButton(
+                  iconSize: 40,
+                  icon: const Icon(
+                    Icons.person, // You can replace this with your custom anonymous icon
+                    size: 40,
+                  ),
+                  onPressed: signInAnonymously, // Anonymous sign-in button press
+                ),
+              ),
+            ],
           ),
         ],
       ),

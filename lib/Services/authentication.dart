@@ -100,4 +100,15 @@ class AuthMethod {
     }
   }
 
+  // Anonymous Login
+  Future<User?> signInAnonymously() async {
+    try {
+      UserCredential userCredential = await _auth.signInAnonymously();
+      return userCredential.user;
+    } catch (e) {
+      print('Anonymous sign-in failed: $e');
+      return null;
+    }
+  }
+
 }
