@@ -51,6 +51,90 @@ class _CatalogueState extends State<Catalogue> {
       'categoria': 'Zapatos',
       'etiquetas': ['deporte', 'cómodo', 'running'],
     },
+    {
+      'nombre': 'Pantalones Vaqueros',
+      'precio': '39,99',
+      'imagen': 'assets/pantalones.jpg',
+      'categoria': 'Pantalones',
+      'etiquetas': ['denim', 'casual', 'versátil'],
+    },
+    {
+      'nombre': 'Falda Plisada',
+      'precio': '24,99',
+      'imagen': 'assets/falda.jpg',
+      'categoria': 'Faldas',
+      'etiquetas': ['elegante', 'oficina', 'otoño'],
+    },
+    {
+      'nombre': 'Chaqueta de Cuero',
+      'precio': '89,99',
+      'imagen': 'assets/chaqueta.jpg',
+      'categoria': 'Chaquetas',
+      'etiquetas': ['rock', 'invierno', 'moda'],
+    },
+    {
+      'nombre': 'Collar de Perlas',
+      'precio': '19,99',
+      'imagen': 'assets/collar.jpg',
+      'categoria': 'Accesorios',
+      'etiquetas': ['elegante', 'clásico', 'joyería'],
+    },
+    {
+      'nombre': 'Camiseta de Rayas',
+      'precio': '15,99',
+      'imagen': 'assets/camiseta_rayas.jpg',
+      'categoria': 'Camisetas',
+      'etiquetas': ['casual', 'marinero', 'primavera'],
+    },
+    {
+      'nombre': 'Vestido de Noche',
+      'precio': '79,99',
+      'imagen': 'assets/vestido_noche.jpg',
+      'categoria': 'Vestidos',
+      'etiquetas': ['fiesta', 'elegante', 'noche'],
+    },
+    {
+      'nombre': 'Botas de Montaña',
+      'precio': '69,99',
+      'imagen': 'assets/botas.jpg',
+      'categoria': 'Zapatos',
+      'etiquetas': ['aventura', 'resistente', 'invierno'],
+    },
+    {
+      'nombre': 'Pantalones de Yoga',
+      'precio': '34,99',
+      'imagen': 'assets/pantalones_yoga.jpg',
+      'categoria': 'Pantalones',
+      'etiquetas': ['deporte', 'cómodo', 'fitness'],
+    },
+    {
+      'nombre': 'Falda Vaquera',
+      'precio': '27,99',
+      'imagen': 'assets/falda_vaquera.jpg',
+      'categoria': 'Faldas',
+      'etiquetas': ['casual', 'denim', 'verano'],
+    },
+    {
+      'nombre': 'Chaqueta Bomber',
+      'precio': '54,99',
+      'imagen': 'assets/chaqueta_bomber.jpg',
+      'categoria': 'Chaquetas',
+      'etiquetas': ['urbano', 'moderno', 'otoño'],
+    },
+    {
+      'nombre': 'Pulsera de Plata',
+      'precio': '22,99',
+      'imagen': 'assets/pulsera.jpg',
+      'categoria': 'Accesorios',
+      'etiquetas': ['joyería', 'elegante', 'regalo'],
+    },
+    {
+      'nombre': 'Camiseta Estampada',
+      'precio': '18,99',
+      'imagen': 'assets/camiseta_estampada.jpg',
+      'categoria': 'Camisetas',
+      'etiquetas': ['colorido', 'verano', 'juvenil'],
+    },
   ];
 
   List<Map<String, dynamic>> get filteredCatalogo {
@@ -235,62 +319,70 @@ class CatalogueGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      padding: const EdgeInsets.all(16.0),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.75,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
-      itemCount: filteredCatalogo.length,
-      itemBuilder: (context, index) {
-        final item = filteredCatalogo[index];
-        return Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double itemWidth = constraints.maxWidth / 5;
+        final double aspectRatio = itemWidth / (itemWidth * 1.5);
+
+        return GridView.builder(
+          padding: const EdgeInsets.all(16.0),
+          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: itemWidth,
+            childAspectRatio: aspectRatio,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-                  child: Image.asset(
-                    item['imagen'],
-                    fit: BoxFit.cover,
-                    width: double.infinity,
+          itemCount: filteredCatalogo.length,
+          itemBuilder: (context, index) {
+            final item = filteredCatalogo[index];
+            return Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(12)),
+                      child: Image.asset(
+                        item['imagen'],
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item['nombre'],
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge!
-                          .copyWith(fontWeight: FontWeight.bold),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item['nombre'],
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleSmall!
+                              .copyWith(fontWeight: FontWeight.bold),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          '${item['precio']}€',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall!
+                              .copyWith(color: Colors.teal),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 4),
-                    Text(
-                      '${item['precio']}€',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium!
-                          .copyWith(color: Colors.teal),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
