@@ -4,7 +4,8 @@ import 'log_in.dart';
 import 'virtual_closet.dart';
 import 'add_product.dart';
 import 'chat.dart';
-import '/Services/authentication.dart';
+import '/Services/catalogue.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Catalogue extends StatefulWidget {
   const Catalogue({Key? key}) : super(key: key);
@@ -17,7 +18,11 @@ class _CatalogueState extends State<Catalogue> {
   int _selectedIndex = 0;
   String _selectedCategory = 'Todos';
   String _searchQuery = '';
-  bool _isLoggedIn = AuthMethod().getCurrentUser() != null;
+  List<Map<String, dynamic>> catalogoRopa = [];
+  bool _isLoading = true;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  final CatalogService _catalogService = CatalogService();
 
   final List<String> categorias = [
     'Todos',
@@ -30,113 +35,22 @@ class _CatalogueState extends State<Catalogue> {
     'Accesorios',
   ];
 
-  final List<Map<String, dynamic>> catalogoRopa = [
-    {
-      'nombre': 'Camiseta Vintage',
-      'precio': '17,00',
-      'imagen': 'assets/camiseta.jpg',
-      'categoria': 'Camisetas',
-      'etiquetas': ['vintage', 'casual', 'verano'],
-    },
-    {
-      'nombre': 'Vestido Floral',
-      'precio': '29,99',
-      'imagen': 'assets/vestido.jpg',
-      'categoria': 'Vestidos',
-      'etiquetas': ['floral', 'elegante', 'primavera'],
-    },
-    {
-      'nombre': 'Zapatillas Deportivas',
-      'precio': '59,99',
-      'imagen': 'assets/zapatillas.jpg',
-      'categoria': 'Zapatos',
-      'etiquetas': ['deporte', 'cómodo', 'running'],
-    },
-    {
-      'nombre': 'Pantalones Vaqueros',
-      'precio': '39,99',
-      'imagen': 'assets/pantalones.jpg',
-      'categoria': 'Pantalones',
-      'etiquetas': ['denim', 'casual', 'versátil'],
-    },
-    {
-      'nombre': 'Falda Plisada',
-      'precio': '24,99',
-      'imagen': 'assets/falda.jpg',
-      'categoria': 'Faldas',
-      'etiquetas': ['elegante', 'oficina', 'otoño'],
-    },
-    {
-      'nombre': 'Chaqueta de Cuero',
-      'precio': '89,99',
-      'imagen': 'assets/chaqueta.jpg',
-      'categoria': 'Chaquetas',
-      'etiquetas': ['rock', 'invierno', 'moda'],
-    },
-    {
-      'nombre': 'Collar de Perlas',
-      'precio': '19,99',
-      'imagen': 'assets/collar.jpg',
-      'categoria': 'Accesorios',
-      'etiquetas': ['elegante', 'clásico', 'joyería'],
-    },
-    {
-      'nombre': 'Camiseta de Rayas',
-      'precio': '15,99',
-      'imagen': 'assets/camiseta_rayas.jpg',
-      'categoria': 'Camisetas',
-      'etiquetas': ['casual', 'marinero', 'primavera'],
-    },
-    {
-      'nombre': 'Vestido de Noche',
-      'precio': '79,99',
-      'imagen': 'assets/vestido_noche.jpg',
-      'categoria': 'Vestidos',
-      'etiquetas': ['fiesta', 'elegante', 'noche'],
-    },
-    {
-      'nombre': 'Botas de Montaña',
-      'precio': '69,99',
-      'imagen': 'assets/botas.jpg',
-      'categoria': 'Zapatos',
-      'etiquetas': ['aventura', 'resistente', 'invierno'],
-    },
-    {
-      'nombre': 'Pantalones de Yoga',
-      'precio': '34,99',
-      'imagen': 'assets/pantalones_yoga.jpg',
-      'categoria': 'Pantalones',
-      'etiquetas': ['deporte', 'cómodo', 'fitness'],
-    },
-    {
-      'nombre': 'Falda Vaquera',
-      'precio': '27,99',
-      'imagen': 'assets/falda_vaquera.jpg',
-      'categoria': 'Faldas',
-      'etiquetas': ['casual', 'denim', 'verano'],
-    },
-    {
-      'nombre': 'Chaqueta Bomber',
-      'precio': '54,99',
-      'imagen': 'assets/chaqueta_bomber.jpg',
-      'categoria': 'Chaquetas',
-      'etiquetas': ['urbano', 'moderno', 'otoño'],
-    },
-    {
-      'nombre': 'Pulsera de Plata',
-      'precio': '22,99',
-      'imagen': 'assets/pulsera.jpg',
-      'categoria': 'Accesorios',
-      'etiquetas': ['joyería', 'elegante', 'regalo'],
-    },
-    {
-      'nombre': 'Camiseta Estampada',
-      'precio': '18,99',
-      'imagen': 'assets/camiseta_estampada.jpg',
-      'categoria': 'Camisetas',
-      'etiquetas': ['colorido', 'verano', 'juvenil'],
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadClothes();
+  }
+
+  Future<void> _loadClothes() async {
+    setState(() {
+      _isLoading = true;
+    });
+    List<Map<String, dynamic>> clothes = await _catalogService.getClothes();
+    setState(() {
+      catalogoRopa = clothes;
+      _isLoading = false;
+    });
+  }
 
   List<Map<String, dynamic>> get filteredCatalogo {
     return catalogoRopa.where((item) {
@@ -174,7 +88,7 @@ class _CatalogueState extends State<Catalogue> {
               );
             },
           ),
-          _isLoggedIn
+          (_auth.currentUser != null)
               ? IconButton(
                   icon: Icon(Icons.person, color: Colors.black),
                   onPressed: () {
@@ -197,10 +111,29 @@ class _CatalogueState extends State<Catalogue> {
           IconButton(
             icon: Icon(Icons.add, color: Colors.black),
             onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const AddProduct()),
-              );
+              if (_auth.currentUser != null) {
+                // Usuario autenticado, ir a la página de añadir producto
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AddProduct()),
+                );
+              } else {
+                // Usuario no autenticado, ir a la página de inicio de sesión
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Login()),
+                ).then((value) {
+                  // Cuando se vuelve de la página de inicio de sesión, verificar si el usuario se autenticó
+                  if (_auth.currentUser != null) {
+                    // Si se autenticó, ir a la página de añadir producto
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const AddProduct()),
+                    );
+                  }
+                });
+              }
             },
           ),
         ],
@@ -253,7 +186,9 @@ class _CatalogueState extends State<Catalogue> {
             ),
           ),
           Expanded(
-            child: CatalogueGrid(filteredCatalogo: filteredCatalogo),
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : CatalogueGrid(filteredCatalogo: filteredCatalogo),
           ),
         ],
       ),
@@ -298,13 +233,11 @@ class _CatalogueState extends State<Catalogue> {
                 context,
                 MaterialPageRoute(builder: (context) => VirtualCloset()),
               );
-              break;
             case 2:
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => MessagingPage()),
               );
-              break;
           }
         },
       ),
