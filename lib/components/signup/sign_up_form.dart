@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../already_have_an_account_acheck.dart';
 import '../../constants.dart';
 import '../../Screens/log_in.dart';
-import '/Services/authentication.dart'; // Import your AuthMethod class
+import '/Services/authentication.dart';
 
 class SignUpForm extends StatefulWidget {
   const SignUpForm({super.key});
@@ -15,8 +15,8 @@ class SignUpForm extends StatefulWidget {
 class _SignUpFormState extends State<SignUpForm> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthMethod _authMethod = AuthMethod(); // Instance of your AuthMethod
-  final _formKey = GlobalKey<FormState>(); // Key to validate the form
+  final AuthMethod _authMethod = AuthMethod();
+  final _formKey = GlobalKey<FormState>();
 
   // Method to sign up user
   void signUpUser(BuildContext context) async {
@@ -28,7 +28,6 @@ class _SignUpFormState extends State<SignUpForm> {
       print("Sign Up Response: $res");
 
       if (res == "success") {
-        // Show success dialog
         showDialog(
           context: context,
           builder: (BuildContext context) {

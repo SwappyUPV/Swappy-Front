@@ -17,15 +17,11 @@ class AuthMethod {
   }
 
   // SignUp User
-
-  Future<String> signupUser({
-    required String email,
-    required String password
-  }) async {
+  Future<String> signupUser(
+      {required String email, required String password}) async {
     String res = "Some error Occurred";
     try {
-      if (email.isNotEmpty ||
-          password.isNotEmpty ) {
+      if (email.isNotEmpty || password.isNotEmpty) {
         // register user in auth with email and password
         UserCredential cred = await _auth.createUserWithEmailAndPassword(
           email: email,
@@ -111,4 +107,8 @@ class AuthMethod {
     }
   }
 
+  // Método para obtener el usuario actual
+  User? getCurrentUser() {
+    return _auth.currentUser;
+  }
 }

@@ -4,6 +4,7 @@ import 'log_in.dart';
 import 'virtual_closet.dart';
 import 'add_product.dart';
 import 'chat.dart';
+import '/Services/authentication.dart';
 
 class Catalogue extends StatefulWidget {
   const Catalogue({Key? key}) : super(key: key);
@@ -16,7 +17,7 @@ class _CatalogueState extends State<Catalogue> {
   int _selectedIndex = 0;
   String _selectedCategory = 'Todos';
   String _searchQuery = '';
-  bool _isLoggedIn = false;
+  bool _isLoggedIn = AuthMethod().getCurrentUser() != null;
 
   final List<String> categorias = [
     'Todos',
