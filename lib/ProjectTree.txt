@@ -1,0 +1,78 @@
+.
+├── app.dart
+├── core
+│   ├── constants
+│   │   ├── constants.dart
+│   │   └── firebase_options.dart
+│   ├── services
+│   │   ├── authentication_service.dart
+│   │   └── upload_product_service.dart
+│   └── utils
+│       ├── background.dart
+│       └── responsive.dart
+├── features
+│   ├── add_product
+│   │   ├── data
+│   │   │   └── models
+│   │   ├── presentation
+│   │   │   ├── screens
+│   │   │   │   └── add_product.dart
+│   │   │   └── widgets
+│   │   │       └── add_product_form.dart
+│   │   └── state
+│   ├── auth
+│   │   ├── data
+│   │   │   └── models
+│   │   │       └── user_model.dart
+│   │   ├── presentation
+│   │   │   ├── screens
+│   │   │   │   ├── login_screen.dart
+│   │   │   │   └── sign_up_screen.dart
+│   │   │   └── widgets
+│   │   │       ├── components
+│   │   │       │   ├── already_have_an_account_acheck.dart
+│   │   │       │   ├── login_screen_top_image.dart
+│   │   │       │   ├── or_divider.dart
+│   │   │       │   ├── sign_up_top_image.dart
+│   │   │       │   ├── socal_sign_up.dart
+│   │   │       │   └── social_icon.dart
+│   │   │       └── forms
+│   │   │           ├── login_form.dart
+│   │   │           └── sign_up_form.dart
+│   │   └── state
+│   │       └── auth_provider.dart
+│   ├── catalogue
+│   │   └── presentation
+│   │       ├── screens
+│   │       │   └── catalogue_screen.dart
+│   │       └── state
+│   │           └── catalogue_provider.dart
+│   ├── chat
+│   │   ├── presentation
+│   │   │   └── screens
+│   │   │       └── chat_screen.dart
+│   │   └── state
+│   │       └── chat_provider.dart
+│   ├── profile
+│   │   ├── presentation
+│   │   │   └── screens
+│   │   │       └── profile_screen.dart
+│   │   └── state
+│   │       └── profile_provider.dart
+│   ├── virtual_closet
+│   │   ├── presentation
+│   │   │   └── screens
+│   │   │       └── virtual_closet_screen.dart
+│   │   └── state
+│   │       └── virtual_closet_provider.dart
+│   └── welcome
+│       ├── presentation
+│       │   └── screens
+│       │       └── welcome_screen.dart
+│       └── widgets
+│           ├── sign_up_btn.dart
+│           └── welcome_image.dart
+├── lib_structure.txt
+└── main.dart
+
+42 directories, 34 files
