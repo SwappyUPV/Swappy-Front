@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
         ),
         inputDecorationTheme: const InputDecorationTheme(
           filled: true,
-          fillColor: kPrimaryLightColor,
+          fillColor: Color.fromARGB(255, 1, 1, 1),
           iconColor: kPrimaryColor,
           prefixIconColor: kPrimaryColor,
           contentPadding: EdgeInsets.symmetric(

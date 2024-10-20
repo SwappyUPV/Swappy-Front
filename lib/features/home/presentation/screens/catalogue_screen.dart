@@ -5,15 +5,16 @@ import '../../../virtual_closet/presentation/screens/virtual_closet_screen.dart'
 import 'add_product_screen.dart';
 import '../../../chat/presentation/screens/chat_screen.dart';
 import 'package:pin/core/services/authentication_service.dart'; // Your AuthMethod class
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 class Catalogue extends StatefulWidget {
-  const Catalogue({Key? key}) : super(key: key);
+  const Catalogue({super.key});
 
   @override
-  _CatalogueState createState() => _CatalogueState();
+  CatalogueState createState() => CatalogueState();
 }
 
-class _CatalogueState extends State<Catalogue> {
+class CatalogueState extends State<Catalogue> {
   int _selectedIndex = 0;
   String _selectedCategory = 'Todos';
   String _searchQuery = '';
@@ -227,7 +228,7 @@ class _CatalogueState extends State<Catalogue> {
               },
             ),
           ),
-          Container(
+          SizedBox(
             height: 50,
             child: ListView(
               scrollDirection: Axis.horizontal,
@@ -298,13 +299,17 @@ class _CatalogueState extends State<Catalogue> {
                 context,
                 MaterialPageRoute(builder: (context) => VirtualCloset()),
               );
-              break;
             case 2:
               Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => MessagingPage()),
-              );
-              break;
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MessagingPage(
+                        user: const types.User(
+                      id: '82091008-a484-4a89-ae75-a22bf8d6f3ac',
+                      firstName: 'Usuario',
+                      imageUrl: 'assets/images/FriendlyUser.jpg',
+                    )),
+                  ));
           }
         },
       ),
@@ -315,8 +320,7 @@ class _CatalogueState extends State<Catalogue> {
 class CatalogueGrid extends StatelessWidget {
   final List<Map<String, dynamic>> filteredCatalogo;
 
-  const CatalogueGrid({Key? key, required this.filteredCatalogo})
-      : super(key: key);
+  const CatalogueGrid({super.key, required this.filteredCatalogo});
 
   @override
   Widget build(BuildContext context) {

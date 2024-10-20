@@ -1,102 +1,128 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_chat_ui/flutter_chat_ui.dart';
+import 'package:intl/intl.dart'; // Para formatear fechas
+import '../../widgets/chat_bubble.dart';
+import '../../state/chat_controller.dart';
 
-class MessagingPage extends StatelessWidget {
-  const MessagingPage({super.key});
+class MessagingPage extends StatefulWidget {
+  final types.User user;
+  const MessagingPage({super.key, required this.user});
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Messages'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
-              // Implement search functionality
-            },
-          ),
-        ],
-      ),
-      body: Row(
-        children: [
-          // Left sidebar for navigation
-          NavigationRail(
-            selectedIndex: 0,
-            onDestinationSelected: (int index) {
-              // Handle navigation
-            },
-            destinations: [
-              NavigationRailDestination(
-                icon: Icon(Icons.message),
-                label: Text('Messages'),
+  State<MessagingPage> createState() => _MessagingPageState();
+}
+
+class _MessagingPageState extends State<MessagingPage> {
+  final List<types.Message> _messages = [];
+  final ChatController _chatController = ChatController();
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: Chat(
+          messages: _messages,
+          onAttachmentPressed: _handleAttachmentPressed,
+          onMessageTap: _handleMessageTap,
+          onPreviewDataFetched: _handlePreviewDataFetched,
+          onSendPressed: _handleSendPressed,
+          user: widget.user,
+          bubbleBuilder: (child,
+              {required message, required nextMessageInGroup}) {
+            return buildChatBubble(
+              child,
+              message: message,
+              currentUser: widget.user,
+              nextMessageInGroup: nextMessageInGroup,
+            );
+          },
+          dateFormat: DateFormat('hh:mm a'),
+        ),
+      );
+
+  void _addMessage(types.Message message) {
+    setState(() {
+      _messages.insert(0, message);
+    });
+  }
+
+  void _handleAttachmentPressed() {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext context) => SafeArea(
+        child: SizedBox(
+          height: 144,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _handleImageSelection();
+                },
+                child: const Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text('Photo'),
+                ),
               ),
-              NavigationRailDestination(
-                icon: Icon(Icons.notifications),
-                label: Text('Notifications'),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _handleFileSelection();
+                },
+                child: const Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text('File'),
+                ),
               ),
-              // Add more navigation items as needed
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text('Cancel'),
+                ),
+              ),
             ],
           ),
-          // Message list
-          Expanded(
-            child: ListView.builder(
-              itemCount: 10, // Replace with actual message count
-              itemBuilder: (context, index) {
-                return ListTile(
-                  leading: CircleAvatar(
-                    child: Text('U'), // Replace with user initial or avatar
-                  ),
-                  title: Text('User ${index + 1}'),
-                  subtitle: Text('Last message preview'),
-                  trailing: Text('2h ago'), // Replace with actual timestamp
-                  onTap: () {
-                    // Open chat detail view
-                  },
-                );
-              },
-            ),
-          ),
-          // Chat detail view (can be conditionally rendered)
-          Expanded(
-            child: Column(
-              children: [
-                // Chat header
-                AppBar(
-                  title: Text('Chat with User'),
-                ),
-                // Chat messages
-                Expanded(
-                  child: ListView(
-                    children: [
-                      // Implement chat messages here
-                    ],
-                  ),
-                ),
-                // Message input
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: 'Type a message...',
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.send),
-                        onPressed: () {
-                          // Send message
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
+  }
+
+  void _handleFileSelection() async {
+    final result = await _chatController.selectFile();
+    if (result != null) {
+      _addMessage(result);
+    }
+  }
+
+  void _handleImageSelection() async {
+    final result = await _chatController.selectImage();
+    if (result != null) {
+      _addMessage(result);
+    }
+  }
+
+  void _handleMessageTap(BuildContext _, types.Message message) async {
+    await _chatController.handleFileTap(message, _messages, setState);
+  }
+
+  void _handlePreviewDataFetched(
+    types.TextMessage message,
+    types.PreviewData previewData,
+  ) {
+    final index = _messages.indexWhere((element) => element.id == message.id);
+    final updatedMessage = (_messages[index] as types.TextMessage).copyWith(
+      previewData: previewData,
+    );
+
+    setState(() {
+      _messages[index] = updatedMessage;
+    });
+  }
+
+  void _handleSendPressed(types.PartialText message) {
+    final textMessage =
+        _chatController.createTextMessage(widget.user, message.text);
+    _addMessage(textMessage);
   }
 }
