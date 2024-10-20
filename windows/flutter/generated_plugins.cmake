@@ -4,11 +4,18 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   cloud_firestore
+  connectivity_plus
+  desktop_drop
   file_selector_windows
   firebase_auth
   firebase_core
   firebase_storage
+  media_kit_video
+  screen_brightness_windows
   screen_retriever
+  share_plus
+  thumblr_windows
+  url_launcher_windows
   window_manager
 )
 

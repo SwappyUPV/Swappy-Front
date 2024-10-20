@@ -1,100 +1,89 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+void main() async {
+  /// Create a new instance of [StreamChatClient] passing the apikey obtained from your
+  /// project dashboard.
+  final client = StreamChatClient(
+    'b67pax5b2wdq',
+    logLevel: Level.INFO,
+  );
+
+  /// Set the current user. In a production scenario, this should be done using
+  /// a backend to generate a user token using our server SDK.
+  /// Please see the following for more information:
+  /// https://getstream.io/chat/docs/flutter-dart/tokens_and_authentication/?language=dart
+  await client.connectUser(
+    User(id: 'tutorial-flutter'),
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidHV0b3JpYWwtZmx1dHRlciJ9.S-MJpoSwDiqyXpUURgO5wVqJ4vKlIVFLSEyrFYCOE1c',
+  );
+
+  /// Creates a channel using the type `messaging` and `flutterdevs`.
+  /// Channels are containers for holding messages between different members. To
+  /// learn more about channels and some of our predefined types, checkout our
+  /// our channel docs: https://getstream.io/chat/docs/flutter-dart/creating_channels/?language=dart
+  final channel = client.channel('messaging', id: 'flutterdevs');
+
+  /// `.watch()` is used to create and listen to the channel for updates. If the
+  /// channel already exists, it will simply listen for new events.
+  await channel.watch();
+
+  runApp(
+    MessagingPage(
+      client: client,
+      channel: channel,
+    ),
+  );
+}
 
 class MessagingPage extends StatelessWidget {
-  const MessagingPage({super.key});
+  /// To initialize this example, an instance of [client] and [channel] is required.
+  const MessagingPage({
+    Key? key,
+    required this.client,
+    required this.channel,
+  }) : super(key: key);
+
+  /// Instance of [StreamChatClient] we created earlier. This contains information about
+  /// our application and connection state.
+  final StreamChatClient client;
+
+  /// The channel we'd like to observe and participate.
+  final Channel channel;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      builder: (context, widget) {
+        return StreamChat(
+          client: client,
+          child: widget,
+        );
+      },
+      home: StreamChannel(
+        channel: channel,
+        child: const ChannelPage(),
+      ),
+    );
+  }
+}
+
+/// Displays the list of messages inside the channel
+class ChannelPage extends StatelessWidget {
+  const ChannelPage({
+    Key? key,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Messages'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
-              // Implement search functionality
-            },
-          ),
-        ],
-      ),
-      body: Row(
-        children: [
-          // Left sidebar for navigation
-          NavigationRail(
-            selectedIndex: 0,
-            onDestinationSelected: (int index) {
-              // Handle navigation
-            },
-            destinations: [
-              NavigationRailDestination(
-                icon: Icon(Icons.message),
-                label: Text('Messages'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.notifications),
-                label: Text('Notifications'),
-              ),
-              // Add more navigation items as needed
-            ],
-          ),
-          // Message list
+      appBar: const StreamChannelHeader(),
+      body: Column(
+        children: const <Widget>[
           Expanded(
-            child: ListView.builder(
-              itemCount: 10, // Replace with actual message count
-              itemBuilder: (context, index) {
-                return ListTile(
-                  leading: CircleAvatar(
-                    child: Text('U'), // Replace with user initial or avatar
-                  ),
-                  title: Text('User ${index + 1}'),
-                  subtitle: Text('Last message preview'),
-                  trailing: Text('2h ago'), // Replace with actual timestamp
-                  onTap: () {
-                    // Open chat detail view
-                  },
-                );
-              },
-            ),
+            child: StreamMessageListView(),
           ),
-          // Chat detail view (can be conditionally rendered)
-          Expanded(
-            child: Column(
-              children: [
-                // Chat header
-                AppBar(
-                  title: Text('Chat with User'),
-                ),
-                // Chat messages
-                Expanded(
-                  child: ListView(
-                    children: [
-                      // Implement chat messages here
-                    ],
-                  ),
-                ),
-                // Message input
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: 'Type a message...',
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.send),
-                        onPressed: () {
-                          // Send message
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+          StreamMessageInput(),
         ],
       ),
     );

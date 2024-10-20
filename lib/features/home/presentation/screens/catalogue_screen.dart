@@ -5,6 +5,7 @@ import '../../../virtual_closet/presentation/screens/virtual_closet_screen.dart'
 import 'add_product_screen.dart';
 import '../../../chat/presentation/screens/chat_screen.dart';
 import 'package:pin/core/services/authentication_service.dart'; // Your AuthMethod class
+import '../../../chat/state/chat_provider.dart';
 
 class Catalogue extends StatefulWidget {
   const Catalogue({Key? key}) : super(key: key);
@@ -302,7 +303,11 @@ class _CatalogueState extends State<Catalogue> {
             case 2:
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => MessagingPage()),
+                MaterialPageRoute(
+                    builder: (context) => MessagingPage(
+                          client: StreamChatProvider.of(context)!.client,
+                          channel: StreamChatProvider.of(context)!.channel,
+                        )),
               );
               break;
           }
