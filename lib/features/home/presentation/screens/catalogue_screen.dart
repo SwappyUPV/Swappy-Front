@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:pin/features/chat/presentation/screens/chats/chats_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
 import '../../../virtual_closet/presentation/screens/virtual_closet_screen.dart';
 import 'add_product_screen.dart';
-import '../../../chat/presentation/screens/chat_screen.dart';
 import 'package:pin/core/services/authentication_service.dart'; // Your AuthMethod class
 
 class Catalogue extends StatefulWidget {
@@ -302,7 +302,7 @@ class _CatalogueState extends State<Catalogue> {
             case 2:
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => MessagingPage()),
+                MaterialPageRoute(builder: (context) => ChatsScreen()),
               );
               break;
           }
