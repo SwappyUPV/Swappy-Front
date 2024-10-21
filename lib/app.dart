@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pin/features/home/presentation/screens/catalogue_screen.dart';
+import 'package:pin/features/catalogue/presentation/widgets/navigation_menu.dart';
 import 'package:pin/core/constants/constants.dart';
 
 class MyApp extends StatelessWidget {
@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const Catalogue(),
+      home: NavigationMenu(),
     );
   }
 }

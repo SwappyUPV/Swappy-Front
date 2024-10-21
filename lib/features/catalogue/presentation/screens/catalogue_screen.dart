@@ -3,7 +3,7 @@ import 'package:pin/features/chat/presentation/screens/chats/chats_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
 import '../../../virtual_closet/presentation/screens/virtual_closet_screen.dart';
-import 'add_product_screen.dart';
+import '../../../add_product/presentation/screens/add_product_screen.dart';
 import 'package:pin/core/services/authentication_service.dart'; // Your AuthMethod class
 
 class Catalogue extends StatefulWidget {
@@ -267,46 +267,6 @@ class _CatalogueState extends State<Catalogue> {
         label: Text('Intercambiar'),
         icon: Icon(Icons.add),
         backgroundColor: Colors.teal,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_bag),
-            label: 'Catálogo',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.inventory),
-            label: 'Armario Virtual',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
-            label: 'Chat',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.teal,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-          switch (index) {
-            case 0:
-              // Ya estamos en la página del catálogo
-              break;
-            case 1:
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => VirtualCloset()),
-              );
-              break;
-            case 2:
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ChatsScreen()),
-              );
-              break;
-          }
-        },
       ),
     );
   }

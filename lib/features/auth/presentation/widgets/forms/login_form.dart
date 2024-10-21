@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart'; // Import for handling SVG images
 import 'package:pin/core/services/authentication_service.dart'; // Your AuthMethod class
+import 'package:pin/features/catalogue/presentation/widgets/navigation_menu.dart';
 import '../components/already_have_an_account_acheck.dart';
 import '../../../../../core/constants/constants.dart';
 import '../../screens/sign_up_screen.dart';
-import '../../../../home/presentation/screens/catalogue_screen.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -40,7 +40,7 @@ class _LoginFormState extends State<LoginForm> {
       if (res == 'success') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const Catalogue()),
+          MaterialPageRoute(builder: (context) => NavigationMenu()),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -61,7 +61,7 @@ class _LoginFormState extends State<LoginForm> {
         // If sign-in is successful, navigate to HomeScreen
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const Catalogue()),
+          MaterialPageRoute(builder: (context) => NavigationMenu()),
         );
       }
     } catch (e) {
