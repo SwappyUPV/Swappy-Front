@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import '/Services/product.dart';
+import '/core/services/product.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import '/Screens/catalogue.dart'; // Añade esta línea al principio del archivo
+import '/features/catalogue/presentation/screens/catalogue_screen.dart'; // Añade esta línea al principio del archivo
 
 class AddProduct extends StatefulWidget {
   const AddProduct({super.key});

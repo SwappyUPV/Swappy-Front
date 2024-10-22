@@ -30,6 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  get: ^4.6.5  # O la versión más reciente
   image_picker: ^0.8.4+4
   universal_html: ^2.2.4
   # The following adds the Cupertino Icons font to your application.
@@ -48,6 +49,7 @@ dependencies:
   window_manager: ^0.4.2
   firebase_storage: ^12.3.1
   flutter_image_compress: ^1.1.0  # Añade esta línea
+  iconsax: ^0.0.8  # O la versión más reciente
 
 
 dev_dependencies:
