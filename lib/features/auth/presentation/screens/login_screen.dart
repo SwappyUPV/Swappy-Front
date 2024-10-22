@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pin/core/utils/responsive.dart';
-import 'package:pin/features/catalogue/presentation/screens/catalogue_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
+import 'package:pin/features/catalogue/presentation/widgets/navigation_menu.dart';
 
 import '../../../../core/utils/background.dart';
 import '../widgets/forms/login_form.dart';
@@ -16,6 +17,8 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final NavigationController navigationController =
+      Get.find<NavigationController>();
 
   @override
   void initState() {
@@ -40,15 +43,17 @@ class _LoginState extends State<Login> {
     String res = await _loginUser(email: email, password: password);
 
     if (res == 'success') {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const Catalogue()),
-      );
+      // Actualizar el índice del NavigationMenu para mostrar el Catálogo
+      navigationController.updateIndex(0);
+
+      // Eliminar todas las rutas anteriores y mostrar el NavigationMenu
+      Get.offAll(() => NavigationMenu());
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error en inicio de sesión automático: $res'),
-          backgroundColor: Colors.red,
-        ),
+      Get.snackbar(
+        'Error',
+        'Error en inicio de sesión automático: $res',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
       );
     }
   }

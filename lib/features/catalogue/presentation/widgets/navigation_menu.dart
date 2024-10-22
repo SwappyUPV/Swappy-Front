@@ -99,7 +99,10 @@ class NavigationMenu extends StatelessWidget {
               child: Text('Iniciar sesión'),
               onPressed: () {
                 Navigator.of(context).pop();
-                Get.to(() => Login());
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Login()),
+                );
               },
             ),
           ],

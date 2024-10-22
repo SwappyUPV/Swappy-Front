@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../profile/presentation/screens/profile_screen.dart';
-import '../../../auth/presentation/screens/login_screen.dart';
 import '../../../../core/services/catalogue.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class Catalogue extends StatefulWidget {
   const Catalogue({Key? key}) : super(key: key);
@@ -16,7 +13,6 @@ class _CatalogueState extends State<Catalogue> {
   String _searchQuery = '';
   List<Map<String, dynamic>> catalogoRopa = [];
   bool _isLoading = true;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   final CatalogService _catalogService = CatalogService();
 
