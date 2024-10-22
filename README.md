@@ -74,7 +74,7 @@ Here are some commonly used Flutter commands to help manage your project:
 **Run the app on a specific device (chrome...)**
 ```bash
   flutter run -d <device_id>
-  flutter run - d chrome --web-port 8080
+  flutter run -d chrome --web-port 8080
 ```
 It must run on a specific port in localhost or address for googleSignIn to work.
 Authorized addresses https://localhost:8080 && https://swappy-pin.web.app.
