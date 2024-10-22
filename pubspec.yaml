@@ -48,7 +48,7 @@ dependencies:
   shared_preferences: ^2.0.0
   window_manager: ^0.4.2
   firebase_storage: ^12.3.1
-  flutter_image_compress: ^1.1.0  # Añade esta línea
+  flutter_image_compress: ^2.0.0  # Añade esta línea
   iconsax: ^0.0.8  # O la versión más reciente
 
 

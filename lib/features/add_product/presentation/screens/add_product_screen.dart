@@ -3,8 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '/core/services/product.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_image_compress/flutter_image_compress.dart';
-import '/features/catalogue/presentation/screens/catalogue_screen.dart'; // Añade esta línea al principio del archivo
+import '/features/catalogue/presentation/screens/catalogue_screen.dart';
 
 class AddProduct extends StatefulWidget {
   const AddProduct({super.key});
@@ -304,19 +303,6 @@ class _AddProductState extends State<AddProduct> {
   Future<void> _loadSizes(String category) async {
     predefinedSizes = await _productService.getVerifiedSizes(category);
     setState(() {});
-  }
-
-  Future<File> compressImage(File file) async {
-    final filePath = file.absolute.path;
-    final lastIndex = filePath.lastIndexOf(RegExp(r'.jp'));
-    final splitted = filePath.substring(0, (lastIndex));
-    final outPath = "${splitted}_out${filePath.substring(lastIndex)}";
-    var result = await FlutterImageCompress.compressAndGetFile(
-      file.absolute.path,
-      outPath,
-      quality: 70,
-    );
-    return result!;
   }
 
   Future<void> _pickImage() async {

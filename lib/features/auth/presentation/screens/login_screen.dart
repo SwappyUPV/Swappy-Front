@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pin/components/responsive.dart';
-import 'package:pin/Screens/catalogue.dart';
-import 'package:pin/Services/authentication.dart';
+import 'package:pin/core/utils/responsive.dart';
+import 'package:pin/features/catalogue/presentation/screens/catalogue_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../core/utils/background.dart';
 import '../widgets/forms/login_form.dart';
@@ -15,7 +15,7 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  final AuthMethod _authMethod = AuthMethod();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void initState() {
@@ -23,21 +23,27 @@ class _LoginState extends State<Login> {
     _autoLogin();
   }
 
+  Future<String> _loginUser(
+      {required String email, required String password}) async {
+    try {
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
+      return 'success';
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
   void _autoLogin() async {
     String email = 's@gmail.com';
     String password = '123456';
 
-    String res = await _authMethod.loginUser(
-      email: email,
-      password: password,
-    );
+    String res = await _loginUser(email: email, password: password);
 
     if (res == 'success') {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const Catalogue()),
       );
     } else {
-      // Si el inicio de sesión automático falla, muestra un mensaje de error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error en inicio de sesión automático: $res'),
