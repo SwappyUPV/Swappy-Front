@@ -187,7 +187,7 @@ class CatalogueGrid extends StatelessWidget {
                     child: ClipRRect(
                       borderRadius:
                           BorderRadius.vertical(top: Radius.circular(12)),
-                      child: Image.asset(
+                      child: Image.network(
                         item['imagen'],
                         fit: BoxFit.cover,
                         width: double.infinity,
