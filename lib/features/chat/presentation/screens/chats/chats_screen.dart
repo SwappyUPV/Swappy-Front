@@ -1,55 +1,31 @@
 import '../../../constants.dart';
 import 'package:flutter/material.dart';
-
-import 'components/body.dart';
+import 'components/body.dart'; // Asegúrate de que este import sea correcto
 
 class ChatsScreen extends StatefulWidget {
   const ChatsScreen({super.key});
 
   @override
-  State<ChatsScreen> createState() => _ChatsScreenState();
+  State<ChatsScreen> createState() => ChatsScreenState();
 }
 
-class _ChatsScreenState extends State<ChatsScreen> {
-  int _selectedIndex = 1;
+class ChatsScreenState extends State<ChatsScreen>
+    with SingleTickerProviderStateMixin {
+  TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  bool _isSearching = false; // Variable para controlar la búsqueda
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(),
-      body: const Body(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: kPrimaryColor,
-        child: const Icon(
-          Icons.person_add_alt_1,
-          color: Colors.white,
-        ),
-      ),
-      bottomNavigationBar: buildBottomNavigationBar(),
-    );
-  }
-
-  BottomNavigationBar buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      currentIndex: _selectedIndex,
-      onTap: (value) {
-        setState(() {
-          _selectedIndex = value;
-        });
-      },
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.messenger), label: "Chats"),
-        BottomNavigationBarItem(icon: Icon(Icons.people), label: "People"),
-        BottomNavigationBarItem(icon: Icon(Icons.call), label: "Calls"),
-        BottomNavigationBarItem(
-          icon: CircleAvatar(
-            radius: 14,
-            backgroundImage: AssetImage("assets/images/user_2.png"),
-          ),
-          label: "Profile",
-        ),
-      ],
+      body: Body(searchQuery: _searchQuery), // Pasa el searchQuery al Body
     );
   }
 
@@ -57,13 +33,41 @@ class _ChatsScreenState extends State<ChatsScreen> {
     return AppBar(
       backgroundColor: kPrimaryColor,
       automaticallyImplyLeading: false,
-      title: const Text("Chats"),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.search),
-          onPressed: () {},
-        ),
-      ],
+      title: Row(
+        children: [
+          // Ícono de búsqueda siempre a la derecha
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              setState(() {
+                _isSearching = !_isSearching; // Alterna el estado de búsqueda
+                if (!_isSearching) {
+                  _searchController
+                      .clear(); // Limpiar el texto si se cierra la búsqueda
+                  _searchQuery = ''; // Reiniciar la consulta de búsqueda
+                }
+              });
+            },
+          ),
+          // Muestra el campo de búsqueda si _isSearching es true
+          if (_isSearching)
+            Expanded(
+              child: TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  hintText: "Buscar...",
+                  border: InputBorder.none,
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery =
+                        value; // Actualiza el searchQuery en tiempo real
+                  });
+                },
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

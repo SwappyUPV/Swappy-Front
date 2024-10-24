@@ -26,7 +26,7 @@ class TextMessage extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
       ),
       child: Text(
-        message!.text,
+        message!.messageContent,
         style: TextStyle(
           color: message!.isSender
               ? Colors.white

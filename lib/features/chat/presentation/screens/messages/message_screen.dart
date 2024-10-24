@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pin/features/exchanges/screens/home/exchanges.dart';
 
 import '../../../constants.dart';
 import 'components/body.dart';
@@ -9,12 +10,12 @@ class MessagesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildAppBar(),
+      appBar: buildAppBar(context),
       body: const Body(),
     );
   }
 
-  AppBar buildAppBar() {
+  AppBar buildAppBar(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
       title: const Row(
@@ -41,12 +42,13 @@ class MessagesScreen extends StatelessWidget {
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.local_phone),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: const Icon(Icons.videocam),
-          onPressed: () {},
+          icon: const Icon(Icons.swap_horiz),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Exchanges()),
+            );
+          },
         ),
         const SizedBox(width: kDefaultPadding / 2),
       ],
