@@ -26,6 +26,17 @@ class _LoginState extends State<Login> {
     _autoLogin();
   }
 
+  Future<void> _autoLogin() async {
+    String email = 's@gmail.com'; // Reemplaza con el email predeterminado
+    String password = '123456'; // Reemplaza con la contraseña predeterminada
+
+    String res = await _loginUser(email: email, password: password);
+
+    if (res == 'success') {
+      _navigateToCatalogue();
+    }
+  }
+
   Future<String> _loginUser(
       {required String email, required String password}) async {
     try {
@@ -36,22 +47,20 @@ class _LoginState extends State<Login> {
     }
   }
 
-  void _autoLogin() async {
-    String email = 's@gmail.com';
-    String password = '123456';
+  void _navigateToCatalogue() {
+    navigationController.updateIndex(0);
+    Get.offAll(() => NavigationMenu());
+  }
 
+  void _handleLogin(String email, String password) async {
     String res = await _loginUser(email: email, password: password);
 
     if (res == 'success') {
-      // Actualizar el índice del NavigationMenu para mostrar el Catálogo
-      navigationController.updateIndex(0);
-
-      // Eliminar todas las rutas anteriores y mostrar el NavigationMenu
-      Get.offAll(() => NavigationMenu());
+      _navigateToCatalogue();
     } else {
       Get.snackbar(
         'Error',
-        'Error en inicio de sesión automático: $res',
+        'Error en inicio de sesión: $res',
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -63,7 +72,7 @@ class _LoginState extends State<Login> {
     return Background(
       child: SingleChildScrollView(
         child: Responsive(
-          mobile: MobileLogin(),
+          mobile: MobileLogin(onLogin: _handleLogin),
           desktop: Row(
             children: [
               Expanded(
@@ -89,8 +98,11 @@ class _LoginState extends State<Login> {
 }
 
 class MobileLogin extends StatelessWidget {
+  final Function(String, String) onLogin;
+
   const MobileLogin({
     super.key,
+    required this.onLogin,
   });
 
   @override

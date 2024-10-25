@@ -18,6 +18,7 @@ class ProductService {
     required String quality,
     required dynamic image,
     required String category,
+    required bool isExchangeOnly,
   }) async {
     try {
       // Obtener el usuario actual directamente de FirebaseAuth
@@ -40,27 +41,26 @@ class ProductService {
       } else {
         throw Exception('Tipo de imagen no soportado');
       }
-      
+
       // Esperar a que se complete la subida
       await uploadTask.whenComplete(() {});
-      
+
       final imageUrl = await storageRef.getDownloadURL();
 
       // Crear documento en Firestore
-      DocumentReference docRef = await _firestore
-          .collection('clothes')
-          .add({
+      DocumentReference docRef = await _firestore.collection('clothes').add({
         'nombre': title,
         'descripcion': description,
         'categoria': category,
         'estilos': styles,
         'etiquetas': [...styles, ...sizes, quality],
         'tallas': sizes,
-        'precio': price,
+        'precio': isExchangeOnly ? null : price,
         'calidad': quality,
         'imagen': imageUrl,
         'createdAt': FieldValue.serverTimestamp(),
         'userId': currentUser.uid,
+        'soloIntercambio': isExchangeOnly,
       });
 
       return "Producto añadido con éxito: ${docRef.id}";
@@ -83,9 +83,10 @@ class ProductService {
         .where('category', isEqualTo: category)
         .where('verified', isEqualTo: true)
         .get();
-    
-    List<String> sizes = snapshot.docs.map((doc) => doc['size'] as String).toList();
-    
+
+    List<String> sizes =
+        snapshot.docs.map((doc) => doc['size'] as String).toList();
+
     sizes.sort((a, b) {
       int? numA = int.tryParse(a);
       int? numB = int.tryParse(b);
@@ -97,7 +98,7 @@ class ProductService {
         return order.indexOf(a).compareTo(order.indexOf(b));
       }
     });
-    
+
     return sizes;
   }
 

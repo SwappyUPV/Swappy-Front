@@ -9,6 +9,15 @@
                 "-d",
                 "chrome"
             ]
+        },
+        {
+            "name": "Flutter (Emulador Android)",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "-d",
+                "emulator-5554"
+            ]
         }
     ]
 }

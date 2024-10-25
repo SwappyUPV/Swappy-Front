@@ -274,7 +274,10 @@ class _AddProductState extends State<AddProduct> {
             TextButton(
               child: Text('Cancelar'),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => Catalogue()),
+                );
               },
             ),
             TextButton(
@@ -336,14 +339,14 @@ class _AddProductState extends State<AddProduct> {
         Expanded(
           child: TextFormField(
             decoration: InputDecoration(
-              labelText: 'Precio*',
+              labelText: 'Precio',
               border: OutlineInputBorder(),
             ),
             keyboardType: TextInputType.number,
             enabled: !isExchangeOnly,
             validator: (value) {
               if (!isExchangeOnly && (value == null || value.isEmpty)) {
-                return 'Este campo es obligatorio';
+                return 'Este campo es obligatorio si no es solo intercambio';
               }
               if (!isExchangeOnly && int.tryParse(value!) == null) {
                 return 'Ingrese solo números';
@@ -427,10 +430,11 @@ class _AddProductState extends State<AddProduct> {
           description: description,
           styles: selectedStyles,
           sizes: selectedSizes,
-          price: price!,
+          price: isExchangeOnly ? null : price,
           quality: selectedQuality!,
           image: _pickedImage,
           category: selectedCategory,
+          isExchangeOnly: isExchangeOnly,
         );
 
         Navigator.of(context).pop(); // Cierra el diálogo de progreso
@@ -485,6 +489,7 @@ class _AddProductState extends State<AddProduct> {
       _pickedImage = null;
       selectedStyles.clear();
       selectedSizes.clear();
+      selectedQuality = null;
       selectedCategory = '';
     });
   }
