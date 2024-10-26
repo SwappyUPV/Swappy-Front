@@ -87,17 +87,6 @@ class _CatalogueState extends State<Catalogue> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const Catalogue()),
-          );
-        },
-        label: Text('Intercambiar'),
-        icon: Icon(Icons.add),
-        backgroundColor: Colors.teal,
-      ),
     );
   }
 }
