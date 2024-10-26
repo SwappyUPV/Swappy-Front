@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
 import '../../constants.dart';
 import '../../models/product.dart';
 import 'components/add_to_cart.dart';
@@ -16,30 +17,30 @@ class DetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.transparent, // Fondo transparente para el blur
       child: LayoutBuilder(
         builder: (context, constraints) {
           final isMobile = constraints.maxWidth < 600; // Detecta si es móvil
           return Container(
-            width: isMobile ? constraints.maxWidth * 0.90 : 500,
+            width:
+                isMobile ? constraints.maxWidth * 0.90 : 500, // Ajusta el ancho
             height: isMobile
                 ? MediaQuery.of(context).size.height * 0.90
-                : MediaQuery.of(context).size.height * 0.75,
-            margin: const EdgeInsets.symmetric(horizontal: 20),
+                : MediaQuery.of(context).size.height * 0.75, // Ajusta la altura
+            margin: const EdgeInsets.symmetric(
+                horizontal: 20), // Margen del diálogo
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.9),
-              borderRadius: BorderRadius.circular(24),
+              color: Colors.white.withOpacity(0.9), // Fondo traslúcido
+              borderRadius: BorderRadius.circular(24), // Esquinas redondeadas
             ),
             child: Column(
               children: <Widget>[
-                MouseRegion(
-                  onEnter: (_) => _showPreviewPopup(context, product),
-                  onExit: (_) => _hidePreviewPopup(),
-                  child: SizedBox(
-                    height: isMobile ? 350 : 300,
-                    child: ProductTitleWithImage(product: product),
-                  ),
+                // Imagen ocupa más espacio
+                SizedBox(
+                  height: isMobile ? 350 : 300, // Altura de la imagen
+                  child: ProductTitleWithImage(product: product),
                 ),
+                // Sección de detalles
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(kDefaultPaddin),
@@ -63,50 +64,5 @@ class DetailsScreen extends StatelessWidget {
         },
       ),
     );
-  }
-
-  void _showPreviewPopup(BuildContext context, Product product) {
-    // Crear el popup como un Overlay
-    OverlayEntry overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        left: 100.0, // Posición X del popup
-        top: 100.0, // Posición Y del popup
-        child: Material(
-          child: Container(
-            width: 200, // Ancho del popup
-            height: 100, // Alto del popup
-            padding: const EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 4,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(
-                  product.title,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 5),
-                Text(product.description),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
-    Overlay.of(context)!.insert(overlayEntry);
-  }
-
-  void _hidePreviewPopup() {
-    // Aquí puedes ocultar el popup si es necesario
   }
 }
