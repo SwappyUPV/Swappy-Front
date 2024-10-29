@@ -46,7 +46,11 @@ class MessagesScreen extends StatelessWidget {
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const Exchanges()),
+              MaterialPageRoute(
+                  builder: (context) => Exchanges(
+                        isNew: false,
+                        selectedProduct: {},
+                      )),
             );
           },
         ),

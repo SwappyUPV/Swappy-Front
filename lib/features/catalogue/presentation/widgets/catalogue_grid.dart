@@ -1,97 +1,78 @@
 import 'package:flutter/material.dart';
-import '../../../../core/utils/responsive.dart';
-import 'product_detail_modal.dart'; // Importa el nuevo widget
+import 'product_detail_modal.dart';
+import 'catalogue_item_card.dart';
 
 class CatalogueGrid extends StatelessWidget {
   final List<Map<String, dynamic>> filteredCatalogo;
 
-  const CatalogueGrid({Key? key, required this.filteredCatalogo})
-      : super(key: key);
+  const CatalogueGrid({
+    super.key,
+    required this.filteredCatalogo,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final bool isMobile = Responsive.isMobile(context);
-        final int crossAxisCount = isMobile ? 2 : 5;
-        final double itemWidth = constraints.maxWidth / crossAxisCount;
-        final double aspectRatio =
-            isMobile ? 1.0 : (itemWidth / (itemWidth * 1.5));
+    final width = MediaQuery.of(context).size.width;
+    final crossAxisCount = (width / 120).floor();
+    final itemSize = (width - (crossAxisCount + 1) * 16) / crossAxisCount;
 
-        return GridView.builder(
-          padding: EdgeInsets.all(isMobile ? 4.0 : 8.0),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            childAspectRatio: aspectRatio,
-            crossAxisSpacing: isMobile ? 4 : 8,
-            mainAxisSpacing: isMobile ? 4 : 8,
-          ),
-          itemCount: filteredCatalogo.length,
-          itemBuilder: (context, index) {
-            final item = filteredCatalogo[index];
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: filteredCatalogo.length,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          mainAxisSpacing: 0,
+          crossAxisSpacing: 16,
+          childAspectRatio: 0.7,
+        ),
+        itemBuilder: (context, index) {
+          if (index == filteredCatalogo.length) {
             return GestureDetector(
-              onTap: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (context) => ProductDetailModal(product: item),
-                );
-              },
-              child: Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(12)),
-                        child: Image.network(
-                          item['imagen'],
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                        ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Center(
+                        child: Icon(Icons.add, size: 40, color: Colors.grey),
                       ),
                     ),
-                    Padding(
-                      padding: EdgeInsets.all(isMobile ? 4.0 : 8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item['nombre'],
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleSmall!
-                                .copyWith(fontWeight: FontWeight.bold),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          SizedBox(height: 2),
-                          ElevatedButton(
-                            onPressed: () {
-                              // Lógica para iniciar intercambio
-                            },
-                            child: Text('SWAP'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.teal,
-                              minimumSize: Size(double.infinity, 36),
-                            ),
-                          ),
-                        ],
-                      ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text(
+                      'Añadir',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             );
-          },
-        );
-      },
+          } else {
+            final item = filteredCatalogo[index];
+            return CatalogueItemCard(
+              product: item,
+              press: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProductDetailModal(product: item),
+                  ),
+                );
+              },
+            );
+          }
+        },
+      ),
     );
   }
 }

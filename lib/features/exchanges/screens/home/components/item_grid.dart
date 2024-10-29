@@ -6,17 +6,20 @@ import 'item_card.dart';
 class ItemGrid extends StatelessWidget {
   final List<Product> items;
   final bool showButtons;
-  final void Function()? onAddItem;
+  final VoidCallback? onAddItem;
   final Function(Product) onDeleteItem;
+  final Function(int)? onRemoveItem;
+  final bool showAddButton;
 
   const ItemGrid({
-    super.key,
+    Key? key,
     required this.items,
-    required this.showButtons,
-    required this.onAddItem,
+    this.onRemoveItem,
+    this.onAddItem,
     required this.onDeleteItem,
-    void Function(int id)? onRemoveItem,
-  });
+    required this.showButtons,
+    this.showAddButton = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +34,7 @@ class ItemGrid extends StatelessWidget {
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        itemCount: items.length + (showButtons && onAddItem != null ? 1 : 0),
+        itemCount: items.length + (showAddButton ? 1 : 0),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: crossAxisCount,
           mainAxisSpacing: 0,
@@ -39,7 +42,7 @@ class ItemGrid extends StatelessWidget {
           childAspectRatio: 0.7, // Ajustar relación de aspecto si es necesario
         ),
         itemBuilder: (context, index) {
-          if (index == items.length && showButtons && onAddItem != null) {
+          if (showAddButton && index == items.length) {
             return GestureDetector(
               onTap: onAddItem,
               child: Column(
