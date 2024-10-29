@@ -19,8 +19,6 @@ class Exchanges extends StatefulWidget {
 }
 
 class ExchangesState extends State<Exchanges> {
-  bool hasResponded =
-      false; // Controla la visibilidad de los botones Responder/Confirmar
   bool hasChanges =
       false; // Indica si se ha realizado algún cambio (agregar o eliminar)
   List<Map<String, dynamic>> modifiedItems =
@@ -47,20 +45,6 @@ class ExchangesState extends State<Exchanges> {
     // }
   }
 
-  void _addItem() {
-    setState(() {
-      modifiedItems.add({
-        "id": 1,
-        "title": "Office Code",
-        "price": 234,
-        "size": 12,
-        "description": dummyText,
-        "image": "assets/images/bag_1.png",
-      });
-      hasChanges = true; // Marcar como cambiado
-    });
-  }
-
   void _removeItem(int id) {
     setState(() {
       modifiedItems.removeWhere((item) => item["id"] == id);
@@ -73,7 +57,6 @@ class ExchangesState extends State<Exchanges> {
       products.clear();
       products.addAll(modifiedItems);
       hasChanges = false; // Resetear cambios
-      hasResponded = false; // Volver al estado inicial
     });
   }
 
@@ -81,7 +64,6 @@ class ExchangesState extends State<Exchanges> {
     setState(() {
       modifiedItems = List.from(products); // Reiniciar cambios
       hasChanges = false; // Resetear cambios
-      hasResponded = false; // Volver al estado inicial
     });
   }
 
@@ -108,16 +90,14 @@ class ExchangesState extends State<Exchanges> {
             // Cuadrícula de mis items con botón de agregar
             ItemGrid(
               items: modifiedItems,
-              onRemoveItem: hasResponded ? _removeItem : null,
-              onAddItem:
-                  widget.isNew ? _addItem : (hasResponded ? _addItem : null),
+              onRemoveItem: _removeItem,
               onDeleteItem: (Map<String, dynamic> product) {
                 setState(() {
                   modifiedItems.remove(product);
                   hasChanges = true;
                 });
               },
-              showButtons: widget.isNew || hasResponded,
+              showButtons: widget.isNew,
               showAddButton:
                   true, // Nuevo parámetro para mostrar el botón de agregar
             ),
@@ -171,63 +151,34 @@ class ExchangesState extends State<Exchanges> {
             Center(
               child: Column(
                 children: [
-                  if (!hasResponded)
-                    // Mostrar botones Responder y Declinar
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              hasResponded = true;
-                            });
-                          },
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 100, vertical: 16),
-                            textStyle: const TextStyle(fontSize: 16),
-                          ),
-                          child: const Text("Responder"),
+                  // Mostrar botones "Enviar contrapropuesta" y Cancelar
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          // Confirmar cambios siempre activo
+                          _confirmChanges();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 40, vertical: 16),
+                          textStyle: const TextStyle(fontSize: 16),
                         ),
-                        const SizedBox(width: 16),
-                        TextButton(
-                          onPressed: () {},
-                          child: const Text(
-                            "Rechazar",
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
-                          ),
+                        child: Text(hasChanges
+                            ? "Enviar contrapropuesta" // Cambia el texto si hay cambios
+                            : "Confirmar"), // Texto por defecto
+                      ),
+                      const SizedBox(width: 16),
+                      TextButton(
+                        onPressed: _cancelChanges,
+                        child: const Text(
+                          "Cancelar",
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
                         ),
-                      ],
-                    )
-                  else
-                    // Mostrar botones "Enviar contrapropuesta" y Cancelar
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            // Confirmar cambios siempre activo
-                            _confirmChanges();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 40, vertical: 16),
-                            textStyle: const TextStyle(fontSize: 16),
-                          ),
-                          child: Text(hasChanges
-                              ? "Enviar contrapropuesta" // Cambia el texto si hay cambios
-                              : "Confirmar"), // Texto por defecto
-                        ),
-                        const SizedBox(width: 16),
-                        TextButton(
-                          onPressed: _cancelChanges,
-                          child: const Text(
-                            "Cancelar",
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

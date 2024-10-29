@@ -14,7 +14,6 @@ class CatalogueGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final crossAxisCount = (width / 120).floor();
-    final itemSize = (width - (crossAxisCount + 1) * 16) / crossAxisCount;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -29,48 +28,18 @@ class CatalogueGrid extends StatelessWidget {
           childAspectRatio: 0.7,
         ),
         itemBuilder: (context, index) {
-          if (index == filteredCatalogo.length) {
-            return GestureDetector(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(16.0),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Center(
-                        child: Icon(Icons.add, size: 40, color: Colors.grey),
-                      ),
-                    ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      'Añadir',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          } else {
-            final item = filteredCatalogo[index];
-            return CatalogueItemCard(
-              product: item,
-              press: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ProductDetailModal(product: item),
-                  ),
-                );
-              },
-            );
-          }
+          final item = filteredCatalogo[index];
+          return CatalogueItemCard(
+            product: item,
+            press: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProductDetailModal(product: item),
+                ),
+              );
+            },
+          );
         },
       ),
     );

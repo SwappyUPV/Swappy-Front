@@ -5,20 +5,18 @@ import 'item_card.dart';
 class ItemGrid extends StatelessWidget {
   final List<Map<String, dynamic>> items;
   final bool showButtons;
-  final VoidCallback? onAddItem;
   final Function(Map<String, dynamic>) onDeleteItem;
   final Function(int)? onRemoveItem;
   final bool showAddButton;
 
   const ItemGrid({
-    Key? key,
+    super.key,
     required this.items,
     this.onRemoveItem,
-    this.onAddItem,
     required this.onDeleteItem,
     required this.showButtons,
     this.showAddButton = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +41,8 @@ class ItemGrid extends StatelessWidget {
         itemBuilder: (context, index) {
           if (showAddButton && index == items.length) {
             return GestureDetector(
-              onTap: onAddItem,
+              //Aquí se abrirá el armario del usuario
+              onTap: () {},
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
