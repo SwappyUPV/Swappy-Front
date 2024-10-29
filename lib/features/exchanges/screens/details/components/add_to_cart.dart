@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../constants.dart';
-import '../../../models/product.dart';
 
 class AddToCart extends StatelessWidget {
   const AddToCart({super.key, required this.product});
 
-  final Product product;
+  final Map<String, dynamic> product;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -18,16 +17,9 @@ class AddToCart extends StatelessWidget {
             margin: const EdgeInsets.only(right: kDefaultPaddin),
             height: 50,
             width: 58,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: product.color,
-              ),
-            ),
             child: IconButton(
               icon: SvgPicture.asset(
                 "assets/icons/add_to_cart.svg",
-                colorFilter: ColorFilter.mode(product.color, BlendMode.srcIn),
               ),
               onPressed: () {},
             ),
@@ -39,7 +31,6 @@ class AddToCart extends StatelessWidget {
                 minimumSize: const Size(double.infinity, 48),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18)),
-                backgroundColor: product.color,
               ),
               child: Text(
                 "Buy  Now".toUpperCase(),

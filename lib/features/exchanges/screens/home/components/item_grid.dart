@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../details/details_screen.dart';
-import '../../../models/product.dart';
 import 'item_card.dart';
 
 class ItemGrid extends StatelessWidget {
-  final List<Product> items;
+  final List<Map<String, dynamic>> items;
   final bool showButtons;
   final VoidCallback? onAddItem;
-  final Function(Product) onDeleteItem;
+  final Function(Map<String, dynamic>) onDeleteItem;
   final Function(int)? onRemoveItem;
   final bool showAddButton;
 

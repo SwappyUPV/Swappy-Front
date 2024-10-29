@@ -12,7 +12,7 @@ import 'components/product_title_with_image.dart';
 class DetailsScreen extends StatelessWidget {
   const DetailsScreen({super.key, required this.product});
 
-  final Product product;
+  final Map<String, dynamic> product;
 
   @override
   Widget build(BuildContext context) {

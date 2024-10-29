@@ -23,7 +23,7 @@ class ExchangesState extends State<Exchanges> {
       false; // Controla la visibilidad de los botones Responder/Confirmar
   bool hasChanges =
       false; // Indica si se ha realizado algún cambio (agregar o eliminar)
-  List<Product> modifiedItems =
+  List<Map<String, dynamic>> modifiedItems =
       List.from(products); // Lista temporal para los cambios
 
   @override
@@ -49,22 +49,21 @@ class ExchangesState extends State<Exchanges> {
 
   void _addItem() {
     setState(() {
-      modifiedItems.add(Product(
-        id: 1,
-        title: "Office Code",
-        price: 234,
-        size: 12,
-        description: dummyText,
-        image: "assets/images/bag_1.png",
-        color: const Color(0xFF3D82AE),
-      ));
+      modifiedItems.add({
+        "id": 1,
+        "title": "Office Code",
+        "price": 234,
+        "size": 12,
+        "description": dummyText,
+        "image": "assets/images/bag_1.png",
+      });
       hasChanges = true; // Marcar como cambiado
     });
   }
 
   void _removeItem(int id) {
     setState(() {
-      modifiedItems.removeWhere((item) => item.id == id);
+      modifiedItems.removeWhere((item) => item["id"] == id);
       hasChanges = true; // Marcar como cambiado
     });
   }
@@ -112,7 +111,7 @@ class ExchangesState extends State<Exchanges> {
               onRemoveItem: hasResponded ? _removeItem : null,
               onAddItem:
                   widget.isNew ? _addItem : (hasResponded ? _addItem : null),
-              onDeleteItem: (Product product) {
+              onDeleteItem: (Map<String, dynamic> product) {
                 setState(() {
                   modifiedItems.remove(product);
                   hasChanges = true;
@@ -155,15 +154,14 @@ class ExchangesState extends State<Exchanges> {
                 child: ItemCard(
                   press: () {},
                   onDelete: () {},
-                  product: Product(
-                    id: widget.selectedProduct['id'],
-                    title: widget.selectedProduct['title'],
-                    price: widget.selectedProduct['price'],
-                    size: widget.selectedProduct['size'],
-                    description: widget.selectedProduct['description'],
-                    image: widget.selectedProduct['image'],
-                    color: Colors.white,
-                  ),
+                  product: {
+                    "id": widget.selectedProduct['id'],
+                    "title": widget.selectedProduct['title'],
+                    "price": widget.selectedProduct['price'],
+                    "size": widget.selectedProduct['size'],
+                    "description": widget.selectedProduct['description'],
+                    "image": widget.selectedProduct['image'],
+                  },
                   showDeleteButton: false,
                 ),
               ),

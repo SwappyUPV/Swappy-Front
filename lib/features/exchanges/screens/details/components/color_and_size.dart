@@ -6,7 +6,7 @@ import '../../../models/product.dart';
 class ColorAndSize extends StatelessWidget {
   const ColorAndSize({super.key, required this.product});
 
-  final Product product;
+  final Map<String, dynamic> product;
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -39,7 +39,7 @@ class ColorAndSize extends StatelessWidget {
               children: [
                 const TextSpan(text: "Size\n"),
                 TextSpan(
-                  text: "${product.size} cm",
+                  text: "${product["size"]} cm",
                   style: Theme.of(context)
                       .textTheme
                       .titleLarge!

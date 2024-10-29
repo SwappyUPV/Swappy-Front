@@ -6,7 +6,7 @@ import '../../../models/product.dart';
 class ProductTitleWithImage extends StatelessWidget {
   const ProductTitleWithImage({super.key, required this.product});
 
-  final Product product;
+  final Map<String, dynamic> product;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -19,7 +19,7 @@ class ProductTitleWithImage extends StatelessWidget {
             style: TextStyle(color: Colors.white),
           ),
           Text(
-            product.title,
+            product["title"],
             style: Theme.of(context)
                 .textTheme
                 .titleLarge!
@@ -33,7 +33,7 @@ class ProductTitleWithImage extends StatelessWidget {
                   children: [
                     const TextSpan(text: "Price\n"),
                     TextSpan(
-                      text: "\$${product.price}",
+                      text: "\$${product["price"]}",
                       style: Theme.of(context)
                           .textTheme
                           .headlineSmall!
@@ -46,9 +46,9 @@ class ProductTitleWithImage extends StatelessWidget {
               const SizedBox(width: kDefaultPaddin),
               Expanded(
                 child: Hero(
-                  tag: "${product.id}",
+                  tag: "${product["id"]}",
                   child: Image.asset(
-                    product.image,
+                    product["image"],
                     fit: BoxFit.fill,
                   ),
                 ),
