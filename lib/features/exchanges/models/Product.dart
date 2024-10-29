@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 List<Map<String, dynamic>> products = [
   {
     "id": 1,
@@ -6,6 +8,7 @@ List<Map<String, dynamic>> products = [
     "size": 12,
     "description": dummyText,
     "image": "assets/images/bag_1.png",
+    "color": const Color(0xFF3D82AE), // Color azul
   },
   {
     "id": 2,
@@ -14,6 +17,7 @@ List<Map<String, dynamic>> products = [
     "size": 8,
     "description": dummyText,
     "image": "assets/images/bag_2.png",
+    "color": const Color(0xFFDDAE68), // Color marrón
   },
   {
     "id": 3,
@@ -22,6 +26,7 @@ List<Map<String, dynamic>> products = [
     "size": 10,
     "description": dummyText,
     "image": "assets/images/bag_3.png",
+    "color": const Color(0xFFB6B4C8), // Color gris
   },
   {
     "id": 4,
@@ -30,6 +35,7 @@ List<Map<String, dynamic>> products = [
     "size": 11,
     "description": dummyText,
     "image": "assets/images/bag_4.png",
+    "color": const Color(0xFFB25C83), // Color púrpura
   },
   {
     "id": 5,
@@ -38,6 +44,7 @@ List<Map<String, dynamic>> products = [
     "size": 12,
     "description": dummyText,
     "image": "assets/images/bag_5.png",
+    "color": const Color(0xFFE04D39), // Color rojo
   },
 ];
 

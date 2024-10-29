@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../constants.dart';
 import 'components/add_to_cart.dart';
@@ -14,36 +15,53 @@ class DetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent, // Fondo transparente para el blur
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final isMobile = constraints.maxWidth < 600; // Detecta si es móvil
-          return Container(
-            width:
-                isMobile ? constraints.maxWidth * 0.90 : 500, // Ajusta el ancho
-            height: isMobile
-                ? MediaQuery.of(context).size.height * 0.90
-                : MediaQuery.of(context).size.height * 0.75, // Ajusta la altura
-            margin: const EdgeInsets.symmetric(
-                horizontal: 20), // Margen del diálogo
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.9), // Fondo traslúcido
-              borderRadius: BorderRadius.circular(24), // Esquinas redondeadas
-            ),
-            child: Column(
-              children: <Widget>[
-                // Imagen ocupa más espacio
-                SizedBox(
-                  height: isMobile ? 350 : 300, // Altura de la imagen
-                  child: ProductTitleWithImage(product: product),
-                ),
-                // Sección de detalles
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(kDefaultPaddin),
+    final Size size = MediaQuery.of(context).size;
+    return Scaffold(
+      backgroundColor: product['color'],
+      appBar: AppBar(
+        backgroundColor: product['color'],
+        elevation: 0,
+        leading: IconButton(
+          icon: SvgPicture.asset(
+            'assets/icons/back.svg',
+            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        actions: <Widget>[
+          IconButton(
+            icon: SvgPicture.asset("assets/icons/search.svg"),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: SvgPicture.asset("assets/icons/cart.svg"),
+            onPressed: () {},
+          ),
+          const SizedBox(width: kDefaultPaddin / 2),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            SizedBox(
+              height: size.height,
+              child: Stack(
+                children: <Widget>[
+                  Container(
+                    margin: EdgeInsets.only(top: size.height * 0.3),
+                    padding: EdgeInsets.only(
+                      top: size.height * 0.12,
+                      left: kDefaultPaddin,
+                      right: kDefaultPaddin,
+                    ),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(24),
+                        topRight: Radius.circular(24),
+                      ),
+                    ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         ColorAndSize(product: product),
                         const SizedBox(height: kDefaultPaddin / 2),
@@ -55,11 +73,12 @@ class DetailsScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
-              ],
+                  ProductTitleWithImage(product: product),
+                ],
+              ),
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }
