@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pin/features/exchanges/models/Product.dart';
 
 import '../../../constants.dart';
 
@@ -11,7 +12,7 @@ class ItemCard extends StatelessWidget {
     this.showDeleteButton = false,
   });
 
-  final Map<String, dynamic> product;
+  final Product product;
   final VoidCallback press;
   final VoidCallback onDelete;
   final bool showDeleteButton;
@@ -30,13 +31,14 @@ class ItemCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(kDefaultPaddin),
                   decoration: BoxDecoration(
+                    color: product.color,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Hero(
-                    tag: "${product['id']}",
+                    tag: "${product.id}",
                     child: Center(
                       child: Image.asset(
-                        product['image'] as String,
+                        product.image,
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -46,7 +48,7 @@ class ItemCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: kDefaultPaddin),
                 child: Text(
-                  product['title'] as String,
+                  product.title,
                   textAlign: TextAlign.center, // Centra el texto
                   style: const TextStyle(
                     color: Color.fromARGB(255, 53, 53, 53),

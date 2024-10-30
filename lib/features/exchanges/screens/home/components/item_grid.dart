@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:pin/features/exchanges/models/Product.dart';
 import '../../details/details_screen.dart';
 import 'item_card.dart';
 
 class ItemGrid extends StatelessWidget {
-  final List<Map<String, dynamic>> items;
+  final List<Product> items;
   final bool showButtons;
-  final Function(Map<String, dynamic>) onDeleteItem;
-  final Function(int)? onRemoveItem;
-  final bool showAddButton;
+  final Function(Product) onDeleteItem;
+  final void Function()? onAddItem;
 
   const ItemGrid({
     super.key,
     required this.items,
-    this.onRemoveItem,
-    required this.onDeleteItem,
     required this.showButtons,
-    this.showAddButton = false,
+    required this.onAddItem,
+    required this.onDeleteItem,
+    void Function(int id)? onRemoveItem,
   });
 
   @override
@@ -31,7 +31,7 @@ class ItemGrid extends StatelessWidget {
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        itemCount: items.length + (showAddButton ? 1 : 0),
+        itemCount: items.length + (showButtons && onAddItem != null ? 1 : 0),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: crossAxisCount,
           mainAxisSpacing: 0,
@@ -39,7 +39,7 @@ class ItemGrid extends StatelessWidget {
           childAspectRatio: 0.7, // Ajustar relación de aspecto si es necesario
         ),
         itemBuilder: (context, index) {
-          if (showAddButton && index == items.length) {
+          if (index == items.length && showButtons && onAddItem != null) {
             return GestureDetector(
               //Aquí se abrirá el armario del usuario
               onTap: () {},

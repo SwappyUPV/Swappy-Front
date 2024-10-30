@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pin/features/exchanges/models/Product.dart';
 
 import '../../../constants.dart';
 
 class AddToCart extends StatelessWidget {
   const AddToCart({super.key, required this.product});
 
-  final Map<String, dynamic> product;
+  final Product product;
   @override
   Widget build(BuildContext context) {
     return Padding(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pin/features/exchanges/models/Product.dart';
 
 import '../../constants.dart';
 import 'components/add_to_cart.dart';
@@ -11,15 +12,15 @@ import 'components/product_title_with_image.dart';
 class DetailsScreen extends StatelessWidget {
   const DetailsScreen({super.key, required this.product});
 
-  final Map<String, dynamic> product;
+  final Product product;
 
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: product['color'],
+      backgroundColor: product.color,
       appBar: AppBar(
-        backgroundColor: product['color'],
+        backgroundColor: product.color,
         elevation: 0,
         leading: IconButton(
           icon: SvgPicture.asset(

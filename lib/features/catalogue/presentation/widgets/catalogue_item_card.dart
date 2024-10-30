@@ -65,11 +65,7 @@ class CatalogueItemCard extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => Exchanges(
-                              isNew: false,
-                              selectedProduct: product,
-                            )),
+                    MaterialPageRoute(builder: (context) => Exchanges()),
                   );
                 },
                 style: ElevatedButton.styleFrom(

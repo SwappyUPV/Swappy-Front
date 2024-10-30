@@ -6,7 +6,6 @@ import '../../../constants.dart';
 import 'components/body.dart';
 import 'package:intl/intl.dart';
 
-
 class MessagesScreen extends StatelessWidget {
   final String chatId;
 
@@ -31,12 +30,14 @@ class MessagesScreen extends StatelessWidget {
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const CircleAvatar(
-                  backgroundImage: AssetImage("assets/images/user.png"), // Placeholder image
+                  backgroundImage:
+                      AssetImage("assets/images/user.png"), // Placeholder image
                 );
               }
               if (!snapshot.hasData || snapshot.data == null) {
                 return const CircleAvatar(
-                  backgroundImage: AssetImage("assets/images/user_2.png"), // Placeholder image
+                  backgroundImage: AssetImage(
+                      "assets/images/user_2.png"), // Placeholder image
                 );
               }
 
@@ -44,7 +45,8 @@ class MessagesScreen extends StatelessWidget {
               return Row(
                 children: [
                   CircleAvatar(
-                    backgroundImage: NetworkImage(chat.image), // Fetch avatar image from Chat object
+                    backgroundImage: NetworkImage(
+                        chat.image), // Fetch avatar image from Chat object
                   ),
                   const SizedBox(width: kDefaultPadding * 0.75),
                   Column(
@@ -75,10 +77,7 @@ class MessagesScreen extends StatelessWidget {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => Exchanges(
-                  isNew: false,
-                  selectedProduct: {},
-                ),
+                builder: (context) => Exchanges(),
               ),
             );
           },
@@ -109,7 +108,8 @@ class MessagesScreen extends StatelessWidget {
     } else if (difference.inDays == 1) {
       return 'Yesterday';
     } else {
-      return DateFormat('MMM d, yyyy').format(timestamp); // E.g., "Oct 30, 2024"
+      return DateFormat('MMM d, yyyy')
+          .format(timestamp); // E.g., "Oct 30, 2024"
     }
   }
 }

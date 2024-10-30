@@ -1,53 +1,43 @@
 import 'package:flutter/material.dart';
-import '../../models/product.dart';
+import 'package:pin/features/exchanges/models/Product.dart';
 import '../home/components/user_header.dart';
 import 'components/item_grid.dart';
-import 'components/item_card.dart';
 
 class Exchanges extends StatefulWidget {
   const Exchanges({
     super.key,
-    required this.isNew,
-    required this.selectedProduct,
   });
-
-  final bool isNew;
-  final Map<String, dynamic> selectedProduct;
 
   @override
   ExchangesState createState() => ExchangesState();
 }
 
 class ExchangesState extends State<Exchanges> {
+  bool hasResponded =
+      false; // Controla la visibilidad de los botones Responder/Confirmar
   bool hasChanges =
       false; // Indica si se ha realizado algún cambio (agregar o eliminar)
-  List<Map<String, dynamic>> modifiedItems =
+  List<Product> modifiedItems =
       List.from(products); // Lista temporal para los cambios
 
-  @override
-  void initState() {
-    super.initState();
-    _validateInputs();
-  }
-
-  void _validateInputs() {
-    if (widget.isNew) {
-      if (widget.selectedProduct.isEmpty) {
-        throw ArgumentError(
-            'Se requiere un producto seleccionado para nuevo intercambio');
-      }
-    }
-    // else {
-    //   if (widget.exchangeId == null) {
-    //     throw ArgumentError(
-    //         'Se requiere ID de intercambio para intercambios existentes');
-    //   }
-    // }
+  void _addItem() {
+    setState(() {
+      modifiedItems.add(Product(
+        id: 1,
+        title: "Office Code",
+        price: 234,
+        size: 12,
+        description: dummyText,
+        image: "assets/images/bag_1.png",
+        color: const Color(0xFF3D82AE),
+      ));
+      hasChanges = true; // Marcar como cambiado
+    });
   }
 
   void _removeItem(int id) {
     setState(() {
-      modifiedItems.removeWhere((item) => item["id"] == id);
+      modifiedItems.removeWhere((item) => item.id == id);
       hasChanges = true; // Marcar como cambiado
     });
   }
@@ -57,6 +47,7 @@ class ExchangesState extends State<Exchanges> {
       products.clear();
       products.addAll(modifiedItems);
       hasChanges = false; // Resetear cambios
+      hasResponded = false; // Volver al estado inicial
     });
   }
 
@@ -64,6 +55,7 @@ class ExchangesState extends State<Exchanges> {
     setState(() {
       modifiedItems = List.from(products); // Reiniciar cambios
       hasChanges = false; // Resetear cambios
+      hasResponded = false; // Volver al estado inicial
     });
   }
 
@@ -74,7 +66,7 @@ class ExchangesState extends State<Exchanges> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {},
         ),
       ),
       body: SingleChildScrollView(
@@ -87,19 +79,18 @@ class ExchangesState extends State<Exchanges> {
               fotoUrl: "assets/images/bag_1.png",
               esMio: true,
             ),
-            // Cuadrícula de mis items con botón de agregar
+            // Cuadrícula de mis items con botón 'X' en cada ItemCard y botón '+' en la cuadrícula
             ItemGrid(
               items: modifiedItems,
-              onRemoveItem: _removeItem,
-              onDeleteItem: (Map<String, dynamic> product) {
+              onRemoveItem: hasResponded ? _removeItem : null,
+              onAddItem: hasResponded ? _addItem : null,
+              onDeleteItem: (Product product) {
                 setState(() {
                   modifiedItems.remove(product);
-                  hasChanges = true;
+                  hasChanges = true; // Marcar como cambiado
                 });
               },
-              showButtons: widget.isNew,
-              showAddButton:
-                  true, // Nuevo parámetro para mostrar el botón de agregar
+              showButtons: hasResponded,
             ),
             // Línea de intercambio con ícono
             const Padding(
@@ -120,65 +111,67 @@ class ExchangesState extends State<Exchanges> {
             ),
             const SizedBox(height: 20), // Espacio antes de los botones
 
-            // Mostrar el producto seleccionado si es nuevo intercambio
-            if (widget.isNew) ...[
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Text(
-                  "Producto seleccionado:",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: ItemCard(
-                  press: () {},
-                  onDelete: () {},
-                  product: {
-                    "id": widget.selectedProduct['id'],
-                    "title": widget.selectedProduct['title'],
-                    "price": widget.selectedProduct['price'],
-                    "size": widget.selectedProduct['size'],
-                    "description": widget.selectedProduct['description'],
-                    "image": widget.selectedProduct['image'],
-                  },
-                  showDeleteButton: false,
-                ),
-              ),
-            ],
-
             // Botones al final
             Center(
               child: Column(
                 children: [
-                  // Mostrar botones "Enviar contrapropuesta" y Cancelar
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          // Confirmar cambios siempre activo
-                          _confirmChanges();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 40, vertical: 16),
-                          textStyle: const TextStyle(fontSize: 16),
+                  if (!hasResponded)
+                    // Mostrar botones Responder y Declinar
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              hasResponded = true;
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 100, vertical: 16),
+                            textStyle: const TextStyle(fontSize: 16),
+                          ),
+                          child: const Text("Responder"),
                         ),
-                        child: Text(hasChanges
-                            ? "Enviar contrapropuesta" // Cambia el texto si hay cambios
-                            : "Confirmar"), // Texto por defecto
-                      ),
-                      const SizedBox(width: 16),
-                      TextButton(
-                        onPressed: _cancelChanges,
-                        child: const Text(
-                          "Cancelar",
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        const SizedBox(width: 16),
+                        TextButton(
+                          onPressed: () {},
+                          child: const Text(
+                            "Declinar",
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    )
+                  else
+                    // Mostrar botones "Enviar contrapropuesta" y Cancelar
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            // Confirmar cambios siempre activo
+                            _confirmChanges();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 40, vertical: 16),
+                            textStyle: const TextStyle(fontSize: 16),
+                          ),
+                          child: Text(hasChanges
+                              ? "Enviar contrapropuesta" // Cambia el texto si hay cambios
+                              : "Confirmar"), // Texto por defecto
+                        ),
+                        const SizedBox(width: 16),
+                        TextButton(
+                          onPressed: _cancelChanges,
+                          child: const Text(
+                            "Cancelar",
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),
