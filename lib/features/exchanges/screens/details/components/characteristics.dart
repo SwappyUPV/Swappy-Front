@@ -10,60 +10,64 @@ class Characteristics extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: RichText(
-            text: TextSpan(
-              style: const TextStyle(color: kTextColor),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: kDefaultPaddin),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Espaciado uniforme
+        children: <Widget>[
+          Expanded(
+            child: Column(
               children: [
-                const TextSpan(text: "Talla\n"),
-                TextSpan(
-                  text: "${product.size}",
+                const Text(
+                  "Talla",
+                  style: TextStyle(color: kTextColor),
+                ),
+                Text(
+                  "${product.size}",
                   style: Theme.of(context)
                       .textTheme
                       .titleLarge!
                       .copyWith(fontWeight: FontWeight.bold),
-                )
+                ),
               ],
             ),
           ),
-        ),
-        Expanded(
-          child: RichText(
-            text: TextSpan(
-              style: const TextStyle(color: kTextColor),
+          Expanded(
+            child: Column(
               children: [
-                const TextSpan(text: "Tela\n"),
-                TextSpan(
-                  text: "Lino",
+                const Text(
+                  "Tela",
+                  style: TextStyle(color: kTextColor),
+                ),
+                Text(
+                  "Lino",
                   style: Theme.of(context)
                       .textTheme
                       .titleLarge!
                       .copyWith(fontWeight: FontWeight.bold),
-                )
+                ),
               ],
             ),
           ),
-        ),
-        Expanded(
-          child: RichText(
-            text: TextSpan(
-              style: const TextStyle(color: kTextColor),
+          Expanded(
+            child: Column(
               children: [
-                const TextSpan(text: "Categoría\n"),
-                TextSpan(
-                  text: "Vintage",
+                const Text(
+                  "Categoría",
+                  style: TextStyle(color: kTextColor),
+                ),
+                Text(
+                  "Vintage",
                   style: Theme.of(context)
                       .textTheme
                       .titleLarge!
                       .copyWith(fontWeight: FontWeight.bold),
-                )
+                ),
               ],
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

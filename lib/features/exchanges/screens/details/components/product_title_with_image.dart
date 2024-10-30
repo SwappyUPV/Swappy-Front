@@ -48,50 +48,45 @@ class _ProductTitleWithImageState extends State<ProductTitleWithImage> {
               ),
               Text(
                 widget.product.title,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge!
-                    .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize:
+                        MediaQuery.of(context).size.width > 600 ? 28 : 20),
               ),
               const SizedBox(height: kDefaultPaddin),
-              const SizedBox(
-                  height:
-                      kDefaultPaddin), // Espacio entre "Casi Nuevo" y las imágenes
+              const SizedBox(height: kDefaultPaddin),
               // PageView for images
               SizedBox(
-                height: MediaQuery.of(context).size.height *
-                    0.5, // 50% del tamaño de la ventana
+                height: MediaQuery.of(context).size.height * 0.5,
                 child: PageView(
                   controller: _pageController,
                   children: [
                     Align(
-                      alignment: Alignment
-                          .bottomCenter, // Alinear la imagen por la parte inferior
+                      alignment: Alignment.bottomCenter,
                       child: Image.asset(
                         'assets/images/product1.png',
-                        fit: BoxFit.contain, // Mantener proporciones
+                        fit: BoxFit.contain,
                       ),
                     ),
                     Align(
-                      alignment: Alignment
-                          .bottomCenter, // Alinear la imagen por la parte inferior
+                      alignment: Alignment.bottomCenter,
                       child: Image.asset(
                         'assets/images/product2.png',
-                        fit: BoxFit.contain, // Mantener proporciones
+                        fit: BoxFit.contain,
                       ),
                     ),
                     Align(
-                      alignment: Alignment
-                          .bottomCenter, // Alinear la imagen por la parte inferior
+                      alignment: Alignment.bottomCenter,
                       child: Image.asset(
                         'assets/images/product3.png',
-                        fit: BoxFit.contain, // Mantener proporciones
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 5), // Espacio entre la imagen y los puntos
+              const SizedBox(height: 5),
               // Dot indicator
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -138,6 +133,39 @@ class _ProductTitleWithImageState extends State<ProductTitleWithImage> {
               ],
             ),
           ),
+          // Botones de navegación para la versión web
+          if (MediaQuery.of(context).size.width > 600) ...[
+            Positioned(
+              left: 10,
+              top: MediaQuery.of(context).size.height * 0.2,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_left, color: Colors.white),
+                onPressed: () {
+                  if (_currentPage > 0) {
+                    _pageController.previousPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                },
+              ),
+            ),
+            Positioned(
+              right: 10,
+              top: MediaQuery.of(context).size.height * 0.2,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_right, color: Colors.white),
+                onPressed: () {
+                  if (_currentPage < 2) {
+                    _pageController.nextPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                },
+              ),
+            ),
+          ],
         ],
       ),
     );
