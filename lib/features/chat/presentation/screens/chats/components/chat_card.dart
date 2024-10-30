@@ -1,6 +1,6 @@
-import '../../../../presentation/models/Chat.dart';
 import 'package:flutter/material.dart';
-
+import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart';
+import 'package:intl/intl.dart'; // Add this import for date formatting
 import '../../../../constants.dart';
 
 class ChatCard extends StatelessWidget {
@@ -49,7 +49,7 @@ class ChatCard extends StatelessWidget {
             Expanded(
               child: Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: kDefaultPadding),
+                const EdgeInsets.symmetric(horizontal: kDefaultPadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -73,7 +73,8 @@ class ChatCard extends StatelessWidget {
             ),
             Opacity(
               opacity: 0.64,
-              child: Text(chat.time),
+              // Format the DateTime to a String
+              child: Text(DateFormat.jm().format(chat.timestamp)), // Update this line
             ),
           ],
         ),

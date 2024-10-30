@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:pin/features/chat/presentation/screens/messages/model/ChatMessageModel.dart';
 import '../../../../constants.dart';
-import '../../../models/chat_message.dart';
 
 class Message extends StatelessWidget {
-  final ChatMessage message;
+  final ChatMessageModel message;
 
   const Message({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
-    Widget messageContent(ChatMessage message) {
-      switch (message.messageType) {
+    Widget messageContent(ChatMessageModel message) {
+      switch (message.type) {
         case ChatMessageType.text:
-          return Text(message.messageContent);
+          return Text(message.content);
+      // Handle other message types (image, audio, video) as needed
         default:
           return const SizedBox();
       }
@@ -21,8 +22,7 @@ class Message extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: kDefaultPadding),
       child: Row(
-        mainAxisAlignment:
-            message.isSender ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: message.isSender ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           if (!message.isSender)
             const CircleAvatar(
@@ -33,8 +33,7 @@ class Message extends StatelessWidget {
           messageContent(message),
           if (message.isSender) ...[
             const SizedBox(width: kDefaultPadding / 2),
-            const Icon(Icons.done,
-                color: kPrimaryColor), // Icono de mensaje enviado
+            const Icon(Icons.done, color: kPrimaryColor), // Icono de mensaje enviado
           ],
         ],
       ),

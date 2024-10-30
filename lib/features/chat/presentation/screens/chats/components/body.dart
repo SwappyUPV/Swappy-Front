@@ -1,9 +1,9 @@
+import 'package:flutter/material.dart';
+import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart'; // Use this Chat model
+import 'package:pin/features/chat/presentation/screens/chats/services/chatService.dart';
 import '../../../components/filled_outline_button.dart';
 import '../../../../constants.dart';
-import '../../../../presentation/models/Chat.dart';
 import '../../messages/message_screen.dart';
-import 'package:flutter/material.dart';
-
 import 'chat_card.dart';
 
 class Body extends StatefulWidget {
@@ -15,19 +15,30 @@ class Body extends StatefulWidget {
 }
 
 class _BodyState extends State<Body> {
-  bool showActive = false; // Estado para mostrar solo usuarios activos
+  bool showActive = false;
+  bool showRecent = true; // Start with recent chats selected by default
+  final ChatService _chatService = ChatService();
+
+  Stream<List<Chat>> _getChatStream() {
+    if (showRecent) {
+      return _chatService.fetchRecentChats(true);
+    } else if (showActive) {
+      return _chatService.fetchActiveChats(true);
+    } else {
+      // Default to an empty stream if neither flag is set (should not happen)
+      return Stream.value([]);
+    }
+  }
+
+  void _toggleChats(bool recent) {
+    setState(() {
+      showRecent = recent;
+      showActive = !recent;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Filtrar chats según la búsqueda y el estado de 'showActive'
-    final filteredChats = chatsData.where((chat) {
-      final matchesSearchQuery =
-          chat.name.toLowerCase().contains(widget.searchQuery.toLowerCase());
-      final matchesActiveStatus =
-          showActive ? chat.isActive : true; // Solo si se muestra activos
-      return matchesSearchQuery && matchesActiveStatus;
-    }).toList();
-
     return Column(
       children: [
         Container(
@@ -37,46 +48,48 @@ class _BodyState extends State<Body> {
           child: Row(
             children: [
               FillOutlineButton(
-                press: () {
-                  setState(() {
-                    showActive =
-                        false; // Reinicia el filtro al mostrar todos los mensajes
-                  });
-                },
+                press: () => _toggleChats(true), // Set to recent chats
                 text: "Recent Message",
-                isFilled: !showActive, // Cambia apariencia según el estado
+                isFilled: showRecent,
               ),
               const SizedBox(width: kDefaultPadding),
               FillOutlineButton(
-                press: () {
-                  setState(() {
-                    showActive =
-                        true; // Activa el filtro para mostrar solo los activos
-                  });
-                },
+                press: () => _toggleChats(false), // Set to active chats
                 text: "Active",
-                isFilled: showActive, // Cambia apariencia según el estado
+                isFilled: showActive,
               ),
             ],
           ),
         ),
         Expanded(
-          child: filteredChats.isNotEmpty // Verifica si hay chats filtrados
-              ? ListView.builder(
-                  itemCount: filteredChats.length,
-                  itemBuilder: (context, index) => ChatCard(
-                    chat: filteredChats[index],
-                    press: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const MessagesScreen(),
-                      ),
+          child: StreamBuilder<List<Chat>>(
+            stream: _getChatStream(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const Center(child: Text("No chats found"));
+              }
+
+              final filteredChats = snapshot.data!
+                  .where((chat) => chat.name.toLowerCase().contains(widget.searchQuery.toLowerCase()))
+                  .toList();
+
+              return ListView.builder(
+                itemCount: filteredChats.length,
+                itemBuilder: (context, index) => ChatCard(
+                  chat: filteredChats[index],
+                  press: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MessagesScreen(chatId: filteredChats[index].uid),
                     ),
                   ),
-                )
-              : Center(
-                  child: const Text(
-                      "No chats found")), // Mensaje si no hay resultados
+                ),
+              );
+            },
+          ),
         ),
       ],
     );
