@@ -1,6 +1,7 @@
 // settings_screen.dart
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:pin/core/services/authentication_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -28,7 +29,7 @@ class SettingsScreen extends StatelessWidget {
           _buildSettingsItem(Iconsax.user_edit, 'Change Username', () {}),
           _buildSettingsItem(Iconsax.lock, 'Change Password', () {}),
           _buildSettingsItem(Iconsax.message, 'Change Email', () {}),
-          _buildSettingsItem(Iconsax.logout, 'Logout', () {}),
+          _buildSettingsItem(Iconsax.logout, 'Logout', () {AuthMethod().signOut();}),
         ],
       ),
     );
