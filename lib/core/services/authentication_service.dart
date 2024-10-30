@@ -151,4 +151,10 @@ class AuthMethod {
   User? getCurrentUser() {
     return _auth.currentUser;
   }
+
+
+  //Logout
+  Future<void> logout() async {
+    await _auth.signOut();
+  }
 }

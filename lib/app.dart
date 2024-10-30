@@ -8,7 +8,7 @@ class Swappy extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp( // Change this line
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Swappy',
       theme: ThemeData(

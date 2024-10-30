@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pin/core/services/user_service.dart';
 import 'package:pin/features/chat/presentation/screens/messages/model/ChatMessageModel.dart';
 import 'package:pin/features/chat/presentation/screens/chats/services/chatService.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
 import '../../../../constants.dart';
 import 'chat_input_field.dart';
 import 'message.dart';
@@ -20,21 +20,22 @@ class BodyState extends State<Body> {
   final ChatService _chatService = ChatService();
   final List<ChatMessageModel> _cachedMessages = [];
   bool _isSendingMessage = false;
-  String? _userId;
+  String? _userId; // Initialize userId
   late StreamSubscription<List<ChatMessageModel>> _subscription;
 
   @override
   void initState() {
     super.initState();
-    _initializeUser();
+    _fetchUserId(); // Fetch the user ID when initializing
     _listenToMessages();
   }
 
-  Future<void> _initializeUser() async {
-    _userId = await UserService().fetchAuthenticatedUserID();
-    if (_userId == null) {
-      print("User is not authenticated.");
-    }
+  // Method to fetch user ID from SharedPreferences
+  Future<void> _fetchUserId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _userId = prefs.getString('userId'); // Retrieve userId from SharedPreferences
+    });
   }
 
   void _listenToMessages() {
@@ -90,8 +91,12 @@ class BodyState extends State<Body> {
   }
 
   Future<void> _handleSendMessage(String messageText) async {
+    // Check if message is not empty and userId is not null
     if (messageText.isNotEmpty && _userId != null) {
       await _chatService.sendMessage(widget.chatId, messageText, _userId!);
+    } else {
+      // Optionally show a message to the user that they need to log in or type a message
+      print("Message not sent: messageText is empty or userId is null.");
     }
   }
 }

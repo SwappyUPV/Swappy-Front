@@ -1,22 +1,32 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:pin/core/services/user_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart';
 import 'package:pin/features/chat/presentation/screens/messages/model/ChatMessageModel.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final UserService _userService = UserService();
-
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   // Cache the authenticated user's ID to reduce duplicate calls
   String? _cachedUserId;
 
   Future<String?> _getUserId() async {
-    _cachedUserId ??= await _userService.fetchAuthenticatedUserID();
+    // Check SharedPreferences for cached user ID
+    if (_cachedUserId == null) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      _cachedUserId = prefs.getString('userId'); // Retrieve from SharedPreferences
+    }
+
+    // If userId is still null, fetch it from UserService
+    if (_cachedUserId == null) {
+      _cachedUserId = await _auth.currentUser?.uid;
+      if (_cachedUserId != null) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('userId', _cachedUserId!); // Store in SharedPreferences
+      }
+    }
     return _cachedUserId;
   }
-
-  // Fetch chats based on isActive or isRecent flag
-  // Update `fetchChats` method with Query type instead of CollectionReference
 
   Stream<List<Chat>> fetchChats({bool? showActive, bool? showRecent}) async* {
     final String? userId = await _getUserId();
