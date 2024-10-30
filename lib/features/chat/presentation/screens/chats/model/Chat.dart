@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Chat {
   final String uid;
   final String name;
-  final String lastMessage;
+  final String user;
   final String image; // Added image field
   final DateTime timestamp; // Renamed from 'time' to 'timestamp' for clarity with Firestore data
   final bool isActive;
@@ -12,8 +12,8 @@ class Chat {
   Chat({
     required this.uid,
     required this.name,
-    required this.lastMessage,
     required this.image,
+    required this.user,
     required this.timestamp,
     required this.isActive,
     required this.isRecent,
@@ -25,7 +25,7 @@ class Chat {
     return Chat(
       uid: doc.id,
       name: data['name'] ?? 'Unknown',
-      lastMessage: data['lastMessage'] ?? '',
+      user: data['user'] ?? 'Unknown',
       image: data['image'] ?? 'assets/images/user.png', // Default image path
       timestamp: (data['timestamp'] as Timestamp).toDate(),
       isActive: data['isActive'] ?? false,

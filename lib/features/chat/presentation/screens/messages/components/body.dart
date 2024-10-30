@@ -27,7 +27,7 @@ class BodyState extends State<Body> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: kDefaultPadding),
             child: StreamBuilder<List<ChatMessageModel>>(
-              stream: _chatService.fetchMessages(widget.chatId), // Fetch messages for the chatId
+              stream: _chatService.fetchMessages(widget.chatId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -37,11 +37,13 @@ class BodyState extends State<Body> {
                 }
 
                 final messages = snapshot.data!;
+                print(messages);
+                // Reverse the messages list to display them in order
+                final orderedMessages = List.from(messages.reversed);
 
                 return ListView.builder(
-                  reverse: true, // Show the latest messages at the bottom
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) => Message(message: messages[index]), // Use the widget
+                  itemCount: orderedMessages.length,
+                  itemBuilder: (context, index) => Message(message: orderedMessages[index]),
                 );
               },
             ),
@@ -58,15 +60,12 @@ class BodyState extends State<Body> {
 
   Future<void> _handleSendMessage(String messageText) async {
     if (messageText.isNotEmpty) {
-     final user = await UserService().fetchAuthenticatedUserID();
-
-      if (user != null) {
-        String senderId = user; // Get the UID from the UserModel
-        await _chatService.sendMessage(widget.chatId, messageText, senderId);
+      final userId = await UserService().fetchAuthenticatedUserID();
+      if (userId != null) {
+        await _chatService.sendMessage(widget.chatId, messageText, userId);
       } else {
         print("User is not authenticated.");
       }
     }
   }
-
 }
