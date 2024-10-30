@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 class UserHeader extends StatelessWidget {
@@ -14,26 +15,35 @@ class UserHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Ajustar el tamaño de la imagen según el ancho de la pantalla y si es web o móvil
+    final double imageSize = kIsWeb
+        ? MediaQuery.of(context).size.width * 0.06 // Tamaño de imagen en web
+        : MediaQuery.of(context).size.width * 0.2; // Tamaño de imagen en móvil
+
+    final double maxWidth = 1000.0; // Máximo ancho del header en web
+
     return Container(
-      padding: const EdgeInsets.all(11.0),
-      margin: const EdgeInsets.only(bottom: 16.0),
-      width: double.infinity,
+      // Aplicar margen solo si es web
+      margin: kIsWeb
+          ? const EdgeInsets.only(bottom: 30, top: 20, left: 20)
+          : EdgeInsets.zero,
+      padding: const EdgeInsets.all(8.0),
+      width: maxWidth,
+      alignment: Alignment.centerLeft, // Alinear todo el header a la izquierda
       child: Row(
         children: [
-          // Imagen del usuario (30% del ancho)
           Container(
-            width: MediaQuery.of(context).size.width * 0.2,
-            height: MediaQuery.of(context).size.width * 0.2,
+            width: imageSize,
+            height: imageSize,
             child: Hero(
               tag: "userImage_$nombreUsuario",
               child: Image.asset(
-                fotoUrl, // Asegúrate de que esto sea la ruta de la foto de usuario
+                fotoUrl,
                 fit: BoxFit.contain,
               ),
             ),
           ),
-          const SizedBox(width: 16), // Espacio entre imagen y texto
-          // Información del usuario (70% del ancho)
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

@@ -22,7 +22,7 @@ class ItemGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final crossAxisCount =
-        (width / 120).floor(); // Ajustar el número de columnas
+        width > 600 ? 6 : 3; // Más columnas en pantallas grandes
     final itemSize = (width - (crossAxisCount + 1) * 16) /
         crossAxisCount; // Calcular tamaño del item
 
