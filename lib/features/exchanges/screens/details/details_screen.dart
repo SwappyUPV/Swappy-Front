@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:pin/features/exchanges/models/Product.dart';
+import 'package:flutter_svg/svg.dart';
 
 import '../../constants.dart';
-import 'components/add_to_cart.dart';
-import 'components/color_and_size.dart';
-import 'components/counter_with_fav_btn.dart';
+import 'components/characteristics.dart';
 import 'components/description.dart';
 import 'components/product_title_with_image.dart';
+import 'package:pin/features/exchanges/models/Product.dart';
 
 class DetailsScreen extends StatelessWidget {
   const DetailsScreen({super.key, required this.product});
@@ -29,17 +27,6 @@ class DetailsScreen extends StatelessWidget {
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        actions: <Widget>[
-          IconButton(
-            icon: SvgPicture.asset("assets/icons/search.svg"),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: SvgPicture.asset("assets/icons/cart.svg"),
-            onPressed: () {},
-          ),
-          const SizedBox(width: kDefaultPaddin / 2),
-        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -49,11 +36,11 @@ class DetailsScreen extends StatelessWidget {
               child: Stack(
                 children: <Widget>[
                   Container(
-                    margin: EdgeInsets.only(top: size.height * 0.3),
+                    margin: EdgeInsets.only(top: size.height * 0.5),
                     padding: EdgeInsets.only(
-                      top: size.height * 0.12,
-                      left: kDefaultPaddin,
-                      right: kDefaultPaddin,
+                      top: size.height * 0.15,
+                      right: 25,
+                      left: 25,
                     ),
                     decoration: const BoxDecoration(
                       color: Colors.white,
@@ -63,14 +50,29 @@ class DetailsScreen extends StatelessWidget {
                       ),
                     ),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
-                        ColorAndSize(product: product),
+                        Characteristics(product: product),
                         const SizedBox(height: kDefaultPaddin / 2),
                         Description(product: product),
                         const SizedBox(height: kDefaultPaddin / 2),
-                        const CounterWithFavBtn(),
-                        const SizedBox(height: kDefaultPaddin / 2),
-                        AddToCart(product: product),
+                        // Botón de "Más información"
+                        TextButton(
+                          onPressed: () {
+                            // Acción a realizar al presionar el botón
+                          },
+                          child: const Text(
+                            "Más información",
+                            style: TextStyle(
+                              color: Colors.grey, // Color gris
+                              fontSize:
+                                  16, // Ajusta el tamaño de la fuente si es necesario
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                            height: kDefaultPaddin /
+                                2), // Espacio adicional si es necesario
                       ],
                     ),
                   ),
