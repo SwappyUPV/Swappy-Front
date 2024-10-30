@@ -7,61 +7,138 @@ class ChatService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final UserService _userService = UserService();
 
-  Stream<List<Chat>> fetchActiveChats(bool showActive) async* {
-    // Fetch authenticated user ID
-    final String? userId = await _userService.fetchAuthenticatedUserID();
+  // Cache the authenticated user's ID to reduce duplicate calls
+  String? _cachedUserId;
 
+  Future<String?> _getUserId() async {
+    _cachedUserId ??= await _userService.fetchAuthenticatedUserID();
+    return _cachedUserId;
+  }
+
+  // Fetch chats based on isActive or isRecent flag
+  // Update `fetchChats` method with Query type instead of CollectionReference
+
+  Stream<List<Chat>> fetchChats({bool? showActive, bool? showRecent}) async* {
+    final String? userId = await _getUserId();
     if (userId == null) {
-      // If no user is authenticated, return an empty stream
       yield [];
       return;
     }
 
-    // Proceed with fetching chats
-    yield* _firestore
+    // Initialize the query as a Query type
+    Query<Map<String, dynamic>> query = _firestore
         .collection('users')
         .doc(userId)
-        .collection('chats')
-        .where('isActive', isEqualTo: showActive)
-        .snapshots()
-        .map((snapshot) =>
-        snapshot.docs.map((doc) => Chat.fromDocument(doc)).toList());
-  }
-  Stream<List<Chat>> fetchRecentChats(bool showRecent) async* {
-    // Fetch authenticated user ID
-    final String? userId = await _userService.fetchAuthenticatedUserID();
+        .collection('chats');
 
-    if (userId == null) {
-      // If no user is authenticated, return an empty stream
-      yield [];
-      return;
+    // Apply filters conditionally
+    if (showActive != null) {
+      query = query.where('isActive', isEqualTo: showActive);
+    }
+    if (showRecent != null) {
+      query = query.where('isRecent', isEqualTo: showRecent);
     }
 
-    // Proceed with fetching chats
+    yield* query.snapshots().map((snapshot) =>
+        snapshot.docs.map((doc) => Chat.fromDocument(doc)).toList());
+  }
+
+
+  // Listen for only the latest incoming message
+  Stream<ChatMessageModel?> listenForNewMessage(String chatId) async* {
+    final String? userId = await _getUserId();
+    if (userId == null) return;
+
     yield* _firestore
         .collection('users')
         .doc(userId)
         .collection('chats')
-        .where('isRecent', isEqualTo: showRecent)
+        .doc(chatId)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .limit(1)
         .snapshots()
         .map((snapshot) =>
-        snapshot.docs.map((doc) => Chat.fromDocument(doc)).toList());
+    snapshot.docs.isNotEmpty ? _mapToChatMessageModel(snapshot.docs.first) : null);
   }
 
-  // Fetch messages for a specific chat ID
+  // Optimized method to send a message without fetching user ID each time
+  Future<void> sendMessage(String chatId, String messageText, String userId) async {
+
+    final messageData = {
+      'content': messageText,
+      'isSender': true,
+      'type': "text",
+      'status': "viewed",
+      'timestamp': FieldValue.serverTimestamp(),
+    };
+
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .add(messageData);
+      print("Message sent successfully.");
+    } catch (e) {
+      print("Error sending message: $e");
+    }
+  }
+
+  // Fetch the latest message for a specific chat
+  Future<ChatMessageModel?> getLatestMessage(String chatId) async {
+    final String? userId = await _getUserId();
+    if (userId == null) return null;
+
+    final snapshot = await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .limit(1)
+        .get();
+
+    return snapshot.docs.isNotEmpty ? _mapToChatMessageModel(snapshot.docs.first) : null;
+  }
+  Future<Chat?> getChatById(String chatId) async {
+    final String? userId = await _getUserId();
+    if (userId == null) return null;
+
+    // Directly access the specific document instead of using a query
+    final chatDoc = await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('chats')
+        .doc(chatId)
+        .get();
+
+    if (chatDoc.exists) {
+      final chatData = chatDoc.data()!;
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+
+      return Chat(
+        uid: chatDoc.id,
+        name: chatData['name'] ?? 'Unknown',
+        image: userDoc['profilePicture'] ?? 'assets/images/user.png',
+        user: chatData['user'],
+        timestamp: (chatData['timestamp'] as Timestamp).toDate(),
+        isActive: chatData['isActive'] ?? false,
+        isRecent: chatData['isRecent'] ?? true,
+      );
+    }
+    return null;
+  }
+
   Stream<List<ChatMessageModel>> fetchMessages(String chatId) async* {
-    // Fetch the current authenticated user's ID
-    final String? currentUserId = await _userService.fetchAuthenticatedUserID();
-    if (currentUserId == null) {
-      print("No authenticated user found.");
-      yield []; // Yield an empty list if no user is authenticated
-      return;
-    }
-
+    final String? userId = await _getUserId();
     // Start streaming messages from Firestore
     yield* _firestore
         .collection('users')
-        .doc(currentUserId)
+        .doc(userId)
         .collection('chats')
         .doc(chatId)
         .collection('messages')
@@ -78,6 +155,8 @@ class ChatService {
       // Map the documents to ChatMessageModel objects
       return snapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
+        // Handle the possibility of a null timestamp
+        Timestamp? timestamp = data['timestamp'] as Timestamp?;
         // Extract message properties
         return ChatMessageModel(
           id: doc.id,
@@ -85,137 +164,25 @@ class ChatService {
           content: data['content'] ?? '',
           isSender: data['isSender'] ?? false, // Ensure this is a boolean
           status: _stringToMessageStatus(data['status']),
-          timestamp: (data['timestamp'] as Timestamp).toDate(),
+          timestamp: timestamp != null ? timestamp.toDate() : DateTime.now(),
         );
       }).toList();
     });
   }
 
-  //TODO The chat and message should also be added in the other user collection. Now it is only in s@gmail.com chats
-  // Send a message to a specific chat
-  Future<void> sendMessage(String chatId, String messageText, String senderId) async {
-    // Fetch the current authenticated user's ID
-    final String? currentUserId = await _userService.fetchAuthenticatedUserID();
-
-    // Check if the user is authenticated
-    if (currentUserId == null) {
-      print("User is not authenticated. Cannot send message.");
-      return; // Exit if no authenticated user
-    }
-
-    // Prepare the message data
-    final messageData = {
-      'content': messageText,
-      'isSender': true, // Assuming the sender is the current user
-      'type': "text",
-      'status': "viewed", // Default status
-      'timestamp': FieldValue.serverTimestamp(),
-    };
-
-    // Debugging: Log the message data before sending
-    print("Sending message: $messageData to chat: $chatId");
-
-    // Add the message to the Firestore collection
-    try {
-      await _firestore
-          .collection('users')
-          .doc(currentUserId)
-          .collection('chats') // Ensure you are adding it under the correct collection
-          .doc(chatId) // Use chatId directly, as it should refer to the chat document
-          .collection('messages')
-          .add(messageData);
-      print("Message sent successfully.");
-    } catch (e) {
-      print("Error sending message: $e"); // Log any errors that occur
-    }
+  // Helper to map Firestore document to ChatMessageModel
+  ChatMessageModel _mapToChatMessageModel(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return ChatMessageModel(
+      id: doc.id,
+      type: _stringToChatMessageType(data['type']),
+      content: data['content'] ?? '',
+      isSender: data['isSender'] ?? false,
+      status: _stringToMessageStatus(data['status']),
+      timestamp: (data['timestamp'] as Timestamp).toDate(),
+    );
   }
 
-
-  Future<Chat?> getChatById(String chatId) async {
-    final userId = await UserService().fetchAuthenticatedUserID();
-    if (userId == null) return null;
-
-    // Fetch the chat document
-    final chatDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('chats')
-        .doc(chatId)
-        .get();
-
-    if (chatDoc.exists) {
-      // Get the chat data
-      final chatData = chatDoc.data()!;
-
-      // Fetch the user document associated with this chat
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId) // Assuming userId is stored in the chat document
-          .get();
-
-      // Create a Chat object
-      return Chat(
-        uid: chatDoc.id,
-        name: chatData['name'],
-        image: userDoc['profilePicture'] ?? 'assets/images/user.png', // Default image if not found
-        user:  chatData['user'],
-        timestamp: (chatData['timestamp'] as Timestamp).toDate(), // Make sure timestamp is fetched correctly
-        isActive: chatData['isActive'] ?? false,
-        isRecent: chatData['isRecent'] ?? true, // You may need to fetch this from the chatData
-      );
-    }
-    return null; // Return null if no chat is found
-  }
-
-  Future<ChatMessageModel?> getLatestMessage(String chatId) async {
-    final userId = await UserService().fetchAuthenticatedUserID();
-    if (userId == null) return null;
-
-    try {
-      final snapshot = await _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('chats')
-          .doc(chatId)
-          .collection('messages')
-          .orderBy('timestamp', descending: true)
-          .limit(1)
-          .get();
-
-      // Log the snapshot for debugging
-      print("Latest message snapshot: ${snapshot.docs}");
-
-      if (snapshot.docs.isNotEmpty) {
-        final latestMessageDoc = snapshot.docs.first;
-        final data = latestMessageDoc.data() as Map<String, dynamic>;
-
-        // Debug logs
-        print("Latest message data: $data");
-
-        // Convert the string to the ChatMessageType enum
-        ChatMessageType messageType = _stringToChatMessageType(data['type']);
-
-        // Convert the string to the MessageStatus enum
-        MessageStatus messageStatus = _stringToMessageStatus(data['status']);
-
-        return ChatMessageModel(
-          id: latestMessageDoc.id,
-          type: messageType,
-          content: data['content'] ?? '',
-          isSender: false, // Correctly determine if the message is from the user
-          status: messageStatus, // Use the mapped MessageStatus
-          timestamp: (data['timestamp'] as Timestamp).toDate(),
-        );
-      } else {
-        print("No messages found for chatId: $chatId");
-      }
-    } catch (e) {
-      print("Error fetching latest message: $e");
-    }
-    return null; // Return null if no message is found
-  }
-
-// Helper function to convert String to MessageStatus
   MessageStatus _stringToMessageStatus(String status) {
     switch (status) {
       case 'notSent':
@@ -224,14 +191,11 @@ class ChatService {
         return MessageStatus.notViewed;
       case 'viewed':
         return MessageStatus.viewed;
-    // Handle other statuses if necessary
       default:
         throw Exception('Unknown message status: $status');
     }
   }
 
-
-// Helper function to convert String to ChatMessageType
   ChatMessageType _stringToChatMessageType(String type) {
     switch (type) {
       case 'text':
@@ -240,11 +204,8 @@ class ChatService {
         return ChatMessageType.image;
       case 'video':
         return ChatMessageType.video;
-    // Handle other types if necessary
       default:
         throw Exception('Unknown message type: $type');
     }
   }
-
-
 }

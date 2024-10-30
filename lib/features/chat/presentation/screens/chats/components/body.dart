@@ -21,9 +21,9 @@ class _BodyState extends State<Body> {
 
   Stream<List<Chat>> _getChatStream() {
     if (showRecent) {
-      return _chatService.fetchRecentChats(true);
+      return _chatService.fetchChats(showRecent: true);
     } else if (showActive) {
-      return _chatService.fetchActiveChats(true);
+      return _chatService.fetchChats(showActive: true);
     } else {
       // Default to an empty stream if neither flag is set (should not happen)
       return Stream.value([]);

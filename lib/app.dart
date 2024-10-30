@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart'; // Import GetX package
 import 'package:pin/features/catalogue/presentation/widgets/navigation_menu.dart';
 import 'package:pin/core/constants/constants.dart';
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class Swappy extends StatelessWidget {
+  const Swappy({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp( // Change this line
       debugShowCheckedModeBanner: false,
       title: 'Swappy',
       theme: ThemeData(
@@ -36,7 +37,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: NavigationMenu(),
+      home: NavigationMenu(), // This can remain as it is
     );
   }
 }

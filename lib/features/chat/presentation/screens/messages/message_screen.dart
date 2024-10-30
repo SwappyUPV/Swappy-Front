@@ -46,7 +46,7 @@ class MessagesScreen extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     backgroundImage: NetworkImage(
-                        chat.image), // Fetch avatar image from Chat object
+                        chat.image),
                   ),
                   const SizedBox(width: kDefaultPadding * 0.75),
                   Column(

@@ -31,11 +31,19 @@ class _CatalogueState extends State<Catalogue> {
     setState(() {
       _isLoading = true;
     });
+
     List<Map<String, dynamic>> clothes = await _catalogService.getClothes();
+
+    // Create a set to hold the categories
     Set<String> categories = {'Todos'};
+
     for (var item in clothes) {
       categories.add(item['categoria']);
     }
+
+    // Check if the widget is still mounted before calling setState
+    if (!mounted) return;
+
     setState(() {
       catalogoRopa = clothes;
       _categories = categories;

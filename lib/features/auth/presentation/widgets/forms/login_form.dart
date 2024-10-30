@@ -5,6 +5,7 @@ import 'package:pin/features/catalogue/presentation/widgets/navigation_menu.dart
 import '../components/already_have_an_account_acheck.dart';
 import '../../../../../core/constants/constants.dart';
 import '../../screens/sign_up_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -15,14 +16,19 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   final TextEditingController _emailController =
-      TextEditingController(text: 's@gmail.com');
+  TextEditingController(text: 's@gmail.com');
   final TextEditingController _passwordController =
-      TextEditingController(text: '123456');
+  TextEditingController(text: '123456');
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
   final AuthMethod _authMethod = AuthMethod();
 
+  // Method to save user ID in SharedPreferences
+  Future<void> saveUserId(String userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userId', userId);
+  }
   // Email/Password Login Method
   void loginUser() async {
     if (_formKey.currentState!.validate()) {
@@ -35,11 +41,20 @@ class _LoginFormState extends State<LoginForm> {
         password: _passwordController.text,
       );
 
+      // Check if the widget is still mounted before updating state
+      if (!mounted) return; // Prevent setState if widget is disposed
+
       setState(() {
         _isLoading = false;
       });
 
       if (res == 'success') {
+        // Get the user ID here
+        String userId = _authMethod.getCurrentUser()!.uid; // Get UID from the current user
+
+        // Save the user ID to SharedPreferences
+        await saveUserId(userId);
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => NavigationMenu()),
@@ -55,19 +70,40 @@ class _LoginFormState extends State<LoginForm> {
     }
   }
 
-  // Google Sign-In Method
+// Google Sign-In Method
   void signInWithGoogle() async {
     try {
-      var userCredential = await _authMethod.signInWithGoogle();
-      if (userCredential != null) {
-        // If sign-in is successful, navigate to HomeScreen
+      String res = await _authMethod.signInWithGoogle();
+
+      // Check if the widget is still mounted before updating state
+      if (!mounted) return; // Prevent setState if widget is disposed
+
+      if (res == "success") {
+        // If sign-in is successful, save user ID to SharedPreferences
+        String userId = _authMethod.getCurrentUser()!.uid; // Get UID from the current user
+        await saveUserId(userId);
+
+        // Navigate to NavigationMenu
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => NavigationMenu()),
         );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(res),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } catch (e) {
       print('exception->$e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Google sign-in failed'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -133,11 +169,11 @@ class _LoginFormState extends State<LoginForm> {
           _isLoading
               ? const CircularProgressIndicator()
               : ElevatedButton(
-                  onPressed: loginUser,
-                  child: Text(
-                    "Login".toUpperCase(),
-                  ),
-                ),
+            onPressed: loginUser,
+            child: Text(
+              "Login".toUpperCase(),
+            ),
+          ),
           const SizedBox(height: defaultPadding),
 
           // Already Have an Account

@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart';
 import 'package:pin/features/chat/presentation/screens/chats/services/chatService.dart'; // Import your ChatService
 import 'package:intl/intl.dart'; // For date formatting
+import 'package:pin/features/chat/presentation/screens/messages/message_screen.dart';
 import 'package:pin/features/chat/presentation/screens/messages/model/ChatMessageModel.dart';
 import '../../../../constants.dart';
 
-class ChatCard extends StatelessWidget {
+class ChatCard extends StatefulWidget {
   const ChatCard({
     super.key,
     required this.chat,
@@ -16,11 +17,35 @@ class ChatCard extends StatelessWidget {
   final VoidCallback press;
 
   @override
-  Widget build(BuildContext context) {
-    final chatService = ChatService(); // Initialize your ChatService
+  State<ChatCard> createState() => _ChatCardState();
+}
 
+class _ChatCardState extends State<ChatCard> {
+  final ChatService chatService = ChatService();
+  ChatMessageModel? latestMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchLatestMessage();
+  }
+
+  Future<void> _fetchLatestMessage() async {
+    final message = await chatService.getLatestMessage(widget.chat.uid);
+    setState(() {
+      latestMessage = message;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return InkWell(
-      onTap: press,
+      onTap: () async {
+        await Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => MessagesScreen(chatId: widget.chat.uid),
+        ));
+        _fetchLatestMessage(); // Refresh when returning
+      },
       child: Padding(
         padding: const EdgeInsets.symmetric(
             horizontal: kDefaultPadding, vertical: kDefaultPadding * 0.75),
@@ -30,9 +55,9 @@ class ChatCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 24,
-                  backgroundImage: AssetImage(chat.image),
+                  backgroundImage: AssetImage(widget.chat.image),
                 ),
-                if (chat.isActive)
+                if (widget.chat.isActive)
                   Positioned(
                     right: 0,
                     bottom: 0,
@@ -58,43 +83,18 @@ class ChatCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      chat.name,
+                      widget.chat.name,
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 8),
-                    FutureBuilder<ChatMessageModel?>(
-                      future: chatService.getLatestMessage(chat.uid), // Fetch the latest message for this chat
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Opacity(
-                            opacity: 0.64,
-                            child: Text("Loading...", // Show loading text while fetching
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis),
-                          );
-                        }
-                        if (!snapshot.hasData || snapshot.data == null) {
-                          return Opacity(
-                            opacity: 0.64,
-                            child: Text(
-                              "No messages",
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          );
-                        }
-
-                        final latestMessage = snapshot.data!;
-                        return Opacity(
-                          opacity: 0.64,
-                          child: Text(
-                            latestMessage.content, // Display the message text
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        );
-                      },
+                    Opacity(
+                      opacity: 0.64,
+                      child: Text(
+                        latestMessage?.content ?? "No messages",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),
@@ -102,19 +102,10 @@ class ChatCard extends StatelessWidget {
             ),
             Opacity(
               opacity: 0.64,
-              child: FutureBuilder<ChatMessageModel?>(
-                future: chatService.getLatestMessage(chat.uid), // Fetch the latest message again for the timestamp
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Text("...");
-                  }
-                  if (!snapshot.hasData || snapshot.data == null) {
-                    return Text(""); // Return empty if no message found
-                  }
-
-                  final latestMessage = snapshot.data!;
-                  return Text(DateFormat.jm().format(latestMessage.timestamp)); // Format and display the timestamp
-                },
+              child: Text(
+                latestMessage != null
+                    ? DateFormat.jm().format(latestMessage!.timestamp)
+                    : "",
               ),
             ),
           ],

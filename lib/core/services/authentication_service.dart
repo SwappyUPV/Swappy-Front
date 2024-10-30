@@ -12,10 +12,50 @@ class AuthMethod {
     return await _googleSignIn.signInSilently();
   }
 
+  /*
   Future<GoogleSignInAccount?> signInWithGoogle() async {
     return await _googleSignIn.signIn();
   }
+  */
+  Future<String> signInWithGoogle() async {
+    String res = "Some error occurred";
+    try {
+      // Start Google Sign-In process
+      GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        return "Google sign-in aborted"; // User aborted the sign-in
+      }
 
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Sign in to Firebase with the Google credentials
+      UserCredential userCredential = await _auth.signInWithCredential(credential);
+
+      // Check if the user already exists in Firestore
+      DocumentSnapshot userDoc = await _firestore.collection("users").doc(userCredential.user!.uid).get();
+
+      if (!userDoc.exists) {
+        // If the user does not exist, add them to Firestore
+        await _firestore.collection("users").doc(userCredential.user!.uid).set({
+          'uid': userCredential.user!.uid,
+          'email': userCredential.user!.email,
+        });
+      }
+
+      res = "success";
+      print(res);
+    } catch (err) {
+      return err.toString();
+    }
+    return res;
+  }
   // SignUp User
   Future<String> signupUser(
       {required String email, required String password}) async {
