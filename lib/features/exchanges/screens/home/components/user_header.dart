@@ -18,7 +18,7 @@ class UserHeader extends StatelessWidget {
     // Ajustar el tamaño de la imagen según el ancho de la pantalla y si es web o móvil
     final double imageSize = kIsWeb
         ? MediaQuery.of(context).size.width * 0.06 // Tamaño de imagen en web
-        : MediaQuery.of(context).size.width * 0.2; // Tamaño de imagen en móvil
+        : MediaQuery.of(context).size.width * 0.18; // Tamaño de imagen en móvil
 
     final double maxWidth = 1000.0; // Máximo ancho del header en web
 
@@ -26,7 +26,7 @@ class UserHeader extends StatelessWidget {
       // Aplicar margen solo si es web
       margin: kIsWeb
           ? const EdgeInsets.only(bottom: 30, top: 20, left: 20)
-          : EdgeInsets.zero,
+          : const EdgeInsets.only(bottom: 15, top: 5, left: 10),
       padding: const EdgeInsets.all(8.0),
       width: maxWidth,
       alignment: Alignment.centerLeft, // Alinear todo el header a la izquierda

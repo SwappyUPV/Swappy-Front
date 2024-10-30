@@ -56,7 +56,10 @@ class ExchangesState extends State<Exchanges> {
 
   @override
   Widget build(BuildContext context) {
-    final double maxWidth = 500.0; // Ancho máximo para botones en móvil y web
+    final bool isWeb = MediaQuery.of(context).size.width > 600;
+    final double maxWidth = isWeb
+        ? 500.0
+        : MediaQuery.of(context).size.width * 0.7; // 70% del ancho en móvil
 
     return Scaffold(
       appBar: AppBar(
