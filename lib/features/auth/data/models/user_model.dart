@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
   final String uid;
@@ -8,7 +9,7 @@ class UserModel {
   final String address;
   final List<String> preferredSizes;
   final String gender;
-  final int birthday;
+  final Timestamp birthday;
 
   UserModel({
     required this.uid,
@@ -21,31 +22,36 @@ class UserModel {
     required this.birthday,
   });
 
-  // Factory method to create a UserModel from a JSON object
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    // Print the JSON to see its structure (for debugging)
+    debugPrint('UserModel fromJson: $json');
+
     return UserModel(
-      uid: json['uid'],
-      name: json['name'],
-      email: json['email'],
-      profilePicture: json['profilePicture'],
-      address: json['address'],
-      preferredSizes: List<String>.from(json['preferredSizes']),
-      gender: json['gender'],
-      birthday: json['birthday'],
+      uid: json['uid'] as String,
+      name: json['name'] as String,
+      email: json['email'] as String,
+      profilePicture: json['profilePicture'] as String?,
+      address: json['address'] as String,
+      preferredSizes: List<String>.from(json['preferredSizes'] ?? []),
+      gender: json['gender'] as String,
+      birthday: (json['birthday'] is Timestamp)
+          ? json['birthday'] as Timestamp // Already a Timestamp
+          : Timestamp.fromMillisecondsSinceEpoch(json['birthday'] is int
+          ? json['birthday'] // If it's an int
+          : DateTime.parse(json['birthday']).millisecondsSinceEpoch), // Fallback for string
     );
   }
 
-  // Method to convert a UserModel to a JSON object
   Map<String, dynamic> toJson() {
     return {
-      'id': uid,
+      'uid': uid,
       'name': name,
       'email': email,
       'profilePicture': profilePicture,
       'address': address,
       'preferredSizes': preferredSizes,
       'gender': gender,
-      'birthday': birthday,
+      'birthday': birthday.millisecondsSinceEpoch, // Convert Timestamp to int
     };
   }
 }

@@ -37,45 +37,45 @@ class NavigationMenu extends StatelessWidget {
         }
       }),
       bottomNavigationBar: Obx(() => NavigationBar(
-            height: 80,
-            elevation: 0,
-            selectedIndex: controller.selectedIndex.value,
-            onDestinationSelected: (index) {
-              if (index == 0 || index == 4) {
-                controller.updateIndex(index);
-              } else if (authController.isLoggedIn.value) {
-                controller.updateIndex(index);
-              } else {
-                _showLoginDialog(context);
-              }
-            },
-            destinations: [
-              NavigationDestination(
-                icon: Icon(Iconsax.home),
-                label: 'Home',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.accessibility),
-                label: 'Wardrobe',
-              ),
-              NavigationDestination(
-                icon: Icon(Iconsax.add),
-                label: 'Add',
-              ),
-              NavigationDestination(
-                icon: Icon(Iconsax.message),
-                label: 'Chat',
-              ),
-              NavigationDestination(
-                icon: authController.isLoggedIn.value
-                    ? Icon(Iconsax.user)
-                    : Icon(Iconsax.login),
-                label: authController.isLoggedIn.value
-                    ? 'Perfil'
-                    : 'Iniciar sesión',
-              ),
-            ],
-          )),
+        height: 80,
+        elevation: 0,
+        selectedIndex: controller.selectedIndex.value,
+        onDestinationSelected: (index) {
+          if (index == 0 || index == 4) {
+            controller.updateIndex(index);
+          } else if (authController.isLoggedIn.value) {
+            controller.updateIndex(index);
+          } else {
+            _showLoginDialog(context);
+          }
+        },
+        destinations: [
+          NavigationDestination(
+            icon: Icon(Iconsax.home),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.accessibility),
+            label: 'Wardrobe',
+          ),
+          NavigationDestination(
+            icon: Icon(Iconsax.add),
+            label: 'Add',
+          ),
+          NavigationDestination(
+            icon: Icon(Iconsax.message),
+            label: 'Chat',
+          ),
+          NavigationDestination(
+            icon: authController.isLoggedIn.value
+                ? Icon(Iconsax.user)
+                : Icon(Iconsax.login),
+            label: authController.isLoggedIn.value
+                ? 'Perfil'
+                : 'Iniciar sesión',
+          ),
+        ],
+      )),
     );
   }
 
@@ -86,7 +86,7 @@ class NavigationMenu extends StatelessWidget {
         return AlertDialog(
           title: Text('Iniciar sesión'),
           content:
-              Text('Necesitas iniciar sesión para acceder a esta función.'),
+          Text('Necesitas iniciar sesión para acceder a esta función.'),
           actions: <Widget>[
             TextButton(
               child: Text('Cancelar'),
@@ -128,6 +128,10 @@ class AuthController extends GetxController {
     super.onInit();
     _auth.authStateChanges().listen((User? user) {
       isLoggedIn.value = user != null;
+      if (isLoggedIn.value) {
+        // Update the selected index to Catalogue when logged in
+        Get.find<NavigationController>().updateIndex(0);
+      }
     });
   }
 }

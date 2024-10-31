@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart';
-import 'package:pin/features/chat/presentation/screens/chats/services/chatService.dart';
+import 'package:pin/core/services/chat_service.dart';
 import 'package:pin/features/exchanges/screens/home/exchanges.dart';
 import '../../../constants.dart';
 import 'components/body.dart';

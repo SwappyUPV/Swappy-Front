@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart'; // Import for handling SVG images
 import 'package:pin/core/services/authentication_service.dart'; // Your AuthMethod class
 import 'package:pin/features/catalogue/presentation/widgets/navigation_menu.dart';
+import 'package:pin/features/auth/data/models/user_model.dart'; // Import UserModel
 import '../components/already_have_an_account_acheck.dart';
 import '../../../../../core/constants/constants.dart';
 import '../../screens/sign_up_screen.dart';
@@ -29,6 +30,8 @@ class _LoginFormState extends State<LoginForm> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('userId', userId);
   }
+
+  // Email/Password Login Method
   // Email/Password Login Method
   void loginUser() async {
     if (_formKey.currentState!.validate()) {
@@ -36,16 +39,33 @@ class _LoginFormState extends State<LoginForm> {
         _isLoading = true;
       });
 
-      String res = await _authMethod.loginUser(
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
+      String res;
+      try {
+        res = await _authMethod.loginUser(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
 
-      // Check if the widget is still mounted before updating state
-      if (!mounted) return; // Prevent setState if widget is disposed
+        // Check if the widget is still mounted before updating state
+        if (!mounted) return; // Prevent setState if widget is disposed
+      } catch (error) {
+        // Handle any exceptions that may occur during login
+        if (mounted) {
+          setState(() {
+            _isLoading = false; // Stop loading if an error occurs
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: $error'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return; // Exit the method if an error occurred
+      }
 
       setState(() {
-        _isLoading = false;
+        _isLoading = false; // Stop loading after receiving a response
       });
 
       if (res == 'success') {
@@ -54,18 +74,24 @@ class _LoginFormState extends State<LoginForm> {
 
         // Save the user ID to SharedPreferences
         await saveUserId(userId);
+        // Save the user Model to SharedPreferences
+        await _authMethod.saveUserModel(userId);
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => NavigationMenu()),
-        );
+        if (mounted) { // Check if still mounted before navigation
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => NavigationMenu()),
+          );
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(res),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (mounted) { // Check if still mounted before showing snackbar
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(res),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }

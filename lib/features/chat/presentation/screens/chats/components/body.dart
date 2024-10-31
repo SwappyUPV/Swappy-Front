@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart'; // Use this Chat model
-import 'package:pin/features/chat/presentation/screens/chats/services/chatService.dart';
+import 'package:pin/core/services/chat_service.dart';
 import '../../../components/filled_outline_button.dart';
 import '../../../../constants.dart';
 import '../../messages/message_screen.dart';
