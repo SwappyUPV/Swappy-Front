@@ -19,8 +19,10 @@ class MessagesScreenState extends State<MessagesScreen> {
   final ChatService _chatService = ChatService();
   String? _userId;
 
-  late String _avatar;
-  late String _name;
+  String? _avatar;
+  String? _name;
+
+  bool _isLoading = true; // Track loading state
 
   @override
   void initState() {
@@ -32,7 +34,9 @@ class MessagesScreenState extends State<MessagesScreen> {
     _userId = await _chatService.getUserId();
     print("Initialized User ID: $_userId"); // Debug line
     _assignUserDetails(); // Call the method to assign avatar and name
-    setState(() {}); // Trigger a rebuild after fetching the userId
+    setState(() {
+      _isLoading = false; // Set loading to false after fetching user details
+    });
   }
 
   void _assignUserDetails() {
@@ -49,7 +53,9 @@ class MessagesScreenState extends State<MessagesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(context),
-      body: Body(chat: widget.chat, userId: _userId),
+      body: _isLoading // Show loading indicator while fetching user details
+          ? Center(child: CircularProgressIndicator())
+          : Body(chat: widget.chat, userId: _userId),
     );
   }
 
@@ -62,14 +68,16 @@ class MessagesScreenState extends State<MessagesScreen> {
           Row(
             children: [
               CircleAvatar(
-                backgroundImage: AssetImage(_avatar), // Use assigned avatar
+                backgroundImage: _avatar != null
+                    ? AssetImage(_avatar!)
+                    : AssetImage('assets/images/user.png'), // Fallback to default
               ),
               const SizedBox(width: kDefaultPadding * 0.75),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _name, // Use assigned name
+                    _name ?? 'Unknown', // Fallback to 'Unknown' if _name is null
                     style: const TextStyle(fontSize: 16),
                   ),
                   Text(

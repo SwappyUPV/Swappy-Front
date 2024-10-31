@@ -45,14 +45,14 @@ class _ChatCardState extends State<ChatCard> {
           _displayName = widget.chat.name2;
           _profileImage = widget.chat.image2.isNotEmpty
               ? widget.chat.image2
-              : 'assets/images/default_avatar.png';
+              : 'assets/images/user.png';
         });
       } else {
         setState(() {
           _displayName = widget.chat.name1;
           _profileImage = widget.chat.image1.isNotEmpty
               ? widget.chat.image1
-              : 'assets/images/default_avatar.png';
+              : 'assets/images/user.png';
         });
       }
     } else {
@@ -60,7 +60,7 @@ class _ChatCardState extends State<ChatCard> {
         _displayName = widget.chat.name1; // fallback to default
         _profileImage = widget.chat.image1.isNotEmpty
             ? widget.chat.image1
-            : 'assets/images/default_avatar.png'; // fallback image
+            : 'assets/images/user.png'; // fallback image
       });
     }
 

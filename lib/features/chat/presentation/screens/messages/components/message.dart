@@ -23,7 +23,6 @@ class Messages extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isSentByUser = message.sender == userId;
-    print("Building message: ${message.content}, Is Sent By User: $isSentByUser"); // Debug line
 
     return Padding(
       padding: const EdgeInsets.only(top: kDefaultPadding),
@@ -74,6 +73,6 @@ class Messages extends StatelessWidget {
     if (imagePath.isNotEmpty) {
       return AssetImage(imagePath);
     }
-    return const AssetImage("assets/images/default_avatar.png");
+    return const AssetImage("assets/images/user.png");
   }
 }

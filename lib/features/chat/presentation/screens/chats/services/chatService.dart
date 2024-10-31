@@ -41,8 +41,6 @@ class ChatService {
     if (showRecent == true) {
       query = query.where('isRecent', isEqualTo: showRecent);
     }
-    print(userId);
-
     // Fetch the chats
     final querySnapshot = await query.get();
 
