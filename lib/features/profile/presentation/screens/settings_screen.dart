@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:pin/core/services/authentication_service.dart';
+import '/features/catalogue/presentation/widgets/navigation_menu.dart';
+import 'package:get/get.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -19,7 +21,7 @@ class SettingsScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Iconsax.arrow_left, color: Colors.black),
           onPressed: () {
-            Navigator.pop(context);  // Navigate back to profile screen
+            Navigator.pop(context); // Navigate back to profile screen
           },
         ),
       ),
@@ -29,7 +31,14 @@ class SettingsScreen extends StatelessWidget {
           _buildSettingsItem(Iconsax.user_edit, 'Change Username', () {}),
           _buildSettingsItem(Iconsax.lock, 'Change Password', () {}),
           _buildSettingsItem(Iconsax.message, 'Change Email', () {}),
-          _buildSettingsItem(Iconsax.logout, 'Logout', () {AuthMethod().signOut();}),
+          _buildSettingsItem(Iconsax.logout, 'Logout', () async {
+            await AuthMethod().logout();
+            Navigator.of(context).pop();
+            final NavigationController navigationController =
+                Get.find<NavigationController>();
+            navigationController.updateIndex(4);
+            Get.off(() => NavigationMenu());
+          }),
         ],
       ),
     );

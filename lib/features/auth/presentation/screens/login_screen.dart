@@ -23,19 +23,20 @@ class _LoginState extends State<Login> {
   @override
   void initState() {
     super.initState();
-    _autoLogin();
+    // Comentamos el auto-login
+    // _autoLogin();
   }
 
-  Future<void> _autoLogin() async {
-    String email = 's@gmail.com'; // Reemplaza con el email predeterminado
-    String password = '123456'; // Reemplaza con la contraseña predeterminada
-
-    String res = await _loginUser(email: email, password: password);
-
-    if (res == 'success') {
-      _navigateToCatalogue();
-    }
-  }
+  // Future<void> _autoLogin() async {
+  //   String email = 's@gmail.com'; // Reemplaza con el email predeterminado
+  //   String password = '123456'; // Reemplaza con la contraseña predeterminada
+  //
+  //   String res = await _loginUser(email: email, password: password);
+  //
+  //   if (res == 'success') {
+  //     _navigateToCatalogue();
+  //   }
+  // }
 
   Future<String> _loginUser(
       {required String email, required String password}) async {

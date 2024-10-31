@@ -1,10 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 enum ChatMessageType { text, image, audio, video }
 
 enum MessageStatus { notSent, notViewed, viewed }
 
-class ChatMessageModel{
+class ChatMessageModel {
   final String id; // Unique identifier for the message
   final ChatMessageType type;
   final String content; // For text, image, or audio

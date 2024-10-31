@@ -27,7 +27,8 @@ class AuthMethod {
       }
 
       // Obtain the auth details from the request
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       // Create a new credential
       final credential = GoogleAuthProvider.credential(
@@ -36,10 +37,14 @@ class AuthMethod {
       );
 
       // Sign in to Firebase with the Google credentials
-      UserCredential userCredential = await _auth.signInWithCredential(credential);
+      UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
 
       // Check if the user already exists in Firestore
-      DocumentSnapshot userDoc = await _firestore.collection("users").doc(userCredential.user!.uid).get();
+      DocumentSnapshot userDoc = await _firestore
+          .collection("users")
+          .doc(userCredential.user!.uid)
+          .get();
 
       if (!userDoc.exists) {
         // If the user does not exist, add them to Firestore
@@ -56,6 +61,7 @@ class AuthMethod {
     }
     return res;
   }
+
   // SignUp User
   Future<String> signupUser(
       {required String email, required String password}) async {
@@ -152,9 +158,11 @@ class AuthMethod {
     return _auth.currentUser;
   }
 
-
   //Logout
   Future<void> logout() async {
     await _auth.signOut();
+    await _auth.authStateChanges().first;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('loggedOut', true);
   }
 }
