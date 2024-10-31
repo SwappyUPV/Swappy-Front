@@ -1,48 +1,57 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:pin/features/exchanges/models/Product.dart';
 
 class CatalogService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<List<Map<String, dynamic>>> getClothes() async {
+  Future<List<Product>> getClothes() async {
     try {
-      // Obtener la colección de ropa
       QuerySnapshot querySnapshot =
           await _firestore.collection('clothes').get();
 
-      // Convertir los documentos a una lista de mapas
-      List<Map<String, dynamic>> clothes = querySnapshot.docs.map((doc) {
-        return {
-          'id': doc.id,
-          'nombre': doc['nombre'],
-          'precio': doc['precio'],
-          'imagen': doc['imagen'],
-          'categoria': doc['categoria'],
-          'etiquetas': List<String>.from(doc['etiquetas'] ?? []),
-        };
+      List<Product> clothes = querySnapshot.docs.map((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        return Product(
+          id: doc.id,
+          title: data['nombre'] ?? '',
+          price: data['precio'] ?? 0,
+          image: data['imagen'] ?? '',
+          description: data['descripcion'] ?? '',
+          size: data['talla'] ?? '',
+          styles: List<String>.from(data['styles'] ?? []),
+          quality: data['quality'] ?? '',
+          category: data['category'] ?? '',
+          isExchangeOnly: data['isExchangeOnly'] ?? false,
+          color: null,
+        );
       }).toList();
 
       return clothes;
     } catch (e) {
       print('Error al obtener la ropa: $e');
-      return [];
+      rethrow;
     }
   }
 
-  // Método para obtener una prenda específica por su ID
-  Future<Map<String, dynamic>?> getClothById(String id) async {
+  Future<Product?> getClothById(String id) async {
     try {
       DocumentSnapshot doc =
           await _firestore.collection('clothes').doc(id).get();
 
       if (doc.exists) {
-        return {
-          'id': doc.id,
-          'nombre': doc['nombre'],
-          'precio': doc['precio'],
-          'imagen': doc['imagen'],
-          'categoria': doc['categoria'],
-          'etiquetas': List<String>.from(doc['etiquetas'] ?? []),
-        };
+        return Product(
+          id: doc.id,
+          title: doc['nombre'],
+          price: doc['precio'],
+          image: doc['imagen'],
+          description: doc['descripcion'],
+          size: doc['talla'],
+          color: doc['color'],
+          styles: doc['styles'],
+          quality: doc['quality'],
+          category: doc['category'],
+          isExchangeOnly: doc['isExchangeOnly'],
+        );
       } else {
         return null;
       }

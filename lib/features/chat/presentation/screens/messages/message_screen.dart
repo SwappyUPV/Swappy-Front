@@ -77,7 +77,9 @@ class MessagesScreen extends StatelessWidget {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => Exchanges(),
+                builder: (context) => Exchanges(
+                  selectedProduct: null,
+                ),
               ),
             );
           },

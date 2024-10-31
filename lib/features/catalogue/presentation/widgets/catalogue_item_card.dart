@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:pin/features/exchanges/models/Product.dart';
 import 'package:pin/features/exchanges/screens/home/exchanges.dart';
 
 class CatalogueItemCard extends StatelessWidget {
-  final Map<String, dynamic> product;
+  final Product product;
   final VoidCallback press;
 
   const CatalogueItemCard({
-    Key? key,
+    super.key,
     required this.product,
     required this.press,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +35,7 @@ class CatalogueItemCard extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
                 child: Image.network(
-                  product['imagen'],
+                  product.image,
                   fit: BoxFit.cover,
                   width: double.infinity,
                   height: double.infinity,
@@ -47,7 +48,7 @@ class CatalogueItemCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    product['nombre'],
+                    product.title,
                     style: Theme.of(context)
                         .textTheme
                         .titleSmall!
@@ -65,7 +66,11 @@ class CatalogueItemCard extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => Exchanges()),
+                    MaterialPageRoute(
+                      builder: (context) => Exchanges(
+                        selectedProduct: product,
+                      ),
+                    ),
                   );
                 },
                 style: ElevatedButton.styleFrom(

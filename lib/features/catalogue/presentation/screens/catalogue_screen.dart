@@ -4,9 +4,10 @@ import '../widgets/catalogue_app_bar.dart';
 import '../widgets/search_bar.dart' as CustomWidgets;
 import '../widgets/category_filter.dart';
 import '../widgets/catalogue_grid.dart';
+import 'package:pin/features/exchanges/models/Product.dart';
 
 class Catalogue extends StatefulWidget {
-  const Catalogue({Key? key}) : super(key: key);
+  const Catalogue({super.key});
 
   @override
   _CatalogueState createState() => _CatalogueState();
@@ -15,7 +16,7 @@ class Catalogue extends StatefulWidget {
 class _CatalogueState extends State<Catalogue> {
   String _selectedCategory = 'Todos';
   String _searchQuery = '';
-  List<Map<String, dynamic>> catalogoRopa = [];
+  List<Product> catalogoRopa = [];
   Set<String> _categories = {'Todos'};
   bool _isLoading = true;
 
@@ -31,14 +32,11 @@ class _CatalogueState extends State<Catalogue> {
     setState(() {
       _isLoading = true;
     });
-
-    List<Map<String, dynamic>> clothes = await _catalogService.getClothes();
-
-    // Create a set to hold the categories
+    List<Product> clothes = await _catalogService.getClothes();
     Set<String> categories = {'Todos'};
 
     for (var item in clothes) {
-      categories.add(item['categoria']);
+      categories.add(item.category);
     }
 
     // Check if the widget is still mounted before calling setState
@@ -51,14 +49,14 @@ class _CatalogueState extends State<Catalogue> {
     });
   }
 
-  List<Map<String, dynamic>> get filteredCatalogo {
+  List<Product> get filteredCatalogo {
     return catalogoRopa.where((item) {
-      final matchesCategory = _selectedCategory == 'Todos' ||
-          item['categoria'] == _selectedCategory;
-      final matchesSearch = item['nombre']
+      final matchesCategory =
+          _selectedCategory == 'Todos' || item.category == _selectedCategory;
+      final matchesSearch = item.title
               .toLowerCase()
               .contains(_searchQuery.toLowerCase()) ||
-          item['etiquetas'].any(
+          item.styles.any(
               (tag) => tag.toLowerCase().contains(_searchQuery.toLowerCase()));
       return matchesCategory && matchesSearch;
     }).toList();
@@ -76,8 +74,7 @@ class _CatalogueState extends State<Catalogue> {
                 _searchQuery = value;
               });
             },
-            productos:
-                catalogoRopa.map((item) => item['nombre'] as String).toList(),
+            productos: catalogoRopa.map((item) => item.title).toList(),
           ),
           CategoryFilter(
             categories: _categories.toList(),

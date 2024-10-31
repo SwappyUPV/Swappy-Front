@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'product_detail_modal.dart';
 import 'catalogue_item_card.dart';
+import 'package:pin/features/exchanges/models/Product.dart';
 
 class CatalogueGrid extends StatelessWidget {
-  final List<Map<String, dynamic>> filteredCatalogo;
+  final List<Product> filteredCatalogo;
 
   const CatalogueGrid({
     super.key,
@@ -19,7 +19,7 @@ class CatalogueGrid extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: GridView.builder(
         shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
+        physics: const ClampingScrollPhysics(),
         itemCount: filteredCatalogo.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: crossAxisCount,
@@ -29,17 +29,7 @@ class CatalogueGrid extends StatelessWidget {
         ),
         itemBuilder: (context, index) {
           final item = filteredCatalogo[index];
-          return CatalogueItemCard(
-            product: item,
-            press: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProductDetailModal(product: item),
-                ),
-              );
-            },
-          );
+          return CatalogueItemCard(product: item, press: () {});
         },
       ),
     );

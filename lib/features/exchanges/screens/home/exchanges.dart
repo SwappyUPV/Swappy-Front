@@ -4,7 +4,12 @@ import '../home/components/user_header.dart';
 import 'components/item_grid.dart';
 
 class Exchanges extends StatefulWidget {
-  const Exchanges({super.key});
+  final Product? selectedProduct;
+
+  const Exchanges({
+    super.key,
+    this.selectedProduct,
+  });
 
   @override
   ExchangesState createState() => ExchangesState();
@@ -18,13 +23,17 @@ class ExchangesState extends State<Exchanges> {
   void _addItem() {
     setState(() {
       modifiedItems.add(Product(
-        id: 1,
+        id: "1",
         title: "Office Code",
         price: 234,
-        size: 12,
+        size: "12",
         description: dummyText,
         image: "assets/images/bag_1.png",
         color: const Color(0xFF3D82AE),
+        category: "Bags",
+        isExchangeOnly: false,
+        styles: ["Office", "Code"],
+        quality: "New",
       ));
       hasChanges = true;
     });
@@ -66,9 +75,7 @@ class ExchangesState extends State<Exchanges> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SingleChildScrollView(

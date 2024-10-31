@@ -10,7 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pin/features/auth/presentation/screens/login_screen.dart';
 
 class NavigationMenu extends StatelessWidget {
-  NavigationMenu({Key? key}) : super(key: key);
+  NavigationMenu({super.key});
 
   final NavigationController controller = Get.put(NavigationController());
   final AuthController authController = Get.put(AuthController());
@@ -19,7 +19,6 @@ class NavigationMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Obx(() {
-        // This is where you'll display the respective screens
         switch (controller.selectedIndex.value) {
           case 0:
             return const Catalogue();
@@ -112,7 +111,6 @@ class NavigationMenu extends StatelessWidget {
   }
 }
 
-//USED OBX BUT CAN USE NAVIGATIONBOTTOMBAR INSTEAD
 class NavigationController extends GetxController {
   final Rx<int> selectedIndex = 0.obs;
 

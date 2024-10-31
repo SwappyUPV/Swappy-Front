@@ -13,7 +13,7 @@ class ProductService {
     required String title,
     required String description,
     required List<String> styles,
-    required List<String> sizes,
+    required String size,
     int? price,
     required String quality,
     required dynamic image,
@@ -21,40 +21,33 @@ class ProductService {
     required bool isExchangeOnly,
   }) async {
     try {
-      // Obtener el usuario actual directamente de FirebaseAuth
       User? currentUser = _auth.currentUser;
       if (currentUser == null) {
         return "Error: No hay usuario autenticado";
       }
 
-      // Subir imagen a Firebase Storage
       final storageRef = _storage
           .ref()
           .child('product_images/${DateTime.now().toIso8601String()}.jpg');
       UploadTask uploadTask;
       if (kIsWeb) {
-        // Para web
         uploadTask = storageRef.putData(await image.readAsBytes());
       } else if (image is File) {
-        // Para móvil
         uploadTask = storageRef.putFile(image);
       } else {
         throw Exception('Tipo de imagen no soportado');
       }
 
-      // Esperar a que se complete la subida
       await uploadTask.whenComplete(() {});
 
       final imageUrl = await storageRef.getDownloadURL();
 
-      // Crear documento en Firestore
       DocumentReference docRef = await _firestore.collection('clothes').add({
         'nombre': title,
         'descripcion': description,
         'categoria': category,
         'estilos': styles,
-        'etiquetas': [...styles, ...sizes, quality],
-        'tallas': sizes,
+        'talla': size,
         'precio': isExchangeOnly ? null : price,
         'calidad': quality,
         'imagen': imageUrl,
@@ -69,19 +62,15 @@ class ProductService {
     }
   }
 
-  Future<List<String>> getVerifiedStyles() async {
-    QuerySnapshot snapshot = await _firestore
-        .collection('styles')
-        .where('verified', isEqualTo: true)
-        .get();
+  Future<List<String>> getStyles() async {
+    QuerySnapshot snapshot = await _firestore.collection('styles').get();
     return snapshot.docs.map((doc) => doc['name'] as String).toList();
   }
 
-  Future<List<String>> getVerifiedSizes(String category) async {
+  Future<List<String>> getSizes(String category) async {
     QuerySnapshot snapshot = await _firestore
         .collection('sizes')
         .where('category', isEqualTo: category)
-        .where('verified', isEqualTo: true)
         .get();
 
     List<String> sizes =
@@ -93,30 +82,12 @@ class ProductService {
       if (numA != null && numB != null) {
         return numA.compareTo(numB);
       } else {
-        // Orden personalizado para tallas no numéricas
         List<String> order = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
         return order.indexOf(a).compareTo(order.indexOf(b));
       }
     });
 
     return sizes;
-  }
-
-  Future<void> addNewStyle(String style) async {
-    await _firestore.collection('styles').add({
-      'name': style,
-      'verified': false,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
-  }
-
-  Future<void> addNewSize(String size, String category) async {
-    await _firestore.collection('sizes').add({
-      'size': size,
-      'category': category,
-      'verified': false,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
   }
 
   Future<List<String>> getClothingCategories() async {
