@@ -16,7 +16,7 @@ class ProfileHeader extends StatelessWidget {
         children: [
           CircleAvatar(
             backgroundImage: userModel.profilePicture != null
-                ? NetworkImage(userModel.profilePicture!)
+                ? AssetImage(userModel.profilePicture!)
                 : null,
             radius: 50,
           ),
