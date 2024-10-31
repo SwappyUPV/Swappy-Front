@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../../../constants.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
@@ -133,47 +134,43 @@ class _ProductTitleWithImageState extends State<ProductTitleWithImage> {
               ],
             ),
           ),
-          // Botones de navegación responsivos a los costados de la imagen
-          Positioned(
-            left: MediaQuery.of(context).size.width *
-                0.1, // Ajustar según sea necesario
-            top: MediaQuery.of(context).size.height * 0.25,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_left),
-              iconSize: MediaQuery.of(context).size.width > 600
-                  ? 40
-                  : 24, // Ajustar tamaño
-              color: Colors.white,
-              onPressed: () {
-                if (_currentPage > 0) {
-                  _pageController.previousPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                }
-              },
+          // Botones de navegación solo visibles en web
+          if (kIsWeb) ...[
+            Positioned(
+              left: MediaQuery.of(context).size.width * 0.1,
+              top: MediaQuery.of(context).size.height * 0.25,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_left),
+                iconSize: MediaQuery.of(context).size.width > 600 ? 40 : 24,
+                color: Colors.white,
+                onPressed: () {
+                  if (_currentPage > 0) {
+                    _pageController.previousPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                },
+              ),
             ),
-          ),
-          Positioned(
-            right: MediaQuery.of(context).size.width *
-                0.1, // Ajustar según sea necesario
-            top: MediaQuery.of(context).size.height * 0.25,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_right),
-              iconSize: MediaQuery.of(context).size.width > 600
-                  ? 40
-                  : 24, // Ajustar tamaño
-              color: Colors.white,
-              onPressed: () {
-                if (_currentPage < 2) {
-                  _pageController.nextPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                }
-              },
+            Positioned(
+              right: MediaQuery.of(context).size.width * 0.1,
+              top: MediaQuery.of(context).size.height * 0.25,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_right),
+                iconSize: MediaQuery.of(context).size.width > 600 ? 40 : 24,
+                color: Colors.white,
+                onPressed: () {
+                  if (_currentPage < 2) {
+                    _pageController.nextPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                },
+              ),
             ),
-          ),
+          ]
         ],
       ),
     );

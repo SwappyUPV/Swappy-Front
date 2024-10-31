@@ -30,17 +30,17 @@ class Product {
 
 List<Product> products = [
   Product(
-    id: '1',
-    title: "Office Code",
-    price: 234,
-    size: "12",
-    description: dummyText,
-    image: "assets/images/bag_1.png",
-    category: "Bags",
-    isExchangeOnly: false,
-    styles: ["Office", "Code"],
-    quality: "New",
-  ),
+      id: '1',
+      title: "Office Code",
+      price: 234,
+      size: "12",
+      description: dummyText,
+      image: "assets/images/bag_1.png",
+      category: "Bags",
+      isExchangeOnly: false,
+      styles: ["Office", "Code"],
+      quality: "New",
+      color: const Color.fromARGB(255, 81, 99, 241)),
   Product(
       id: '2',
       title: "Belt Bag",
