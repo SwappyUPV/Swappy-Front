@@ -10,58 +10,57 @@ class ChatService {
   // Cache the authenticated user's ID to reduce duplicate calls
   String? _cachedUserId;
 
-  Future<String?> _getUserId() async {
-    // Check SharedPreferences for cached user ID
+  Future<String?> getUserId() async {
     if (_cachedUserId == null) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      _cachedUserId = prefs.getString('userId'); // Retrieve from SharedPreferences
-    }
+      _cachedUserId = prefs.getString('userId') ?? _auth.currentUser?.uid;
 
-    // If userId is still null, fetch it from UserService
-    if (_cachedUserId == null) {
-      _cachedUserId = await _auth.currentUser?.uid;
       if (_cachedUserId != null) {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('userId', _cachedUserId!); // Store in SharedPreferences
+        await prefs.setString('userId', _cachedUserId!);
       }
     }
     return _cachedUserId;
   }
 
   Stream<List<Chat>> fetchChats({bool? showActive, bool? showRecent}) async* {
-    final String? userId = await _getUserId();
+    final String? userId = await getUserId();
     if (userId == null) {
       yield [];
       return;
     }
 
-    // Initialize the query as a Query type
+    // Create the base query with `array-contains`
     Query<Map<String, dynamic>> query = _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('chats');
+        .collection('chats')
+        .where('users', arrayContains: userId);
 
-    // Apply filters conditionally
-    if (showActive != null) {
+    // Apply additional filters if specified
+    if (showActive == true) {
       query = query.where('isActive', isEqualTo: showActive);
     }
-    if (showRecent != null) {
+    if (showRecent == true) {
       query = query.where('isRecent', isEqualTo: showRecent);
     }
+    print(userId);
 
-    yield* query.snapshots().map((snapshot) =>
-        snapshot.docs.map((doc) => Chat.fromDocument(doc)).toList());
+    // Fetch the chats
+    final querySnapshot = await query.get();
+
+    // Map the documents to Chat objects directly
+    final filteredChats = querySnapshot.docs.map((doc) {
+      return Chat.fromDocument(doc);
+    }).toList();
+
+    // Yield the filtered list of chats
+    yield filteredChats;
   }
-
 
   // Listen for only the latest incoming message
   Stream<ChatMessageModel?> listenForNewMessage(String chatId) async* {
-    final String? userId = await _getUserId();
+    final String? userId = await getUserId();
     if (userId == null) return;
 
     yield* _firestore
-        .collection('users')
-        .doc(userId)
         .collection('chats')
         .doc(chatId)
         .collection('messages')
@@ -74,10 +73,15 @@ class ChatService {
 
   // Optimized method to send a message without fetching user ID each time
   Future<void> sendMessage(String chatId, String messageText, String userId) async {
+    if (userId.isEmpty) {
+      print("Attempting to send message with empty userId");
+      return; // Exit if userId is empty
+    }
 
     final messageData = {
+      'id': chatId,
       'content': messageText,
-      'isSender': true,
+      'sender': userId,
       'type': "text",
       'status': "viewed",
       'timestamp': FieldValue.serverTimestamp(),
@@ -85,8 +89,6 @@ class ChatService {
 
     try {
       await _firestore
-          .collection('users')
-          .doc(userId)
           .collection('chats')
           .doc(chatId)
           .collection('messages')
@@ -99,12 +101,10 @@ class ChatService {
 
   // Fetch the latest message for a specific chat
   Future<ChatMessageModel?> getLatestMessage(String chatId) async {
-    final String? userId = await _getUserId();
+    final String? userId = await getUserId();
     if (userId == null) return null;
 
     final snapshot = await _firestore
-        .collection('users')
-        .doc(userId)
         .collection('chats')
         .doc(chatId)
         .collection('messages')
@@ -115,40 +115,39 @@ class ChatService {
     return snapshot.docs.isNotEmpty ? _mapToChatMessageModel(snapshot.docs.first) : null;
   }
   Future<Chat?> getChatById(String chatId) async {
-    final String? userId = await _getUserId();
+    final String? userId = await getUserId();
     if (userId == null) return null;
 
     // Directly access the specific document instead of using a query
     final chatDoc = await _firestore
-        .collection('users')
-        .doc(userId)
         .collection('chats')
         .doc(chatId)
         .get();
 
     if (chatDoc.exists) {
       final chatData = chatDoc.data()!;
-      final userDoc = await _firestore.collection('users').doc(userId).get();
 
       return Chat(
         uid: chatDoc.id,
-        name: chatData['name'] ?? 'Unknown',
-        image: userDoc['profilePicture'] ?? 'assets/images/user.png',
-        user: chatData['user'],
+        user1: chatData['user1'],
+        user2: chatData['user2'],
+        image1: chatData['image1'],
+        image2: chatData['image2'],
+        name1: chatData['name1'],
+        name2: chatData['name2'],
         timestamp: (chatData['timestamp'] as Timestamp).toDate(),
         isActive: chatData['isActive'] ?? false,
         isRecent: chatData['isRecent'] ?? true,
+        users: chatData['users'].cast<String>(),
       );
     }
     return null;
   }
 
   Stream<List<ChatMessageModel>> fetchMessages(String chatId) async* {
-    final String? userId = await _getUserId();
+    final String? userId = await getUserId();
     // Start streaming messages from Firestore
     yield* _firestore
-        .collection('users')
-        .doc(userId)
         .collection('chats')
         .doc(chatId)
         .collection('messages')
@@ -172,7 +171,7 @@ class ChatService {
           id: doc.id,
           type: _stringToChatMessageType(data['type']),
           content: data['content'] ?? '',
-          isSender: data['isSender'] ?? false, // Ensure this is a boolean
+          sender: data['sender'] ?? '', //
           status: _stringToMessageStatus(data['status']),
           timestamp: timestamp != null ? timestamp.toDate() : DateTime.now(),
         );
@@ -187,7 +186,7 @@ class ChatService {
       id: doc.id,
       type: _stringToChatMessageType(data['type']),
       content: data['content'] ?? '',
-      isSender: data['isSender'] ?? false,
+      sender: data['sender'] ?? '',
       status: _stringToMessageStatus(data['status']),
       timestamp: (data['timestamp'] as Timestamp).toDate(),
     );

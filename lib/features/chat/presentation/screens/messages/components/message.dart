@@ -2,41 +2,78 @@ import 'package:flutter/material.dart';
 import 'package:pin/features/chat/presentation/screens/messages/model/ChatMessageModel.dart';
 import '../../../../constants.dart';
 
-class Message extends StatelessWidget {
+class Messages extends StatelessWidget {
   final ChatMessageModel message;
+  final String? userId; // This is the ID of the logged-in user
+  final String user1;
+  final String user2;
+  final String userImage1;
+  final String userImage2;
 
-  const Message({super.key, required this.message});
+  const Messages({
+    super.key,
+    required this.message,
+    this.userId,
+    required this.user1,
+    required this.user2,
+    required this.userImage1,
+    required this.userImage2,
+  });
 
   @override
   Widget build(BuildContext context) {
-    Widget messageContent(ChatMessageModel message) {
-      switch (message.type) {
-        case ChatMessageType.text:
-          return Text(message.content);
-      // Handle other message types (image, audio, video) as needed
-        default:
-          return const SizedBox();
-      }
-    }
+    bool isSentByUser = message.sender == userId;
+    print("Building message: ${message.content}, Is Sent By User: $isSentByUser"); // Debug line
 
     return Padding(
       padding: const EdgeInsets.only(top: kDefaultPadding),
       child: Row(
-        mainAxisAlignment: message.isSender ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isSentByUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
-          if (!message.isSender)
-            const CircleAvatar(
-              radius: 12,
-              backgroundImage: AssetImage("assets/images/user_2.png"),
+          // Show the other user's avatar if the message is not sent by the logged-in user
+          if (!isSentByUser)
+            CircleAvatar(
+              radius: 20, // Increased size for the avatar
+              backgroundImage: message.sender == user1
+                  ? _getImageProvider(userImage1)
+                  : _getImageProvider(userImage2), // Use userImage1 or userImage2 based on the sender
             ),
           const SizedBox(width: kDefaultPadding / 2),
-          messageContent(message),
-          if (message.isSender) ...[
+          // Display message content
+          _messageContent(message, isSentByUser),
+          // Show the logged-in user's avatar if the message is sent by the logged-in user
+          if (isSentByUser) ...[
             const SizedBox(width: kDefaultPadding / 2),
-            const Icon(Icons.done, color: kPrimaryColor), // Icono de mensaje enviado
+            CircleAvatar(
+              radius: 20, // Increased size for the avatar
+              backgroundImage: message.sender == user1
+                  ? _getImageProvider(userImage1)
+                  : _getImageProvider(userImage2), // Use userImage1 or userImage2 based on the sender
+            ),
           ],
         ],
       ),
     );
+  }
+
+  Widget _messageContent(ChatMessageModel message, bool isSentByUser) {
+    return Container(
+      padding: const EdgeInsets.all(12), // Increased padding for the message bubble
+      decoration: BoxDecoration(
+        color: isSentByUser ? Colors.blueAccent : Colors.grey[300], // Change colors based on sender
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        message.content,
+        style: TextStyle(fontSize: 16, color: isSentByUser ? Colors.white : Colors.black), // Increased font size
+      ),
+    );
+  }
+
+  ImageProvider _getImageProvider(String imagePath) {
+    if (imagePath.isNotEmpty) {
+      return AssetImage(imagePath);
+    }
+    return const AssetImage("assets/images/default_avatar.png");
   }
 }

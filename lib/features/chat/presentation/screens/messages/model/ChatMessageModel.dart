@@ -6,7 +6,7 @@ class ChatMessageModel {
   final String id; // Unique identifier for the message
   final ChatMessageType type;
   final String content; // For text, image, or audio
-  final bool isSender; // If the message was sent by the user
+  final String sender; // ID of the user who sent the message
   final MessageStatus status;
   final DateTime timestamp; // Timestamp of when the message was sent
 
@@ -14,7 +14,7 @@ class ChatMessageModel {
     required this.id,
     required this.type,
     required this.content,
-    required this.isSender,
+    required this.sender,
     required this.status,
     required this.timestamp, // Initialize timestamp
   });

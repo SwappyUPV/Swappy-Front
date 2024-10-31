@@ -6,16 +6,50 @@ import '../../../constants.dart';
 import 'components/body.dart';
 import 'package:intl/intl.dart';
 
-class MessagesScreen extends StatelessWidget {
-  final String chatId;
+class MessagesScreen extends StatefulWidget {
+  final Chat chat;
 
-  const MessagesScreen({super.key, required this.chatId});
+  const MessagesScreen({super.key, required this.chat});
+
+  @override
+  MessagesScreenState createState() => MessagesScreenState();
+}
+
+class MessagesScreenState extends State<MessagesScreen> {
+  final ChatService _chatService = ChatService();
+  String? _userId;
+
+  late String _avatar;
+  late String _name;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeUserId();
+  }
+
+  Future<void> _initializeUserId() async {
+    _userId = await _chatService.getUserId();
+    print("Initialized User ID: $_userId"); // Debug line
+    _assignUserDetails(); // Call the method to assign avatar and name
+    setState(() {}); // Trigger a rebuild after fetching the userId
+  }
+
+  void _assignUserDetails() {
+    if (_userId == widget.chat.user1) {
+      _name = widget.chat.name2; // Assign name2 if userId matches user1
+      _avatar = widget.chat.image2; // Assign image2 if userId matches user1
+    } else {
+      _name = widget.chat.name1; // Assign name1 otherwise
+      _avatar = widget.chat.image1; // Assign image1 otherwise
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(context),
-      body: Body(chatId: chatId), // Pass chatId to the Body widget
+      body: Body(chat: widget.chat, userId: _userId),
     );
   }
 
@@ -25,48 +59,28 @@ class MessagesScreen extends StatelessWidget {
       title: Row(
         children: [
           BackButton(),
-          FutureBuilder<Chat?>(
-            future: _getChat(chatId), // Fetch chat data based on chatId
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircleAvatar(
-                  backgroundImage:
-                      AssetImage("assets/images/user.png"), // Placeholder image
-                );
-              }
-              if (!snapshot.hasData || snapshot.data == null) {
-                return const CircleAvatar(
-                  backgroundImage: AssetImage(
-                      "assets/images/user_2.png"), // Placeholder image
-                );
-              }
-
-              final chat = snapshot.data!;
-              return Row(
+          Row(
+            children: [
+              CircleAvatar(
+                backgroundImage: AssetImage(_avatar), // Use assigned avatar
+              ),
+              const SizedBox(width: kDefaultPadding * 0.75),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    backgroundImage: NetworkImage(
-                        chat.image),
+                  Text(
+                    _name, // Use assigned name
+                    style: const TextStyle(fontSize: 16),
                   ),
-                  const SizedBox(width: kDefaultPadding * 0.75),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        chat.name,
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      Text(
-                        chat.isActive
-                            ? "Active Now"
-                            : "Last active ${_formatTimestamp(chat.timestamp)}", // Use formatted timestamp
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ],
+                  Text(
+                    widget.chat.isActive
+                        ? "Active Now"
+                        : "Last active ${_formatTimestamp(widget.chat.timestamp)}",
+                    style: const TextStyle(fontSize: 12),
                   ),
                 ],
-              );
-            },
+              ),
+            ],
           ),
         ],
       ),
@@ -89,15 +103,7 @@ class MessagesScreen extends StatelessWidget {
     );
   }
 
-  //HELPER METHODS
-  Future<Chat?> _getChat(String chatId) async {
-    // Fetch the chat details based on chatId from ChatService
-    final chatService = ChatService();
-    return await chatService.getChatById(chatId); // Fetch chat data
-  }
-
   String _formatTimestamp(DateTime timestamp) {
-    // Format the timestamp to a readable string
     final now = DateTime.now();
     final difference = now.difference(timestamp);
 
@@ -110,8 +116,7 @@ class MessagesScreen extends StatelessWidget {
     } else if (difference.inDays == 1) {
       return 'Yesterday';
     } else {
-      return DateFormat('MMM d, yyyy')
-          .format(timestamp); // E.g., "Oct 30, 2024"
+      return DateFormat('MMM d, yyyy').format(timestamp);
     }
   }
 }
