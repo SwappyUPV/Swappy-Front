@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pin/features/chat/presentation/screens/chats/chats_screen.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
+import 'package:pin/features/exchanges/screens/details/components/confirmation.dart';
 import '../home/components/user_header.dart';
 import 'components/item_grid.dart';
 import 'package:pin/features/profile/presentation/screens/profile_screen.dart';
@@ -51,17 +55,51 @@ class ExchangesState extends State<Exchanges> {
   }
 
   void _confirmChanges() {
-    setState(() {
-      products.clear();
-      products.addAll(modifiedItems);
-      hasChanges = false;
-      hasResponded = false;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar Intercambio'),
+          content: const Text('¿Estás seguro de realizar este intercambio?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Cierra el diálogo sin hacer nada
+              },
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Confirmar cambios y cerrar el diálogo
+                setState(() {
+                  products.clear();
+                  products.addAll(modifiedItems);
+                  hasChanges = false;
+                  hasResponded = false;
 
-      // Aquí se suman los puntos de intercambio a los actuales de rewards
-      // Suponiendo que tienes una variable para los puntos actuales en Rewards
-      Rewards.currentPoints +=
-          200; // Cambia 200 al valor real de puntos de intercambio
-    });
+                  // Sumar puntos de intercambio
+                  Rewards.currentPoints += 200; // Cambia 200 al valor real
+                });
+                Navigator.of(context).pop(); // Cierra el diálogo
+
+                // Navegar a la pantalla de confirmación
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => ConfirmationScreen(
+                      title: 'Intercambio Confirmado',
+                      description: 'El intercambio se ha completado con éxito.',
+                      image:
+                          'assets/images/Help_lightTheme.png', // Asegúrate de tener esta imagen
+                    ),
+                  ),
+                );
+              },
+              child: const Text('Confirmar'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _cancelChanges() {
