@@ -5,6 +5,7 @@ import 'package:pin/features/exchanges/models/Product.dart';
 import '../home/components/user_header.dart';
 import 'components/item_grid.dart';
 import 'package:pin/features/profile/presentation/screens/profile_screen.dart';
+import 'package:pin/features/rewards/rewards.dart'; // Asegúrate de importar Rewards
 
 class Exchanges extends StatefulWidget {
   final Product? selectedProduct;
@@ -55,6 +56,11 @@ class ExchangesState extends State<Exchanges> {
       products.addAll(modifiedItems);
       hasChanges = false;
       hasResponded = false;
+
+      // Aquí se suman los puntos de intercambio a los actuales de rewards
+      // Suponiendo que tienes una variable para los puntos actuales en Rewards
+      Rewards.currentPoints +=
+          200; // Cambia 200 al valor real de puntos de intercambio
     });
   }
 
@@ -89,14 +95,14 @@ class ExchangesState extends State<Exchanges> {
               children: [
                 SvgPicture.asset(
                   'assets/icons/points.svg',
-                  height: iconSize, // Tamaño responsivo del icono SVG
+                  height: iconSize,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   "200 pts",
                   style: TextStyle(
                     color: Colors.black,
-                    fontSize: fontSize, // Tamaño responsivo del texto
+                    fontSize: fontSize,
                   ),
                 ),
               ],
@@ -113,14 +119,14 @@ class ExchangesState extends State<Exchanges> {
               children: [
                 SvgPicture.asset(
                   'assets/icons/tickets.svg',
-                  height: iconSize, // Tamaño responsivo del icono SVG
+                  height: iconSize,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   "2 tickets",
                   style: TextStyle(
                     color: Colors.black,
-                    fontSize: fontSize, // Tamaño responsivo del texto
+                    fontSize: fontSize,
                   ),
                 ),
               ],
@@ -133,12 +139,12 @@ class ExchangesState extends State<Exchanges> {
             },
           ),
           Padding(
-            padding: const EdgeInsets.only(right: 10.0), // Margen derecho de 10
+            padding: const EdgeInsets.only(right: 10.0),
             child: IconButton(
               icon: Icon(
                 Icons.help_outline,
                 color: Color.fromRGBO(112, 105, 128, 1),
-                size: iconSize, // Tamaño responsivo del icono de ayuda
+                size: iconSize,
               ),
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -146,7 +152,7 @@ class ExchangesState extends State<Exchanges> {
                     content: Text(
                       "Estos son los puntos y tickets que vas a ganar por el intercambio! Luego puedes canjearlos por premios en la tienda de regalos de tu perfil",
                     ),
-                    duration: Duration(seconds: 3), // Duración del Snackbar
+                    duration: Duration(seconds: 3),
                   ),
                 );
               },
@@ -158,7 +164,6 @@ class ExchangesState extends State<Exchanges> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            // UserHeader para mí
             const UserHeader(
               nombreUsuario: "Nicolas Maduro",
               fotoUrl: "assets/images/user_2.png",

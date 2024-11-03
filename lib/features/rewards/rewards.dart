@@ -6,6 +6,8 @@ import 'package:pin/features/rewards/models/product_model.dart';
 import 'package:pin/features/rewards/constants.dart';
 
 class Rewards extends StatelessWidget {
+  static int currentPoints = 1200; // Puntos actuales iniciales
+
   const Rewards({super.key});
 
   @override
@@ -30,7 +32,7 @@ class Rewards extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  "1200 pts",
+                  "$currentPoints pts", // Mostrar puntos actuales
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: fontSize,
