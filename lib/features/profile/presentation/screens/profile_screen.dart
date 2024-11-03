@@ -1,11 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:pin/features/profile/presentation/widgets/post_grid.dart';
 import 'package:pin/features/profile/presentation/widgets/profile_header.dart';
+import 'package:pin/features/rewards/rewards.dart';
 import 'settings_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:pin/features/auth/data/models/user_model.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);
@@ -35,7 +38,8 @@ class _ProfileState extends State<Profile> {
         if (mounted) {
           setState(() {
             _userModel = UserModel.fromJson(userModelMap);
-            _isLoading = false; // Set loading to false after userModel is loaded
+            _isLoading =
+                false; // Set loading to false after userModel is loaded
           });
         }
       } else {
@@ -59,6 +63,8 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
+    double iconSize = kIsWeb ? 35 : 26; // Tamaño para íconos en web o móvil
+    double fontSize = kIsWeb ? 20 : 15; // Tamaño para texto en web o móvil
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -74,6 +80,30 @@ class _ProfileState extends State<Profile> {
         ),
         actions: [
           IconButton(
+            icon: Row(
+              children: [
+                SvgPicture.asset(
+                  'assets/icons/prize.svg',
+                  height: iconSize, // Tamaño responsivo del icono SVG
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  "Recompensas",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: fontSize, // Tamaño responsivo del texto
+                  ),
+                ),
+              ],
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const Rewards()),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Iconsax.setting_2, color: Colors.black),
             onPressed: () {
               // Navigate to the settings screen
@@ -88,15 +118,19 @@ class _ProfileState extends State<Profile> {
       body: _isLoading // Use loading state for UI
           ? Center(child: CircularProgressIndicator())
           : _userModel == null
-          ? Center(child: Text('No user data available'))
-          : Column(
-        crossAxisAlignment: CrossAxisAlignment.start, // Align children to the left
-        children: [
-          ProfileHeader(userModel: _userModel!), // Pass the userModel to the profile header
-          const Divider(),
-          const Expanded(child: PostGrid()), // Use the post grid widget
-        ],
-      ),
+              ? Center(child: Text('No user data available'))
+              : Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start, // Align children to the left
+                  children: [
+                    ProfileHeader(
+                        userModel:
+                            _userModel!), // Pass the userModel to the profile header
+                    const Divider(),
+                    const Expanded(
+                        child: PostGrid()), // Use the post grid widget
+                  ],
+                ),
     );
   }
 }

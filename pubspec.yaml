@@ -51,6 +51,7 @@ dependencies:
   flutter_image_compress: ^2.0.0  # Añade esta línea
   iconsax: ^0.0.8  # O la versión más reciente
   intl: ^0.17.0
+  cached_network_image: ^3.4.1
 
 
 dev_dependencies:

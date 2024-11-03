@@ -1,7 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
 import '../home/components/user_header.dart';
 import 'components/item_grid.dart';
+import 'package:pin/features/profile/presentation/screens/profile_screen.dart';
 
 class Exchanges extends StatefulWidget {
   final Product? selectedProduct;
@@ -69,14 +72,87 @@ class ExchangesState extends State<Exchanges> {
     final double maxWidth = isWeb
         ? 500.0
         : MediaQuery.of(context).size.width * 0.7; // 70% del ancho en móvil
+    double iconSize = kIsWeb ? 35 : 26; // Tamaño para íconos en web o móvil
+    double fontSize = kIsWeb ? 20 : 15; // Tamaño para texto en web o móvil
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            icon: Row(
+              children: [
+                SvgPicture.asset(
+                  'assets/icons/points.svg',
+                  height: iconSize, // Tamaño responsivo del icono SVG
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  "200 pts",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: fontSize, // Tamaño responsivo del texto
+                  ),
+                ),
+              ],
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const Profile()),
+              );
+            },
+          ),
+          IconButton(
+            icon: Row(
+              children: [
+                SvgPicture.asset(
+                  'assets/icons/tickets.svg',
+                  height: iconSize, // Tamaño responsivo del icono SVG
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  "2 tickets",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: fontSize, // Tamaño responsivo del texto
+                  ),
+                ),
+              ],
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const Profile()),
+              );
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 10.0), // Margen derecho de 10
+            child: IconButton(
+              icon: Icon(
+                Icons.help_outline,
+                color: Color.fromRGBO(112, 105, 128, 1),
+                size: iconSize, // Tamaño responsivo del icono de ayuda
+              ),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      "Estos son los puntos y tickets que vas a ganar por el intercambio! Luego puedes canjearlos por premios en la tienda de regalos de tu perfil",
+                    ),
+                    duration: Duration(seconds: 3), // Duración del Snackbar
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
