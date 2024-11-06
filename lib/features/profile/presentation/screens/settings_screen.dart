@@ -28,7 +28,10 @@ class SettingsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildSettingsItem(Iconsax.user_edit, 'Change Username', () {}),
+          _buildSettingsItem(Iconsax.user_edit, 'Change Name', () {}),
+          _buildSettingsItem(Iconsax.size, 'Change Preferred Sizes', () {}),
+          _buildSettingsItem(Iconsax.calendar, 'Change Birthday', () {}),
+          _buildSettingsItem(Iconsax.map, 'Change Address', () {}),
           _buildSettingsItem(Iconsax.lock, 'Change Password', () {}),
           _buildSettingsItem(Iconsax.message, 'Change Email', () {}),
           _buildSettingsItem(Iconsax.logout, 'Logout', () async {
@@ -39,6 +42,7 @@ class SettingsScreen extends StatelessWidget {
             navigationController.updateIndex(4);
             Get.off(() => NavigationMenu());
           }),
+          _buildSettingsItem(Iconsax.profile_delete, 'Delete account', () {}),
         ],
       ),
     );
