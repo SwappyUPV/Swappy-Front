@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pin/features/auth/data/models/user_model.dart';
 import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart';
 import 'package:pin/features/chat/presentation/screens/messages/model/ChatMessageModel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -174,6 +175,46 @@ class ChatService {
           timestamp: timestamp != null ? timestamp.toDate() : DateTime.now(),
         );
       }).toList();
+    });
+  }
+
+  /// Check if a chat already exists between the authenticated user and the specified user ID.
+  Future<bool> doesChatExist(String otherUserId) async {
+    final String? userId = await getUserId();
+    if (userId == null) return false;
+
+    final querySnapshot = await _firestore
+        .collection('chats')
+        .where('users', arrayContains: userId)
+        .get();
+
+    // Check if any of the chats already include the other user
+    return querySnapshot.docs.any((doc) {
+      List<String> users = List<String>.from(doc['users']);
+      return users.contains(otherUserId);
+    });
+  }
+
+  /// Fetch users from the `users` collection by name.
+  Stream<List<UserModel>> searchUsersByName(String name) {
+    return _firestore
+        .collection('users')
+        .where('name', isGreaterThanOrEqualTo: name)
+        .where('name', isLessThanOrEqualTo: name + '\uf8ff')
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+      return UserModel.fromFirestore(doc);
+    }).toList());
+  }
+
+  Future<void> startNewChat(String otherUserId) async {
+    final String? currentUserId = await getUserId();
+    if (currentUserId == null) return;
+
+    await _firestore.collection('chats').add({
+      'users': [currentUserId, otherUserId],
+      'createdAt': FieldValue.serverTimestamp(),
+      'lastMessage': "", // Or set an initial message if needed
     });
   }
 

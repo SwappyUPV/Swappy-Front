@@ -54,4 +54,19 @@ class UserModel {
       'birthday': birthday.millisecondsSinceEpoch, // Convert Timestamp to int
     };
   }
+
+  // New method to create UserModel from Firestore DocumentSnapshot
+  factory UserModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return UserModel(
+      uid: doc.id, // Use the document ID as the UID
+      name: data['name'] as String,
+      email: data['email'] as String,
+      profilePicture: data['profilePicture'] as String?,
+      address: data['address'] as String,
+      preferredSizes: List<String>.from(data['preferredSizes'] ?? []),
+      gender: data['gender'] as String,
+      birthday: data['birthday'] as Timestamp,
+    );
+  }
 }

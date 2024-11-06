@@ -27,7 +27,7 @@ class NavigationMenu extends StatelessWidget {
           case 2:
             return const AddProduct();
           case 3:
-            return const ChatsScreen();
+            return ChatsScreen();
           case 4:
             return authController.isLoggedIn.value
                 ? const Profile()
