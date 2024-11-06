@@ -211,12 +211,56 @@ class ChatService {
     final String? currentUserId = await getUserId();
     if (currentUserId == null) return;
 
-    await _firestore.collection('chats').add({
+    // Retrieve current user's data
+    final currentUser = await fetchUserById(currentUserId);
+    final otherUser = await fetchUserById(otherUserId);
+
+    if (currentUser == null || otherUser == null) return;
+
+    // Create a new chat document
+    final chatDocRef = await _firestore.collection('chats').add({
+      'user1': currentUserId,
+      'user2': otherUserId,
+      'name1': currentUser.name,
+      'name2': otherUser.name,
+      'image1': currentUser.profilePicture ?? "assets/images/default_user.png",
+      'image2': otherUser.profilePicture ?? "assets/images/default_user.png",
+      'isActive': false,
+      'isRecent': true,
+      'timestamp': FieldValue.serverTimestamp(),
       'users': [currentUserId, otherUserId],
-      'createdAt': FieldValue.serverTimestamp(),
-      'lastMessage': "", // Or set an initial message if needed
+    });
+
+    // Create the messages sub-collection within the newly created chat
+    await chatDocRef.collection('messages').add({
+      'content': 'Hola', // Initial message content
+      'sender': currentUserId, // Assuming the current user is the sender
+      'status': 'viewed', // Set initial status
+      'timestamp': FieldValue.serverTimestamp(),
+      'type': 'text', // Message type, assuming it's a text message
     });
   }
+
+
+  // Fetch a user by their ID
+  Future<UserModel?> fetchUserById(String userId) async {
+    try {
+      // Get the user document from the 'users' collection
+      DocumentSnapshot snapshot = await _firestore.collection('users').doc(userId).get();
+
+      if (snapshot.exists) {
+        // Convert the document data into a UserModel
+        return UserModel.fromJson(snapshot.data() as Map<String, dynamic>);
+      } else {
+        print("User not found");
+        return null;
+      }
+    } catch (e) {
+      print("Error fetching user: $e");
+      return null;
+    }
+  }
+
 
   // Helper to map Firestore document to ChatMessageModel
   ChatMessageModel _mapToChatMessageModel(DocumentSnapshot doc) {

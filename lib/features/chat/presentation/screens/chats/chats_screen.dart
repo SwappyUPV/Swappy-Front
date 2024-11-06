@@ -149,6 +149,7 @@ class ChatsScreenState extends State<ChatsScreen> with SingleTickerProviderState
                       final user = users[index];
                       return ListTile(
                         title: Text(user.name),
+                        subtitle: Text(user.email),
                         onTap: () async {
                           final chatExists = await ChatService().doesChatExist(user.uid);
                           if (!chatExists) {
