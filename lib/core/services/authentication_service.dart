@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:pin/features/auth/data/models/user_model.dart'; // Ensure your UserModel is defined correctly
 import 'dart:convert';
 
 class AuthMethod {
@@ -56,23 +55,28 @@ class AuthMethod {
   }
 
   // SignUp User
-  Future<String> signupUser({required String email, required String password}) async {
+  Future<String> signupUser({
+    required String email,
+    required String password,
+    required Map<String, dynamic> additionalData,
+  }) async {
     String res = "Some error occurred";
     try {
       if (email.isNotEmpty && password.isNotEmpty) {
-        // Register user in auth with email and password
         UserCredential cred = await _auth.createUserWithEmailAndPassword(
           email: email,
           password: password,
         );
 
-        // Add user to Firestore database
         await _firestore.collection("users").doc(cred.user!.uid).set({
           'uid': cred.user!.uid,
           'email': email,
+          ...additionalData,
+          'birthday': additionalData['birthday'] != null
+              ? Timestamp.fromDate(additionalData['birthday'])
+              : null,
         });
         res = "success";
-        print(res);
       } else {
         res = "Please fill in all fields";
       }
