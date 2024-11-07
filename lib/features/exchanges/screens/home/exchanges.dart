@@ -3,20 +3,24 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:pin/features/chat/presentation/screens/chats/chats_screen.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
 import 'package:pin/features/exchanges/screens/details/components/confirmation.dart';
 import '../home/components/user_header.dart';
+import 'package:pin/core/services/exchange_service.dart';
 import 'components/item_grid.dart';
 import 'package:pin/features/profile/presentation/screens/profile_screen.dart';
 import 'package:pin/features/rewards/rewards.dart'; // Asegúrate de importar Rewards
 
 class Exchanges extends StatefulWidget {
   final Product? selectedProduct;
+  final String? userId;
+  final String? chatId;
 
   const Exchanges({
     super.key,
     this.selectedProduct,
+    this.userId,
+    this.chatId,
   });
 
   @override
@@ -27,6 +31,22 @@ class ExchangesState extends State<Exchanges> {
   bool hasResponded = false;
   bool hasChanges = false;
   List<Product> modifiedItems = List.from(products);
+  final ExchangeService _exchangeService = ExchangeService();
+
+  Future<void> _createExchange(userId, chatId) async {
+    String receiverId = userId;
+    String exchangeId = await _exchangeService.createExchange(
+      senderId: userId!,
+      receiverId: receiverId,
+      itemsOffered: [], // Pueden estar vacíos por ahora
+      itemsRequested: [],
+    );
+
+    await _exchangeService.notifyNewExchange(userId);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Intercambio creado con éxito")),
+    );
+  }
 
   void _addItem() {
     setState(() {
@@ -54,7 +74,7 @@ class ExchangesState extends State<Exchanges> {
     });
   }
 
-  void _confirmChanges() {
+  void _confirmChanges() async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -69,8 +89,8 @@ class ExchangesState extends State<Exchanges> {
               child: const Text('Cancelar'),
             ),
             TextButton(
-              onPressed: () {
-                // Confirmar cambios y cerrar el diálogo
+              onPressed: () async {
+                await _createExchange(widget.userId!, widget.chatId!);
                 setState(() {
                   products.clear();
                   products.addAll(modifiedItems);
@@ -78,18 +98,16 @@ class ExchangesState extends State<Exchanges> {
                   hasResponded = false;
 
                   // Sumar puntos de intercambio
-                  Rewards.currentPoints += 200; // Cambia 200 al valor real
+                  Rewards.currentPoints += 200;
                 });
-                Navigator.of(context).pop(); // Cierra el diálogo
+                Navigator.of(context).pop();
 
-                // Navegar a la pantalla de confirmación
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => ConfirmationScreen(
+                    builder: (context) => const ConfirmationScreen(
                       title: 'Intercambio Confirmado',
                       description: 'El intercambio se ha completado con éxito.',
-                      image:
-                          'assets/images/Help_lightTheme.png', // Asegúrate de tener esta imagen
+                      image: 'assets/images/Help_lightTheme.png',
                     ),
                   ),
                 );

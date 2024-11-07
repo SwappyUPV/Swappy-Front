@@ -70,14 +70,16 @@ class MessagesScreenState extends State<MessagesScreen> {
               CircleAvatar(
                 backgroundImage: _avatar != null
                     ? AssetImage(_avatar!)
-                    : AssetImage('assets/images/user.png'), // Fallback to default
+                    : AssetImage(
+                        'assets/images/user.png'), // Fallback to default
               ),
               const SizedBox(width: kDefaultPadding * 0.75),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _name ?? 'Unknown', // Fallback to 'Unknown' if _name is null
+                    _name ??
+                        'Unknown', // Fallback to 'Unknown' if _name is null
                     style: const TextStyle(fontSize: 16),
                   ),
                   Text(
@@ -101,6 +103,8 @@ class MessagesScreenState extends State<MessagesScreen> {
               MaterialPageRoute(
                 builder: (context) => Exchanges(
                   selectedProduct: null,
+                  userId: widget.chat.user1,
+                  chatId: widget.chat.uid,
                 ),
               ),
             );

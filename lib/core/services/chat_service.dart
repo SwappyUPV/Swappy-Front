@@ -31,9 +31,8 @@ class ChatService {
     }
 
     // Create the base query with `array-contains`
-    Query<Map<String, dynamic>> query = _firestore
-        .collection('chats')
-        .where('users', arrayContains: userId);
+    Query<Map<String, dynamic>> query =
+        _firestore.collection('chats').where('users', arrayContains: userId);
 
     // Apply additional filters if specified
     if (showActive == true) {
@@ -66,12 +65,14 @@ class ChatService {
         .orderBy('timestamp', descending: true)
         .limit(1)
         .snapshots()
-        .map((snapshot) =>
-    snapshot.docs.isNotEmpty ? _mapToChatMessageModel(snapshot.docs.first) : null);
+        .map((snapshot) => snapshot.docs.isNotEmpty
+            ? _mapToChatMessageModel(snapshot.docs.first)
+            : null);
   }
 
   // Optimized method to send a message without fetching user ID each time
-  Future<void> sendMessage(String chatId, String messageText, String userId) async {
+  Future<void> sendMessage(
+      String chatId, String messageText, String userId) async {
     if (userId.isEmpty) {
       print("Attempting to send message with empty userId");
       return; // Exit if userId is empty
@@ -111,17 +112,17 @@ class ChatService {
         .limit(1)
         .get();
 
-    return snapshot.docs.isNotEmpty ? _mapToChatMessageModel(snapshot.docs.first) : null;
+    return snapshot.docs.isNotEmpty
+        ? _mapToChatMessageModel(snapshot.docs.first)
+        : null;
   }
+
   Future<Chat?> getChatById(String chatId) async {
     final String? userId = await getUserId();
     if (userId == null) return null;
 
     // Directly access the specific document instead of using a query
-    final chatDoc = await _firestore
-        .collection('chats')
-        .doc(chatId)
-        .get();
+    final chatDoc = await _firestore.collection('chats').doc(chatId).get();
 
     if (chatDoc.exists) {
       final chatData = chatDoc.data()!;
@@ -153,7 +154,6 @@ class ChatService {
         .orderBy('timestamp') // Ensure ascending order to retrieve oldest first
         .snapshots()
         .map((snapshot) {
-
       // Return an empty list if there are no messages
       if (snapshot.docs.isEmpty) {
         print("No messages found.");
@@ -203,8 +203,8 @@ class ChatService {
         .where('name', isLessThanOrEqualTo: name + '\uf8ff')
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) {
-      return UserModel.fromFirestore(doc);
-    }).toList());
+              return UserModel.fromFirestore(doc);
+            }).toList());
   }
 
   Future<void> startNewChat(String otherUserId) async {
@@ -241,12 +241,12 @@ class ChatService {
     });
   }
 
-
   // Fetch a user by their ID
   Future<UserModel?> fetchUserById(String userId) async {
     try {
       // Get the user document from the 'users' collection
-      DocumentSnapshot snapshot = await _firestore.collection('users').doc(userId).get();
+      DocumentSnapshot snapshot =
+          await _firestore.collection('users').doc(userId).get();
 
       if (snapshot.exists) {
         // Convert the document data into a UserModel
@@ -260,7 +260,6 @@ class ChatService {
       return null;
     }
   }
-
 
   // Helper to map Firestore document to ChatMessageModel
   ChatMessageModel _mapToChatMessageModel(DocumentSnapshot doc) {
@@ -296,6 +295,8 @@ class ChatService {
         return ChatMessageType.image;
       case 'video':
         return ChatMessageType.video;
+      case 'exchangeNotification':
+        return ChatMessageType.notification;
       default:
         throw Exception('Unknown message type: $type');
     }

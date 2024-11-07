@@ -1,4 +1,4 @@
-enum ChatMessageType { text, image, audio, video }
+enum ChatMessageType { text, image, audio, video, notification }
 
 enum MessageStatus { notSent, notViewed, viewed }
 
