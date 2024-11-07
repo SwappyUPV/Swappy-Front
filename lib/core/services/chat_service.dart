@@ -296,7 +296,7 @@ class ChatService {
       case 'video':
         return ChatMessageType.video;
       case 'exchangeNotification':
-        return ChatMessageType.notification;
+        return ChatMessageType.exchangeNotification;
       default:
         throw Exception('Unknown message type: $type');
     }

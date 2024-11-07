@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pin/core/services/chat_service.dart';
 import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart';
+import 'package:pin/features/exchanges/models/Exchange.dart';
 
 class ExchangeService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -29,6 +30,24 @@ class ExchangeService {
     } catch (e) {
       print('Error al crear el intercambio: $e');
       return "Error al crear el intercambio";
+    }
+  }
+
+  Future<Exchange?> getExchangeById(String exchangeId) async {
+    try {
+      DocumentSnapshot docSnapshot =
+          await _firestore.collection('exchanges').doc(exchangeId).get();
+
+      if (docSnapshot.exists) {
+        return Exchange.fromFirestore(
+            docSnapshot); // Retorna el objeto Exchange
+      } else {
+        print('El intercambio con el ID $exchangeId no existe');
+        return null;
+      }
+    } catch (e) {
+      print('Error al obtener el intercambio con ID $exchangeId: $e');
+      rethrow;
     }
   }
 
@@ -82,7 +101,7 @@ class ExchangeService {
         'sender': senderId,
         'status': 'viewed', // Estado del mensaje
         'timestamp': FieldValue.serverTimestamp(),
-        'type': 'text',
+        'type': 'exchangeNotification',
       });
     } catch (e) {
       print('Error al enviar la notificación de intercambio: $e');

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pin/features/chat/presentation/components/exchange_notification.dart';
 import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart';
 import 'package:pin/core/services/chat_service.dart';
 import 'package:intl/intl.dart'; // For date formatting
@@ -85,7 +86,7 @@ class _ChatCardState extends State<ChatCard> {
             Expanded(
               child: Padding(
                 padding:
-                const EdgeInsets.symmetric(horizontal: kDefaultPadding),
+                    const EdgeInsets.symmetric(horizontal: kDefaultPadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -116,7 +117,8 @@ class _ChatCardState extends State<ChatCard> {
     return InkWell(
       onTap: () async {
         await Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => MessagesScreen(chat: widget.chat), // Pass the entire Chat object
+          builder: (context) =>
+              MessagesScreen(chat: widget.chat), // Pass the entire Chat object
         ));
         _fetchLatestMessage(); // Refresh when returning
       },
@@ -152,7 +154,7 @@ class _ChatCardState extends State<ChatCard> {
             Expanded(
               child: Padding(
                 padding:
-                const EdgeInsets.symmetric(horizontal: kDefaultPadding),
+                    const EdgeInsets.symmetric(horizontal: kDefaultPadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -164,11 +166,14 @@ class _ChatCardState extends State<ChatCard> {
                     const SizedBox(height: 8),
                     Opacity(
                       opacity: 0.64,
-                      child: Text(
-                        latestMessage?.content ?? "No messages",
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      child: latestMessage?.type ==
+                              ChatMessageType.exchangeNotification
+                          ? ExchangeNotification(exchange: latestMessage)
+                          : Text(
+                              latestMessage?.content ?? "No messages",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                     ),
                   ],
                 ),

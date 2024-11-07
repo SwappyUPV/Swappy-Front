@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pin/core/services/chat_service.dart';
+import 'package:pin/features/exchanges/models/Exchange.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
 import 'package:pin/features/exchanges/screens/details/components/confirmation.dart';
 import '../home/components/user_header.dart';
@@ -13,14 +15,14 @@ import 'package:pin/features/rewards/rewards.dart'; // Asegúrate de importar Re
 
 class Exchanges extends StatefulWidget {
   final Product? selectedProduct;
-  final String? userId;
-  final String? chatId;
+  final String? exchangeId;
+  final String? receiverId;
 
   const Exchanges({
     super.key,
     this.selectedProduct,
-    this.userId,
-    this.chatId,
+    this.exchangeId,
+    this.receiverId,
   });
 
   @override
@@ -32,20 +34,58 @@ class ExchangesState extends State<Exchanges> {
   bool hasChanges = false;
   List<Product> modifiedItems = List.from(products);
   final ExchangeService _exchangeService = ExchangeService();
+  final ChatService _chatService = ChatService();
 
-  Future<void> _createExchange(userId, chatId) async {
-    String receiverId = userId;
-    String exchangeId = await _exchangeService.createExchange(
-      senderId: userId!,
-      receiverId: receiverId,
-      itemsOffered: [], // Pueden estar vacíos por ahora
-      itemsRequested: [],
-    );
+  Future<void> _createExchange() async {
+    // Esperamos obtener el userId si es necesario
+    String? senderId = await _chatService.getUserId(); // Aquí utilizamos await
 
-    await _exchangeService.notifyNewExchange(userId);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Intercambio creado con éxito")),
-    );
+    // Crea un nuevo intercambio si no existe exchangeId
+    if (widget.exchangeId == null || widget.exchangeId!.isEmpty) {
+      final newExchange = await _exchangeService.createExchange(
+        senderId: senderId!, // Usamos el ID del usuario actual
+        receiverId:
+            widget.receiverId ?? '', // Usamos el ID del receptor de la clase
+        itemsOffered: [], // Se puede llenar con los productos ofrecidos
+        itemsRequested: [], // Se puede llenar con los productos solicitados
+      );
+
+      // Si el intercambio se crea correctamente, mostrar mensaje y continuar con la lógica
+      if (newExchange != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Intercambio creado con éxito")),
+        );
+        setState(() {
+          // Actualizar el estado según sea necesario
+        });
+
+        // Notificar al receptor sobre el nuevo intercambio
+        if (widget.receiverId != null) {
+          await _exchangeService.notifyNewExchange(widget.receiverId!);
+        }
+      }
+    } else {
+      // Si el exchangeId existe, obtener el intercambio correspondiente
+      _exchangeService
+          .getExchangeById(widget.exchangeId!)
+          .then((dataExchange) async {
+        if (dataExchange != null) {
+          // Usar los datos del intercambio si ya existe
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Intercambio obtenido con éxito")),
+          );
+          setState(() {
+            // Actualizar el estado con los datos del intercambio
+            // Aquí puedes actualizar los productos, etc.
+          });
+
+          // Notificar al receptor sobre el intercambio existente
+          if (dataExchange.receiverId != null) {
+            await _exchangeService.notifyNewExchange(dataExchange.receiverId);
+          }
+        }
+      });
+    }
   }
 
   void _addItem() {
@@ -90,7 +130,7 @@ class ExchangesState extends State<Exchanges> {
             ),
             TextButton(
               onPressed: () async {
-                await _createExchange(widget.userId!, widget.chatId!);
+                await _createExchange(); // Pasar la instancia de Exchange
                 setState(() {
                   products.clear();
                   products.addAll(modifiedItems);

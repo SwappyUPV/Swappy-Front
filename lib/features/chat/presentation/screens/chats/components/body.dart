@@ -73,7 +73,9 @@ class _BodyState extends State<Body> {
               }
 
               final filteredChats = snapshot.data!
-                  .where((chat) => chat.name1.toLowerCase().contains(widget.searchQuery.toLowerCase()))
+                  .where((chat) => chat.name1
+                      .toLowerCase()
+                      .contains(widget.searchQuery.toLowerCase()))
                   .toList();
 
               return ListView.builder(
@@ -83,7 +85,8 @@ class _BodyState extends State<Body> {
                   press: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => MessagesScreen(chat: filteredChats[index]),
+                      builder: (context) =>
+                          MessagesScreen(chat: filteredChats[index]),
                     ),
                   ),
                 ),
