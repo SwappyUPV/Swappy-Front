@@ -98,7 +98,7 @@ class MessagesScreenState extends State<MessagesScreen> {
         IconButton(
           icon: const Icon(Icons.swap_horiz),
           onPressed: () {
-            Navigator.pushReplacement(
+            Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => Exchanges(

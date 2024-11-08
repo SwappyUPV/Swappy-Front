@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart';
 import 'package:pin/features/chat/presentation/screens/messages/model/ChatMessageModel.dart';
+import 'package:pin/features/chat/presentation/components/exchange_notification.dart';
 import 'package:pin/core/services/chat_service.dart';
 import '../../../../constants.dart';
 import 'chat_input_field.dart';
@@ -9,7 +10,7 @@ import 'message.dart';
 
 class Body extends StatefulWidget {
   final Chat chat;
-  final String? userId;
+  final String? userId; // userId passed as parameter
 
   const Body({super.key, required this.chat, required this.userId});
 
@@ -44,9 +45,17 @@ class BodyState extends State<Body> {
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final message = messages[index];
+                    if (message.type == ChatMessageType.exchangeNotification) {
+                      return ExchangeNotification(
+                        exchange: message,
+                        receiver: widget.userId == widget.chat.user1
+                            ? widget.chat.user2
+                            : widget.chat.user1,
+                      );
+                    }
                     return Messages(
                       message: message,
-                      userId: widget.userId,  // Use widget.userId here
+                      userId: widget.userId, // Use widget.userId directly
                       user1: widget.chat.user1,
                       user2: widget.chat.user2,
                       userImage1: widget.chat.image1,
@@ -60,10 +69,13 @@ class BodyState extends State<Body> {
         ),
         ChatInputField(
           onMessageSent: (String messageText) async {
-            if (messageText.isNotEmpty && widget.userId != null) {  // Use widget.userId here
-              await _chatService.sendMessage(widget.chat.uid, messageText, widget.userId!);
+            if (messageText.isNotEmpty && widget.userId != null) {
+              // Use widget.userId here
+              await _chatService.sendMessage(
+                  widget.chat.uid, messageText, widget.userId!);
             } else {
-              print("Message not sent: messageText is empty or userId is null.");
+              print(
+                  "Message not sent: messageText is empty or userId is null.");
             }
           },
         ),

@@ -26,18 +26,22 @@ class _ChatCardState extends State<ChatCard> {
   ChatMessageModel? latestMessage;
   String _displayName = "";
   String _profileImage = ""; // Initially empty
+  String? userId;
 
   @override
   void initState() {
     super.initState();
+    _initializeUserId(); // Initialize userId
     _fetchLatestMessage();
+  }
+
+  Future<void> _initializeUserId() async {
+    // Fetch and store userId once
+    userId = await chatService.getUserId();
   }
 
   Future<void> _fetchLatestMessage() async {
     final message = await chatService.getLatestMessage(widget.chat.uid);
-
-    // Fetch current user ID
-    final userId = await chatService.getUserId();
 
     // Determine the other user in the chat and set the name and image dynamically
     if (userId != null) {
@@ -168,7 +172,13 @@ class _ChatCardState extends State<ChatCard> {
                       opacity: 0.64,
                       child: latestMessage?.type ==
                               ChatMessageType.exchangeNotification
-                          ? ExchangeNotification(exchange: latestMessage)
+                          ? ExchangeNotification(
+                              exchange: latestMessage,
+                              isClickable: false,
+                              receiver: widget.chat.user1 == userId
+                                  ? widget.chat.user2
+                                  : widget.chat.user1,
+                            )
                           : Text(
                               latestMessage?.content ?? "No messages",
                               maxLines: 1,
