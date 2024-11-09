@@ -31,11 +31,18 @@ class ExchangeNotification extends StatelessWidget {
     }
   }
 
-  Future<String> _getUserName(String uid) async {
+  Future<String> _getUserName(String? uid) async {
+    if (uid == null || uid.isEmpty) {
+      return 'Usuario desconocido'; // Devolver un valor por defecto si el UID es nulo o vacío
+    }
+
     final userDoc =
         await FirebaseFirestore.instance.collection('users').doc(uid).get();
-    final userData = UserModel.fromFirestore(userDoc);
-    return userData.name;
+    if (userDoc.exists) {
+      final userData = UserModel.fromFirestore(userDoc);
+      return userData.name;
+    }
+    return 'Usuario desconocido'; // Valor por defecto si no se encuentra el usuario
   }
 
   @override
@@ -44,21 +51,23 @@ class ExchangeNotification extends StatelessWidget {
     final String currentUserUid = _auth.currentUser?.uid ?? '';
 
     return FutureBuilder<String>(
-      future: (exchange != null && exchange!.sender != currentUserUid)
-          ? _getUserName(exchange!.sender)
-          : _getUserName(receiver),
+      future: _getUserName(
+        exchange != null && exchange!.sender != currentUserUid
+            ? exchange!
+                .sender // Si el usuario actual no es el remitente, obtener el nombre del remitente
+            : exchange
+                ?.receiver, // Si es el remitente, obtener el nombre del receptor
+      ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return const Center(
-            child: Text("Error al cargar el nombre del usuario"),
-          );
+              child: Text("Error al cargar el nombre del usuario"));
         }
 
-        final userName = snapshot.data ?? 'Usuario';
+        final userName = snapshot.data ??
+            'Usuario desconocido'; // Usar un valor predeterminado si es null
         final String messageText = exchange != null
             ? (isClickable
                 ? (exchange!.sender == currentUserUid
@@ -102,7 +111,7 @@ class ExchangeNotification extends StatelessWidget {
                         messageText,
                         style: const TextStyle(color: Colors.blueAccent),
                         overflow: TextOverflow.ellipsis,
-                        maxLines: 2, // Ensure text does not overflow
+                        maxLines: 2,
                       ),
                       if (exchange != null)
                         Text(

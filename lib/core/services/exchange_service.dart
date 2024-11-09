@@ -33,6 +33,20 @@ class ExchangeService {
     }
   }
 
+  Future<String> cancelExchange(String exchangeId) async {
+    try {
+      await _firestore.collection('exchanges').doc(exchangeId).update({
+        'status': 'cancelado',
+        'lastModified': FieldValue.serverTimestamp(),
+      });
+
+      return "Intercambio cancelado con éxito";
+    } catch (e) {
+      print('Error al cancelar el intercambio: $e');
+      return "Error al cancelar el intercambio";
+    }
+  }
+
   Future<Exchange?> getExchangeById(String exchangeId) async {
     try {
       DocumentSnapshot docSnapshot =

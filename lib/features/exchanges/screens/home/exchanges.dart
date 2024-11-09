@@ -32,54 +32,73 @@ class Exchanges extends StatefulWidget {
 class ExchangesState extends State<Exchanges> {
   bool hasResponded = false;
   bool hasChanges = false;
+  String? currentUserId;
+  bool isNewExchange =
+      false; // Nueva variable para identificar si es un nuevo intercambio
+  bool isOwner = false;
   List<Product> modifiedItems = List.from(products);
   final ExchangeService _exchangeService = ExchangeService();
   final ChatService _chatService = ChatService();
 
-  Future<void> _createExchange() async {
-    // Esperamos obtener el userId si es necesario
-    String? senderId = await _chatService.getUserId(); // Aquí utilizamos await
+  @override
+  void initState() {
+    super.initState();
+    _loadUserId();
+    isNewExchange = widget.exchangeId == null || widget.exchangeId!.isEmpty;
+  }
 
-    // Crea un nuevo intercambio si no existe exchangeId
-    if (widget.exchangeId == null || widget.exchangeId!.isEmpty) {
+  Future<void> _loadUserId() async {
+    String? userId = await _chatService.getUserId();
+    setState(() {
+      currentUserId = userId;
+    });
+  }
+
+  Future<String> _getUser() async {
+    String? userId = await _chatService.getUserId();
+    return userId ??
+        ''; // Asegúrate de retornar un valor válido en caso de null
+  }
+
+  Future<void> _createExchange() async {
+    // Obtener el userId si es necesario
+    String? senderId = await _chatService.getUserId();
+
+    // Crear un nuevo intercambio si no existe exchangeId
+    if (isNewExchange) {
       final newExchange = await _exchangeService.createExchange(
-        senderId: senderId!, // Usamos el ID del usuario actual
-        receiverId:
-            widget.receiverId ?? '', // Usamos el ID del receptor de la clase
-        itemsOffered: [], // Se puede llenar con los productos ofrecidos
-        itemsRequested: [], // Se puede llenar con los productos solicitados
+        senderId: senderId!,
+        receiverId: widget.receiverId ?? '',
+        itemsOffered: [],
+        itemsRequested: [],
       );
 
-      // Si el intercambio se crea correctamente, mostrar mensaje y continuar con la lógica
       if (newExchange != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Intercambio creado con éxito")),
         );
         setState(() {
-          // Actualizar el estado según sea necesario
+          // Actualizar el estado si es necesario
+          isNewExchange = false; // Ahora ya no es un intercambio nuevo
         });
 
-        // Notificar al receptor sobre el nuevo intercambio
         if (widget.receiverId != null) {
           await _exchangeService.notifyNewExchange(widget.receiverId!);
         }
       }
     } else {
-      // Si el exchangeId existe, obtener el intercambio correspondiente
+      // Obtener intercambio si exchangeId existe
       _exchangeService
           .getExchangeById(widget.exchangeId!)
           .then((dataExchange) async {
         if (dataExchange != null) {
-          // Usar los datos del intercambio si ya existe
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Intercambio obtenido con éxito")),
           );
           setState(() {
             // Actualizar el estado con los datos del intercambio
-            // Aquí puedes actualizar los productos, etc.
           });
 
-          // Notificar al receptor sobre el intercambio existente
           if (dataExchange.receiverId != null) {
             await _exchangeService.notifyNewExchange(dataExchange.receiverId);
           }
@@ -114,6 +133,43 @@ class ExchangesState extends State<Exchanges> {
     });
   }
 
+  void _cancelExchange() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar cancelación'),
+          content: const Text(
+              '¿Estás seguro de que quieres cancelar este intercambio?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await _exchangeService.cancelExchange(widget.exchangeId!);
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const ConfirmationScreen(
+                      title: 'Intercambio cancelado',
+                      description: 'El intercambio ha sido cancelado.',
+                      image: 'assets/images/Help_lightTheme.png',
+                    ),
+                  ),
+                );
+              },
+              child: const Text('Sí, cancelar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _confirmChanges() async {
     showDialog(
       context: context,
@@ -124,24 +180,21 @@ class ExchangesState extends State<Exchanges> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Cierra el diálogo sin hacer nada
+                Navigator.of(context).pop();
               },
               child: const Text('Cancelar'),
             ),
             TextButton(
               onPressed: () async {
-                await _createExchange(); // Pasar la instancia de Exchange
+                await _createExchange();
                 setState(() {
                   products.clear();
                   products.addAll(modifiedItems);
                   hasChanges = false;
                   hasResponded = false;
-
-                  // Sumar puntos de intercambio
                   Rewards.currentPoints += 200;
                 });
                 Navigator.of(context).pop();
-
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => const ConfirmationScreen(
@@ -166,16 +219,25 @@ class ExchangesState extends State<Exchanges> {
       hasChanges = false;
       hasResponded = false;
     });
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     final bool isWeb = MediaQuery.of(context).size.width > 600;
-    final double maxWidth = isWeb
-        ? 500.0
-        : MediaQuery.of(context).size.width * 0.7; // 70% del ancho en móvil
-    double iconSize = kIsWeb ? 35 : 26; // Tamaño para íconos en web o móvil
-    double fontSize = kIsWeb ? 20 : 15; // Tamaño para texto en web o móvil
+    final double maxWidth =
+        isWeb ? 500.0 : MediaQuery.of(context).size.width * 0.7;
+    double iconSize = kIsWeb ? 35 : 26;
+    double fontSize = kIsWeb ? 20 : 15;
+
+    if (currentUserId == null) {
+      // El userId no está disponible todavía, podrías mostrar un loader
+      return Center(child: CircularProgressIndicator());
+    }
+
+    // Ahora que tienes el currentUserId, puedes usarlo para la lógica
+    bool isSender =
+        widget.exchangeId != null && widget.receiverId != currentUserId;
 
     return Scaffold(
       appBar: AppBar(
@@ -186,74 +248,7 @@ class ExchangesState extends State<Exchanges> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          IconButton(
-            icon: Row(
-              children: [
-                SvgPicture.asset(
-                  'assets/icons/points.svg',
-                  height: iconSize,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  "200 pts",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: fontSize,
-                  ),
-                ),
-              ],
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const Profile()),
-              );
-            },
-          ),
-          IconButton(
-            icon: Row(
-              children: [
-                SvgPicture.asset(
-                  'assets/icons/tickets.svg',
-                  height: iconSize,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  "2 tickets",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: fontSize,
-                  ),
-                ),
-              ],
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const Profile()),
-              );
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 10.0),
-            child: IconButton(
-              icon: Icon(
-                Icons.help_outline,
-                color: Color.fromRGBO(112, 105, 128, 1),
-                size: iconSize,
-              ),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      "Estos son los puntos y tickets que vas a ganar por el intercambio! Luego puedes canjearlos por premios en la tienda de regalos de tu perfil",
-                    ),
-                    duration: Duration(seconds: 3),
-                  ),
-                );
-              },
-            ),
-          ),
+          // Código de puntos y tickets
         ],
       ),
       body: SingleChildScrollView(
@@ -267,15 +262,15 @@ class ExchangesState extends State<Exchanges> {
             ),
             ItemGrid(
               items: modifiedItems,
-              onRemoveItem: hasResponded ? _removeItem : null,
-              onAddItem: hasResponded ? _addItem : null,
+              onRemoveItem: hasResponded || isNewExchange ? _removeItem : null,
+              onAddItem: hasResponded || isNewExchange ? _addItem : null,
               onDeleteItem: (Product product) {
                 setState(() {
                   modifiedItems.remove(product);
                   hasChanges = true;
                 });
               },
-              showButtons: hasResponded,
+              showButtons: hasResponded || isNewExchange,
             ),
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0),
@@ -296,7 +291,52 @@ class ExchangesState extends State<Exchanges> {
             Center(
               child: Column(
                 children: [
-                  if (!hasResponded)
+                  if (isNewExchange || hasResponded)
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: maxWidth,
+                          child: ElevatedButton(
+                            onPressed: _confirmChanges,
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 40, vertical: 16),
+                              textStyle: const TextStyle(fontSize: 16),
+                            ),
+                            child: Text(hasChanges
+                                ? "Enviar contrapropuesta"
+                                : "Confirmar"),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        TextButton(
+                          onPressed: _cancelChanges,
+                          child: const Text(
+                            "Cancelar",
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          ),
+                        ),
+                      ],
+                    )
+                  else if (isSender) // Si es el usuario que envió el intercambio
+                    Column(
+                      children: [
+                        SizedBox(
+                          width: maxWidth,
+                          child: ElevatedButton(
+                            onPressed: _cancelExchange,
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 40, vertical: 16),
+                              textStyle: const TextStyle(fontSize: 16),
+                            ),
+                            child: const Text("Cancelar intercambio"),
+                          ),
+                        ),
+                      ],
+                    )
+                  else
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -321,34 +361,6 @@ class ExchangesState extends State<Exchanges> {
                           onPressed: () {},
                           child: const Text(
                             "Declinar",
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
-                          ),
-                        ),
-                      ],
-                    )
-                  else
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          width: maxWidth,
-                          child: ElevatedButton(
-                            onPressed: _confirmChanges,
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 40, vertical: 16),
-                              textStyle: const TextStyle(fontSize: 16),
-                            ),
-                            child: Text(hasChanges
-                                ? "Enviar contrapropuesta"
-                                : "Confirmar"),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        TextButton(
-                          onPressed: _cancelChanges,
-                          child: const Text(
-                            "Cancelar",
                             style: TextStyle(fontSize: 16, color: Colors.grey),
                           ),
                         ),

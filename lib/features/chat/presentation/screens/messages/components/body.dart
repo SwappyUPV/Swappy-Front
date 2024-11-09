@@ -48,7 +48,7 @@ class BodyState extends State<Body> {
                     if (message.type == ChatMessageType.exchangeNotification) {
                       return ExchangeNotification(
                         exchange: message,
-                        receiver: widget.userId == widget.chat.user1
+                        receiver: widget.chat.user1 == widget.userId
                             ? widget.chat.user2
                             : widget.chat.user1,
                       );
