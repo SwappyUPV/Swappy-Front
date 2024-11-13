@@ -6,11 +6,17 @@ import 'components/characteristics.dart';
 import 'components/description.dart';
 import 'components/product_title_with_image.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
+import 'package:pin/features/exchanges/screens/home/exchanges.dart';
 
 class DetailsScreen extends StatelessWidget {
-  const DetailsScreen({super.key, required this.product});
+  const DetailsScreen({
+    super.key,
+    required this.product,
+    this.showActionButtons = false,
+  });
 
   final Product product;
+  final bool showActionButtons;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +29,7 @@ class DetailsScreen extends StatelessWidget {
         leading: IconButton(
           icon: SvgPicture.asset(
             'assets/icons/back.svg',
-            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+            colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -56,7 +62,37 @@ class DetailsScreen extends StatelessWidget {
                         const SizedBox(height: kDefaultPaddin / 2),
                         Description(product: product),
                         const SizedBox(height: kDefaultPaddin / 2),
-                        // Botón de "Más información"
+                        if (showActionButtons) ...[
+                          const SizedBox(height: kDefaultPaddin),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    // Implementar lógica de compra
+                                  },
+                                  child: const Text('COMPRAR'),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => Exchanges(
+                                          selectedProduct: product,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: const Text('SWAP'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                         TextButton(
                           onPressed: () {
                             // Acción a realizar al presionar el botón
@@ -64,15 +100,11 @@ class DetailsScreen extends StatelessWidget {
                           child: const Text(
                             "Más información",
                             style: TextStyle(
-                              color: Colors.grey, // Color gris
-                              fontSize:
-                                  16, // Ajusta el tamaño de la fuente si es necesario
+                              color: Colors.grey,
+                              fontSize: 16,
                             ),
                           ),
                         ),
-                        const SizedBox(
-                            height: kDefaultPaddin /
-                                2), // Espacio adicional si es necesario
                       ],
                     ),
                   ),

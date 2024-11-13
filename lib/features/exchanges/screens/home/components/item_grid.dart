@@ -78,7 +78,10 @@ class ItemGrid extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => DetailsScreen(product: items[index]),
+                    builder: (context) => DetailsScreen(
+                      product: items[index],
+                      showActionButtons: false,
+                    ),
                   ),
                 );
               },
