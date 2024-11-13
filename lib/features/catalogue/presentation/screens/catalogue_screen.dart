@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../../profile/presentation/screens/profile_screen.dart';
-import '../../../auth/presentation/screens/login_screen.dart';
 import '../../../../core/services/catalogue.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../widgets/catalogue_app_bar.dart';
+import '../widgets/search_bar.dart' as CustomWidgets;
+import '../widgets/category_filter.dart';
+import '../widgets/catalogue_grid.dart';
+import 'package:pin/features/exchanges/models/Product.dart';
 
 class Catalogue extends StatefulWidget {
-  const Catalogue({Key? key}) : super(key: key);
+  const Catalogue({super.key});
 
   @override
   _CatalogueState createState() => _CatalogueState();
@@ -14,22 +16,11 @@ class Catalogue extends StatefulWidget {
 class _CatalogueState extends State<Catalogue> {
   String _selectedCategory = 'Todos';
   String _searchQuery = '';
-  List<Map<String, dynamic>> catalogoRopa = [];
+  List<Product> catalogoRopa = [];
+  Set<String> _categories = {'Todos'};
   bool _isLoading = true;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   final CatalogService _catalogService = CatalogService();
-
-  final List<String> categorias = [
-    'Todos',
-    'Camisetas',
-    'Vestidos',
-    'Pantalones',
-    'Zapatos',
-    'Faldas',
-    'Chaquetas',
-    'Accesorios',
-  ];
 
   @override
   void initState() {
@@ -41,21 +32,31 @@ class _CatalogueState extends State<Catalogue> {
     setState(() {
       _isLoading = true;
     });
-    List<Map<String, dynamic>> clothes = await _catalogService.getClothes();
+    List<Product> clothes = await _catalogService.getClothes();
+    Set<String> categories = {'Todos'};
+
+    for (var item in clothes) {
+      categories.add(item.category);
+    }
+
+    // Check if the widget is still mounted before calling setState
+    if (!mounted) return;
+
     setState(() {
       catalogoRopa = clothes;
+      _categories = categories;
       _isLoading = false;
     });
   }
 
-  List<Map<String, dynamic>> get filteredCatalogo {
+  List<Product> get filteredCatalogo {
     return catalogoRopa.where((item) {
-      final matchesCategory = _selectedCategory == 'Todos' ||
-          item['categoria'] == _selectedCategory;
-      final matchesSearch = item['nombre']
+      final matchesCategory =
+          _selectedCategory == 'Todos' || item.category == _selectedCategory;
+      final matchesSearch = item.title
               .toLowerCase()
               .contains(_searchQuery.toLowerCase()) ||
-          item['etiquetas'].any(
+          item.styles.any(
               (tag) => tag.toLowerCase().contains(_searchQuery.toLowerCase()));
       return matchesCategory && matchesSearch;
     }).toList();
@@ -64,74 +65,25 @@ class _CatalogueState extends State<Catalogue> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Row(
-          children: [
-            Image.asset('../../assets/swappy.png', height: 30),
-            SizedBox(width: 10),
-            Text('Catálogo', style: TextStyle(color: Colors.black)),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.favorite_border, color: Colors.black),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text('Pantalla de favoritos no implementada')),
-              );
-            },
-          ),
-        ],
-      ),
+      appBar: CatalogueAppBar(),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Busca ropa para intercambiar',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Colors.grey[200],
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
-            ),
+          CustomWidgets.SearchBar(
+            onSearch: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
+            productos: catalogoRopa.map((item) => item.title).toList(),
           ),
-          Container(
-            height: 50,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                SizedBox(width: 16),
-                for (String categoria in categorias)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: ChoiceChip(
-                      label: Text(categoria),
-                      selected: _selectedCategory == categoria,
-                      onSelected: (selected) {
-                        setState(() {
-                          _selectedCategory = categoria;
-                        });
-                      },
-                      selectedColor: Colors.teal.shade100,
-                      backgroundColor: Colors.grey.shade200,
-                    ),
-                  ),
-                SizedBox(width: 8),
-              ],
-            ),
+          CategoryFilter(
+            categories: _categories.toList(),
+            selectedCategory: _selectedCategory,
+            onCategorySelected: (category) {
+              setState(() {
+                _selectedCategory = category;
+              });
+            },
           ),
           Expanded(
             child: _isLoading
@@ -140,95 +92,6 @@ class _CatalogueState extends State<Catalogue> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const Catalogue()),
-          );
-        },
-        label: Text('Intercambiar'),
-        icon: Icon(Icons.add),
-        backgroundColor: Colors.teal,
-      ),
-    );
-  }
-}
-
-class CatalogueGrid extends StatelessWidget {
-  final List<Map<String, dynamic>> filteredCatalogo;
-
-  const CatalogueGrid({Key? key, required this.filteredCatalogo})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final double itemWidth = constraints.maxWidth / 5;
-        final double aspectRatio = itemWidth / (itemWidth * 1.5);
-
-        return GridView.builder(
-          padding: const EdgeInsets.all(16.0),
-          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: itemWidth,
-            childAspectRatio: aspectRatio,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-          ),
-          itemCount: filteredCatalogo.length,
-          itemBuilder: (context, index) {
-            final item = filteredCatalogo[index];
-            return Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(12)),
-                      child: Image.asset(
-                        item['imagen'],
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item['nombre'],
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleSmall!
-                              .copyWith(fontWeight: FontWeight.bold),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          '${item['precio']}€',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall!
-                              .copyWith(color: Colors.teal),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
     );
   }
 }

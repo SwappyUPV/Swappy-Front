@@ -17,10 +17,7 @@ class UploadProductMethod {
   }) async {
     String res = "Ocurrió un error";
     try {
-      if (name.isNotEmpty &&
-          description.isNotEmpty &&
-          price > 0 &&
-          image != null) {
+      if (name.isNotEmpty && description.isNotEmpty && price > 0) {
         User? user = _auth.currentUser;
         if (user == null) {
           return "Usuario no autenticado";

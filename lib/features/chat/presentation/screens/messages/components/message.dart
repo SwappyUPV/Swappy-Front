@@ -1,87 +1,78 @@
-import '../../../models/chat_message.dart';
 import 'package:flutter/material.dart';
-
+import 'package:pin/features/chat/presentation/screens/messages/model/ChatMessageModel.dart';
 import '../../../../constants.dart';
-import 'audio_message.dart';
-import 'text_message.dart';
-import 'video_message.dart';
 
-class Message extends StatelessWidget {
-  const Message({
+class Messages extends StatelessWidget {
+  final ChatMessageModel message;
+  final String? userId; // This is the ID of the logged-in user
+  final String user1;
+  final String user2;
+  final String userImage1;
+  final String userImage2;
+
+  const Messages({
     super.key,
     required this.message,
+    this.userId,
+    required this.user1,
+    required this.user2,
+    required this.userImage1,
+    required this.userImage2,
   });
-
-  final ChatMessage message;
 
   @override
   Widget build(BuildContext context) {
-    Widget messageContaint(ChatMessage message) {
-      switch (message.messageType) {
-        case ChatMessageType.text:
-          return TextMessage(message: message);
-        case ChatMessageType.audio:
-          return AudioMessage(message: message);
-        case ChatMessageType.video:
-          return const VideoMessage();
-        default:
-          return const SizedBox();
-      }
-    }
+    bool isSentByUser = message.sender == userId;
 
     return Padding(
       padding: const EdgeInsets.only(top: kDefaultPadding),
       child: Row(
-        mainAxisAlignment:
-            message.isSender ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isSentByUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
-          if (!message.isSender) ...[
-            const CircleAvatar(
-              radius: 12,
-              backgroundImage: AssetImage("assets/images/user_2.png"),
+          // Show the other user's avatar if the message is not sent by the logged-in user
+          if (!isSentByUser)
+            CircleAvatar(
+              radius: 20, // Increased size for the avatar
+              backgroundImage: message.sender == user1
+                  ? _getImageProvider(userImage1)
+                  : _getImageProvider(userImage2), // Use userImage1 or userImage2 based on the sender
             ),
+          const SizedBox(width: kDefaultPadding / 2),
+          // Display message content
+          _messageContent(message, isSentByUser),
+          // Show the logged-in user's avatar if the message is sent by the logged-in user
+          if (isSentByUser) ...[
             const SizedBox(width: kDefaultPadding / 2),
+            CircleAvatar(
+              radius: 20, // Increased size for the avatar
+              backgroundImage: message.sender == user1
+                  ? _getImageProvider(userImage1)
+                  : _getImageProvider(userImage2), // Use userImage1 or userImage2 based on the sender
+            ),
           ],
-          messageContaint(message),
-          if (message.isSender) MessageStatusDot(status: message.messageStatus)
         ],
       ),
     );
   }
-}
 
-class MessageStatusDot extends StatelessWidget {
-  final MessageStatus? status;
-
-  const MessageStatusDot({super.key, this.status});
-  @override
-  Widget build(BuildContext context) {
-    Color dotColor(MessageStatus status) {
-      switch (status) {
-        case MessageStatus.notSent:
-          return kErrorColor;
-        case MessageStatus.notView:
-          return Theme.of(context).textTheme.bodyLarge!.color!.withOpacity(0.1);
-        case MessageStatus.viewed:
-          return kPrimaryColor;
-        default:
-          return Colors.transparent;
-      }
-    }
-
+  Widget _messageContent(ChatMessageModel message, bool isSentByUser) {
     return Container(
-      margin: const EdgeInsets.only(left: kDefaultPadding / 2),
-      height: 12,
-      width: 12,
+      padding: const EdgeInsets.all(12), // Increased padding for the message bubble
       decoration: BoxDecoration(
-        color: dotColor(status!),
-        shape: BoxShape.circle,
+        color: isSentByUser ? Colors.blueAccent : Colors.grey[300], // Change colors based on sender
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Icon(
-        status == MessageStatus.notSent ? Icons.close : Icons.done,
-        size: 8,
-        color: Theme.of(context).scaffoldBackgroundColor,
+      child: Text(
+        message.content,
+        style: TextStyle(fontSize: 16, color: isSentByUser ? Colors.white : Colors.black), // Increased font size
       ),
     );
+  }
+
+  ImageProvider _getImageProvider(String imagePath) {
+    if (imagePath.isNotEmpty) {
+      return AssetImage(imagePath);
+    }
+    return const AssetImage("assets/images/user.png");
   }
 }

@@ -1,6 +1,9 @@
 // settings_screen.dart
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:pin/core/services/authentication_service.dart';
+import '/features/catalogue/presentation/widgets/navigation_menu.dart';
+import 'package:get/get.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -18,17 +21,28 @@ class SettingsScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Iconsax.arrow_left, color: Colors.black),
           onPressed: () {
-            Navigator.pop(context);  // Navigate back to profile screen
+            Navigator.pop(context); // Navigate back to profile screen
           },
         ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildSettingsItem(Iconsax.user_edit, 'Change Username', () {}),
+          _buildSettingsItem(Iconsax.user_edit, 'Change Name', () {}),
+          _buildSettingsItem(Iconsax.size, 'Change Preferred Sizes', () {}),
+          _buildSettingsItem(Iconsax.calendar, 'Change Birthday', () {}),
+          _buildSettingsItem(Iconsax.map, 'Change Address', () {}),
           _buildSettingsItem(Iconsax.lock, 'Change Password', () {}),
           _buildSettingsItem(Iconsax.message, 'Change Email', () {}),
-          _buildSettingsItem(Iconsax.logout, 'Logout', () {}),
+          _buildSettingsItem(Iconsax.logout, 'Logout', () async {
+            await AuthMethod().logout();
+            Navigator.of(context).pop();
+            final NavigationController navigationController =
+                Get.find<NavigationController>();
+            navigationController.updateIndex(4);
+            Get.off(() => NavigationMenu());
+          }),
+          _buildSettingsItem(Iconsax.profile_delete, 'Delete account', () {}),
         ],
       ),
     );

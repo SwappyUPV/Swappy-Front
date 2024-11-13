@@ -1,43 +1,32 @@
-// profile_header.dart
 import 'package:flutter/material.dart';
-import 'profile_widgets.dart';  // Import the reusable profile widgets
+import 'package:pin/features/auth/data/models/user_model.dart'; // Import UserModel
 
 class ProfileHeader extends StatelessWidget {
-  const ProfileHeader({Key? key}) : super(key: key);
+  final UserModel userModel;
+
+  const ProfileHeader({Key? key, required this.userModel}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Row(
+      padding: const EdgeInsets.only(left: 16.0), // Add left margin
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center, // Center content vertically
+        crossAxisAlignment: CrossAxisAlignment.start, // Align children to the start (left)
         children: [
-          const CircleAvatar(
-            radius: 40,
-            backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+          CircleAvatar(
+            backgroundImage: userModel.profilePicture != null
+                ? AssetImage(userModel.profilePicture!)
+                : null,
+            radius: 50,
           ),
-          const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'User Name',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: const [
-                  ProfileInfoItem(label: 'Posts', value: '25'),
-                  SizedBox(width: 16),
-                  ProfileInfoItem(label: 'Followers', value: '512'),
-                  SizedBox(width: 16),
-                  ProfileInfoItem(label: 'Following', value: '320'),
-                ],
-              ),
-            ],
+          const SizedBox(height: 8),
+          Text(
+            userModel.name,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
+          Text(userModel.email),
+          // Add more user information here as needed
         ],
       ),
     );

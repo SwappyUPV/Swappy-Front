@@ -10,7 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pin/features/auth/presentation/screens/login_screen.dart';
 
 class NavigationMenu extends StatelessWidget {
-  NavigationMenu({Key? key}) : super(key: key);
+  NavigationMenu({super.key});
 
   final NavigationController controller = Get.put(NavigationController());
   final AuthController authController = Get.put(AuthController());
@@ -19,7 +19,6 @@ class NavigationMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Obx(() {
-        // This is where you'll display the respective screens
         switch (controller.selectedIndex.value) {
           case 0:
             return const Catalogue();
@@ -28,7 +27,7 @@ class NavigationMenu extends StatelessWidget {
           case 2:
             return const AddProduct();
           case 3:
-            return const ChatsScreen();
+            return ChatsScreen();
           case 4:
             return authController.isLoggedIn.value
                 ? const Profile()
@@ -38,45 +37,45 @@ class NavigationMenu extends StatelessWidget {
         }
       }),
       bottomNavigationBar: Obx(() => NavigationBar(
-            height: 80,
-            elevation: 0,
-            selectedIndex: controller.selectedIndex.value,
-            onDestinationSelected: (index) {
-              if (index == 0 || index == 4) {
-                controller.updateIndex(index);
-              } else if (authController.isLoggedIn.value) {
-                controller.updateIndex(index);
-              } else {
-                _showLoginDialog(context);
-              }
-            },
-            destinations: [
-              NavigationDestination(
-                icon: Icon(Iconsax.home),
-                label: 'Home',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.accessibility),
-                label: 'Wardrobe',
-              ),
-              NavigationDestination(
-                icon: Icon(Iconsax.add),
-                label: 'Add',
-              ),
-              NavigationDestination(
-                icon: Icon(Iconsax.message),
-                label: 'Chat',
-              ),
-              NavigationDestination(
-                icon: authController.isLoggedIn.value
-                    ? Icon(Iconsax.user)
-                    : Icon(Iconsax.login),
-                label: authController.isLoggedIn.value
-                    ? 'Perfil'
-                    : 'Iniciar sesión',
-              ),
-            ],
-          )),
+        height: 80,
+        elevation: 0,
+        selectedIndex: controller.selectedIndex.value,
+        onDestinationSelected: (index) {
+          if (index == 0 || index == 4) {
+            controller.updateIndex(index);
+          } else if (authController.isLoggedIn.value) {
+            controller.updateIndex(index);
+          } else {
+            _showLoginDialog(context);
+          }
+        },
+        destinations: [
+          NavigationDestination(
+            icon: Icon(Iconsax.home),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.accessibility),
+            label: 'Wardrobe',
+          ),
+          NavigationDestination(
+            icon: Icon(Iconsax.add),
+            label: 'Add',
+          ),
+          NavigationDestination(
+            icon: Icon(Iconsax.message),
+            label: 'Chat',
+          ),
+          NavigationDestination(
+            icon: authController.isLoggedIn.value
+                ? Icon(Iconsax.user)
+                : Icon(Iconsax.login),
+            label: authController.isLoggedIn.value
+                ? 'Perfil'
+                : 'Iniciar sesión',
+          ),
+        ],
+      )),
     );
   }
 
@@ -87,7 +86,7 @@ class NavigationMenu extends StatelessWidget {
         return AlertDialog(
           title: Text('Iniciar sesión'),
           content:
-              Text('Necesitas iniciar sesión para acceder a esta función.'),
+          Text('Necesitas iniciar sesión para acceder a esta función.'),
           actions: <Widget>[
             TextButton(
               child: Text('Cancelar'),
@@ -99,7 +98,10 @@ class NavigationMenu extends StatelessWidget {
               child: Text('Iniciar sesión'),
               onPressed: () {
                 Navigator.of(context).pop();
-                Get.to(() => Login());
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Login()),
+                );
               },
             ),
           ],
@@ -109,7 +111,6 @@ class NavigationMenu extends StatelessWidget {
   }
 }
 
-//USED OBX BUT CAN USE NAVIGATIONBOTTOMBAR INSTEAD
 class NavigationController extends GetxController {
   final Rx<int> selectedIndex = 0.obs;
 
@@ -127,6 +128,10 @@ class AuthController extends GetxController {
     super.onInit();
     _auth.authStateChanges().listen((User? user) {
       isLoggedIn.value = user != null;
+      if (isLoggedIn.value) {
+        // Update the selected index to Catalogue when logged in
+        Get.find<NavigationController>().updateIndex(0);
+      }
     });
   }
 }
