@@ -103,7 +103,9 @@ class MessagesScreenState extends State<MessagesScreen> {
               MaterialPageRoute(
                 builder: (context) => Exchanges(
                   selectedProduct: null,
-                  receiverId: widget.chat.user2,
+                  receiverId: widget.chat.user1 == _userId
+                      ? widget.chat.user2
+                      : widget.chat.user1,
                 ),
               ),
             );
