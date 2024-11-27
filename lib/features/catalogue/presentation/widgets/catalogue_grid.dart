@@ -14,7 +14,7 @@ class CatalogueGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final crossAxisCount = (width / 120).floor();
+    final crossAxisCount = 2; // 2 productos por fila
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -26,7 +26,7 @@ class CatalogueGrid extends StatelessWidget {
           crossAxisCount: crossAxisCount,
           mainAxisSpacing: 20,
           crossAxisSpacing: 20,
-          childAspectRatio: 0.7,
+          childAspectRatio: 0.5, // Aumentar la altura de los productos
         ),
         itemBuilder: (context, index) {
           final item = filteredCatalogo[index];
