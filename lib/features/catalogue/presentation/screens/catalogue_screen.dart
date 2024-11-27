@@ -39,8 +39,7 @@ class _CatalogueState extends State<Catalogue> {
       categories.add(item.category);
     }
 
-    // Check if the widget is still mounted before calling setState
-    if (!mounted) return;
+    if (!mounted) return; // Check to avoid setState after widget is disposed
 
     setState(() {
       catalogoRopa = clothes;
@@ -65,32 +64,150 @@ class _CatalogueState extends State<Catalogue> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CatalogueAppBar(),
-      body: Column(
-        children: [
-          CustomWidgets.SearchBar(
-            onSearch: (value) {
-              setState(() {
-                _searchQuery = value;
-              });
-            },
-            productos: catalogoRopa.map((item) => item.title).toList(),
-          ),
-          CategoryFilter(
-            categories: _categories.toList(),
-            selectedCategory: _selectedCategory,
-            onCategorySelected: (category) {
-              setState(() {
-                _selectedCategory = category;
-              });
-            },
-          ),
-          Expanded(
-            child: _isLoading
-                ? Center(child: CircularProgressIndicator())
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Slider de nueva temporada
+            Container(
+              height: 500,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/portadas/portada1.png'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Row con logo y botón
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8.0),
+                    child: Stack(
+                      children: [
+                        // Logo centrado horizontalmente
+                        Align(
+                          alignment: Alignment.center,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 13.0),
+                            child: Image.asset(
+                              'assets/icons/logo.png',
+                              width: 40,
+                              height: 40,
+                            ),
+                          ),
+                        ),
+                        // Iconos alineados a la derecha
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.only(top: 10.0, right: 8.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.favorite_border,
+                                    color: Colors.white,
+                                  ),
+                                  iconSize: 30.0,
+                                  onPressed: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            'Pantalla de favoritos no implementada'),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                Icon(
+                                  Icons.menu,
+                                  color: Colors.white,
+                                  size: 35.0,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  CustomWidgets.SearchBar(
+                    onSearch: (value) {
+                      setState(() {
+                        _searchQuery = value;
+                      });
+                    },
+                    productos: catalogoRopa.map((item) => item.title).toList(),
+                  ),
+                  // Contenido principal del slider
+                  Padding(
+                    padding: const EdgeInsets.only(top: 100, left: 40),
+                    child: Column(
+                      children: [
+                        // "RENUEVA" alineado a la izquierda
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'RENUEVA',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 50,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        // "TEMPORADA" e "INVIERNO 2024" centrados
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'TEMPORADA',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 50,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'INVIERNO 2024',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 20),
+
+            CategoryFilter(
+              categories: _categories.toList(),
+              selectedCategory: _selectedCategory,
+              onCategorySelected: (category) {
+                setState(() {
+                  _selectedCategory = category;
+                });
+              },
+            ),
+
+            _isLoading
+                ? Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
                 : CatalogueGrid(filteredCatalogo: filteredCatalogo),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
