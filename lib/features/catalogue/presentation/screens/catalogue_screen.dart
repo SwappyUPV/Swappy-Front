@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/services/catalogue.dart';
 import '../widgets/catalogue_app_bar.dart';
 import '../widgets/search_bar.dart' as CustomWidgets;
@@ -14,10 +16,17 @@ class Catalogue extends StatefulWidget {
 }
 
 class _CatalogueState extends State<Catalogue> {
-  String _selectedCategory = 'Todos';
+  String _selectedCategory = 'Streetwear';
   String _searchQuery = '';
   List<Product> catalogoRopa = [];
-  Set<String> _categories = {'Todos'};
+  Set<String> _categories = {
+    'Streetwear',
+    'Grunge',
+    'Motorsport',
+    'Y2K',
+    'Coquette',
+    'Glam'
+  };
   bool _isLoading = true;
 
   final CatalogService _catalogService = CatalogService();
@@ -33,7 +42,14 @@ class _CatalogueState extends State<Catalogue> {
       _isLoading = true;
     });
     List<Product> clothes = await _catalogService.getClothes();
-    Set<String> categories = {'Todos'};
+    Set<String> categories = {
+      'Streetwear',
+      'Grunge',
+      'Motorsport',
+      'Y2K',
+      'Coquette',
+      'Glam'
+    };
 
     for (var item in clothes) {
       categories.add(item.category);
@@ -50,8 +66,8 @@ class _CatalogueState extends State<Catalogue> {
 
   List<Product> get filteredCatalogo {
     return catalogoRopa.where((item) {
-      final matchesCategory =
-          _selectedCategory == 'Todos' || item.category == _selectedCategory;
+      final matchesCategory = _selectedCategory == 'Streetwear' ||
+          item.category == _selectedCategory;
       final matchesSearch = item.title
               .toLowerCase()
               .contains(_searchQuery.toLowerCase()) ||
@@ -189,7 +205,54 @@ class _CatalogueState extends State<Catalogue> {
             ),
 
             SizedBox(height: 20),
-
+            Column(children: [
+              Row(
+                children: [
+                  Padding(
+                      padding: const EdgeInsets.only(top: 5, left: 15),
+                      child: Column(children: [
+                        // "RENUEVA" alineado a la izquierda
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'On Trend',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 28,
+                              fontFamily: 'UrbaneMedium',
+                            ),
+                          ),
+                        ),
+                      ])),
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 10, left: 10),
+                      child: SvgPicture.asset(
+                        'assets/icons/Linea5.svg', // Ruta del SVG
+                        height: 20.0, // Tamaño opcional
+                        width: 20.0,
+                        semanticsLabel: 'Mi ícono', // Etiqueta accesible
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Padding(
+                  padding: const EdgeInsets.only(top: 0, left: 15),
+                  child: Column(children: [
+                    // "RENUEVA" alineado a la izquierda
+                    Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Los estilos que están arrasando',
+                          style: GoogleFonts.openSans(
+                            textStyle:
+                                TextStyle(fontSize: 15, color: Colors.black),
+                          ),
+                        )),
+                  ])),
+            ]),
+            SizedBox(height: 20),
             CategoryFilter(
               categories: _categories.toList(),
               selectedCategory: _selectedCategory,
