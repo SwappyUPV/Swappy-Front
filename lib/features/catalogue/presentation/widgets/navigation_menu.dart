@@ -10,72 +10,80 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pin/features/auth/presentation/screens/login_screen.dart';
 
 class NavigationMenu extends StatelessWidget {
-  NavigationMenu({super.key});
+  final Widget? child;
+  late final NavigationController controller;
+  late final AuthController authController;
 
-  final NavigationController controller = Get.put(NavigationController());
-  final AuthController authController = Get.put(AuthController());
+  NavigationMenu({
+    Key? key,
+    this.child,
+  }) : super(key: key) {
+    controller = Get.put(NavigationController());
+    authController = Get.put(AuthController());
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Obx(() {
-        switch (controller.selectedIndex.value) {
-          case 0:
-            return const Catalogue();
-          case 1:
-            return const VirtualCloset();
-          case 2:
-            return const AddProduct();
-          case 3:
-            return ChatsScreen();
-          case 4:
-            return authController.isLoggedIn.value
-                ? const Profile()
-                : const Login();
-          default:
-            return const Catalogue();
-        }
-      }),
+      body: child ??
+          Obx(() {
+            switch (controller.selectedIndex.value) {
+              case 0:
+                return const Catalogue();
+              case 1:
+                return const VirtualCloset();
+              case 2:
+                return const AddProduct();
+              case 3:
+                return ChatsScreen();
+              case 4:
+                return authController.isLoggedIn.value
+                    ? const Profile()
+                    : const Login();
+              default:
+                return const Catalogue();
+            }
+          }),
       bottomNavigationBar: Obx(() => NavigationBar(
-        height: 80,
-        elevation: 0,
-        selectedIndex: controller.selectedIndex.value,
-        onDestinationSelected: (index) {
-          if (index == 0 || index == 4) {
-            controller.updateIndex(index);
-          } else if (authController.isLoggedIn.value) {
-            controller.updateIndex(index);
-          } else {
-            _showLoginDialog(context);
-          }
-        },
-        destinations: [
-          NavigationDestination(
-            icon: Icon(Iconsax.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.accessibility),
-            label: 'Wardrobe',
-          ),
-          NavigationDestination(
-            icon: Icon(Iconsax.add),
-            label: 'Add',
-          ),
-          NavigationDestination(
-            icon: Icon(Iconsax.message),
-            label: 'Chat',
-          ),
-          NavigationDestination(
-            icon: authController.isLoggedIn.value
-                ? Icon(Iconsax.user)
-                : Icon(Iconsax.login),
-            label: authController.isLoggedIn.value
-                ? 'Perfil'
-                : 'Iniciar sesión',
-          ),
-        ],
-      )),
+            height: 80,
+            elevation: 0,
+            selectedIndex: controller.selectedIndex.value,
+            onDestinationSelected: (index) {
+              if (index == 0 || index == 4) {
+                controller.updateIndex(index);
+              } else if (authController.isLoggedIn.value) {
+                controller.updateIndex(index);
+              } else {
+                _showLoginDialog(context);
+              }
+            },
+            destinations: [
+              NavigationDestination(
+                icon: Icon(Iconsax.home),
+                label: 'Home',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.accessibility),
+                label: 'Wardrobe',
+              ),
+              NavigationDestination(
+                icon: Icon(Iconsax.add),
+                label: 'Add',
+              ),
+              NavigationDestination(
+                icon: Icon(Iconsax.message),
+                label: 'Chat',
+              ),
+              NavigationDestination(
+                icon: authController.isLoggedIn.value
+                    ? Icon(Iconsax.user)
+                    : Icon(Iconsax.login),
+                label: authController.isLoggedIn.value
+                    ? 'Perfil'
+                    : 'Iniciar sesión',
+              ),
+            ],
+          )),
     );
   }
 
@@ -86,7 +94,7 @@ class NavigationMenu extends StatelessWidget {
         return AlertDialog(
           title: Text('Iniciar sesión'),
           content:
-          Text('Necesitas iniciar sesión para acceder a esta función.'),
+              Text('Necesitas iniciar sesión para acceder a esta función.'),
           actions: <Widget>[
             TextButton(
               child: Text('Cancelar'),

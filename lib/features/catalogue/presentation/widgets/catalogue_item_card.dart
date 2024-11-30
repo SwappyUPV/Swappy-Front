@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
 import 'package:pin/features/exchanges/screens/home/exchanges.dart';
+import 'package:pin/features/wishlist/services/wishlist_service.dart';
 
-class CatalogueItemCard extends StatelessWidget {
+class CatalogueItemCard extends StatefulWidget {
   final Product product;
   final VoidCallback press;
 
@@ -13,9 +14,16 @@ class CatalogueItemCard extends StatelessWidget {
   });
 
   @override
+  State<CatalogueItemCard> createState() => _CatalogueItemCardState();
+}
+
+class _CatalogueItemCardState extends State<CatalogueItemCard> {
+  final WishlistService _wishlistService = WishlistService();
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: press,
+      onTap: widget.press,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -60,7 +68,7 @@ class CatalogueItemCard extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                 child: Image.network(
-                  product.image, // Imagen del producto
+                  widget.product.image, // Imagen del producto
                   fit: BoxFit.cover,
                   width: double.infinity,
                   height: double.infinity,
@@ -71,8 +79,8 @@ class CatalogueItemCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Text(
-                product.title.isNotEmpty
-                    ? product.title
+                widget.product.title.isNotEmpty
+                    ? widget.product.title
                     : 'Camiseta de Verano', // Nombre del producto o ejemplo
                 style: TextStyle(
                   fontFamily: 'UrbaneMedium', // Usando la fuente registrada
@@ -88,9 +96,9 @@ class CatalogueItemCard extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
               child: Text(
-                product.size.isEmpty
+                widget.product.size.isEmpty
                     ? 'M/38'
-                    : product.size, // Talla o M/38 si no hay talla
+                    : widget.product.size, // Talla o M/38 si no hay talla
                 style: TextStyle(
                   fontFamily: 'UrbaneMedium', // Usando la fuente registrada
                   fontSize: 14, // Tamaño del texto
@@ -112,9 +120,35 @@ class CatalogueItemCard extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.add_circle_outline),
+                    icon: Icon(
+                      _wishlistService.isInWishlist(widget.product)
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: _wishlistService.isInWishlist(widget.product)
+                          ? Colors.red
+                          : null,
+                    ),
                     onPressed: () {
-                      // Acción para el botón "+"
+                      setState(() {
+                        if (_wishlistService.isInWishlist(widget.product)) {
+                          _wishlistService.removeFromWishlist(widget.product);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content:
+                                  Text('Eliminado de la lista de deseados'),
+                              duration: Duration(seconds: 1),
+                            ),
+                          );
+                        } else {
+                          _wishlistService.addToWishlist(widget.product);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Añadido a la lista de deseados'),
+                              duration: Duration(seconds: 1),
+                            ),
+                          );
+                        }
+                      });
                     },
                   ),
                 ],
@@ -129,7 +163,7 @@ class CatalogueItemCard extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => Exchanges(
-                        selectedProduct: product,
+                        selectedProduct: widget.product,
                       ),
                     ),
                   );

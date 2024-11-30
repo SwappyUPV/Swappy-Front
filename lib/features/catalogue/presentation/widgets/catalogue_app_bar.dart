@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 // import 'package:firebase_storage/firebase_storage.dart';
+import 'package:pin/features/wishlist/presentation/screens/wishlist_screen.dart';
+import 'package:pin/features/wishlist/services/wishlist_service.dart';
 
 class CatalogueAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final WishlistService _wishlistService = WishlistService();
+
   @override
   Widget build(BuildContext context) {
     return AppBar(
@@ -18,10 +22,15 @@ class CatalogueAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         IconButton(
-          icon: Icon(Icons.favorite_border, color: Colors.black),
+          icon: const Icon(Icons.favorite_border, color: Colors.black),
           onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Pantalla de favoritos no implementada')),
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => WishlistScreen(
+                  wishlistItems: _wishlistService.wishlistItems,
+                ),
+              ),
             );
           },
         ),

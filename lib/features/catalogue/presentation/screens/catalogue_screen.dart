@@ -8,6 +8,8 @@ import '../widgets/search_bar.dart' as CustomWidgets;
 import '../widgets/category_filter.dart';
 import '../widgets/catalogue_grid.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
+import 'package:pin/features/wishlist/presentation/screens/wishlist_screen.dart';
+import 'package:pin/features/wishlist/services/wishlist_service.dart';
 
 class Catalogue extends StatefulWidget {
   const Catalogue({super.key});
@@ -131,10 +133,13 @@ class _CatalogueState extends State<Catalogue> {
                                   ),
                                   iconSize: 30.0,
                                   onPressed: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            'Pantalla de favoritos no implementada'),
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => WishlistScreen(
+                                          wishlistItems:
+                                              WishlistService().wishlistItems,
+                                        ),
                                       ),
                                     );
                                   },
