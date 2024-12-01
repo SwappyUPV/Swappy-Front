@@ -1,194 +1,76 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pin/features/add_product/presentation/screens/add_product_screen.dart';
 import 'package:pin/features/catalogue/presentation/screens/catalogue_screen.dart';
 import 'package:pin/features/chat/presentation/screens/chats/chats_screen.dart';
 import 'package:pin/features/profile/presentation/screens/profile_screen.dart';
-import 'package:pin/features/virtual_closet/presentation/screens/virtual_closet_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pin/features/auth/presentation/screens/login_screen.dart';
+import 'package:pin/features/virtual_closet/presentation/screens/virtual_closet_screen.dart';
 
-class NavigationMenu extends StatelessWidget {
-  NavigationMenu({super.key});
+class NavigationMenu extends StatefulWidget {
+  const NavigationMenu({Key? key}) : super(key: key);
 
+  @override
+  State<NavigationMenu> createState() => _NavigationMenuState();
+}
+
+class _NavigationMenuState extends State<NavigationMenu> {
   final NavigationController controller = Get.put(NavigationController());
   final AuthController authController = Get.put(AuthController());
 
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.maxWidth >= 600) {
-          return Scaffold(
-            body: Row(
-              children: [
-                NavigationRail(
-                  selectedIndex: controller.selectedIndex.value,
-                  onDestinationSelected: (index) {
-                    if (index == 0 || index == 4) {
-                      controller.updateIndex(index);
-                    } else if (authController.isLoggedIn.value) {
-                      controller.updateIndex(index);
-                    } else {
-                      _showLoginDialog(context);
-                    }
-                  },
-                  labelType: NavigationRailLabelType.all,
-                  destinations: [
-                    NavigationRailDestination(
-                      icon: SvgPicture.asset('assets/icons/navBar/home.svg', width: 30, height: 30),
-                      selectedIcon: SvgPicture.asset('assets/icons/navBar/home_selected.svg', width: 30, height: 30),
-                      label: Text('Catálogo'),
-                    ),
-                    NavigationRailDestination(
-                      icon: SvgPicture.asset('assets/icons/navBar/top.svg', width: 30, height: 30),
-                      selectedIcon: SvgPicture.asset('assets/icons/navBar/top_selected.svg', width: 30, height: 30),
-                      label: Text('Armario'),
-                    ),
-                    NavigationRailDestination(
-                      icon: SvgPicture.asset('assets/icons/navBar/chat.svg', width: 30, height: 30),
-                      selectedIcon: SvgPicture.asset('assets/icons/navBar/chat_selected.svg', width: 30, height: 30),
-                      label: Text('Chat'),
-                    ),
-                    NavigationRailDestination(
-                      icon: SvgPicture.asset('assets/icons/navBar/user.svg', width: 30, height: 30),
-                      selectedIcon: SvgPicture.asset('assets/icons/navBar/user_selected.svg', width: 30, height: 30),
-                      label: Text(authController.isLoggedIn.value ? 'Perfil' : 'Iniciar Sesión'),
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: Obx(() {
-                    switch (controller.selectedIndex.value) {
-                      case 0:
-                        return const Catalogue();
-                      case 1:
-                        return const VirtualCloset();
-                      case 2:
-                        return const AddProduct();
-                      case 3:
-                        return ChatsScreen();
-                      case 4:
-                        return authController.isLoggedIn.value
-                            ? const Profile()
-                            : const Login();
-                      default:
-                        return const Catalogue();
-                    }
-                  }),
-                ),
-              ],
-            ),
-          );
-        } else {
-          return Scaffold(
-            body: Obx(() {
-              switch (controller.selectedIndex.value) {
-                case 0:
-                  return const Catalogue();
-                case 1:
-                  return const VirtualCloset();
-                case 2:
-                  return const AddProduct();
-                case 3:
-                  return ChatsScreen();
-                case 4:
-                  return authController.isLoggedIn.value
-                      ? const Profile()
-                      : const Login();
-                default:
-                  return const Catalogue();
-              }
-            }),
-            bottomNavigationBar: Obx(() => Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(150.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 15,
-                          spreadRadius: 5,
-                          offset: Offset(0, 0),
-                        ),
-                      ],
-                    ),
-                    child: BottomNavigationBar(
-                      currentIndex: controller.selectedIndex.value,
-                      onTap: (index) {
-                        if (index == 0 || index == 4) {
-                          controller.updateIndex(index);
-                        } else if (authController.isLoggedIn.value) {
-                          controller.updateIndex(index);
-                        } else {
-                          _showLoginDialog(context);
-                        }
-                      },
-                      type: BottomNavigationBarType.fixed,
-                      showSelectedLabels: false,
-                      showUnselectedLabels: false,
-                      items: [
-                        _buildNavBarItem('home', 'home_selected', 0),
-                        _buildNavBarItem('top', 'top_selected', 1),
-                        _buildNavBarItem('chat', 'chat_selected', 3),
-                        _buildNavBarItem('user', 'user_selected', 4),
-                      ],
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 40,
-                  child: FloatingActionButton(
-                    onPressed: () {
-                      controller.updateIndex(2);
-                    },
-                    backgroundColor: Colors.black,
-                    child: SvgPicture.asset('assets/icons/navBar/add.svg', width: 30, height: 30, color: Colors.white),
-                  ),
-                ),
-              ],
-            )),
-          );
-        }
-      },
-    );
+  final List<GlobalKey<NavigatorState>> _navKeys = List.generate(5, (_) => GlobalKey<NavigatorState>());
+  final List<Widget> _pages = [
+    const Catalogue(),
+    const VirtualCloset(),
+    const AddProduct(),
+    ChatsScreen(),
+    const Profile(),
+  ];
+
+  int _selectedIndex = 0;
+
+  Future<bool> _onWillPop() async {
+    if (_navKeys[_selectedIndex].currentState?.canPop() ?? false) {
+      _navKeys[_selectedIndex].currentState?.pop();
+      return false;
+    }
+    return true;
   }
 
-  BottomNavigationBarItem _buildNavBarItem(String icon, String selectedIcon, int index) {
-    return BottomNavigationBarItem(
-      icon: SizedBox(
-        width: 30,
-        height: 30,
-        child: SvgPicture.asset(
-          'assets/icons/navBar/${controller.selectedIndex.value != index ? icon : selectedIcon}.svg',
-        ),
-      ),
-      label: '',
-    );
+  void _onItemTapped(int index) {
+    if (_selectedIndex == index) {
+      _navKeys[index].currentState?.popUntil((route) => route.isFirst);
+    } else if (index == 1 || index == 2 || index == 3 || index == 4) {
+      if (authController.isLoggedIn.value) {
+        setState(() {
+          _selectedIndex = index;
+        });
+      } else {
+        _showLoginDialog();
+      }
+    } else {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
   }
 
-  void _showLoginDialog(BuildContext context) {
+  void _showLoginDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Login Required'),
-          content: const Text('You need to log in to access this feature.'),
+          title: const Text('Inicio de Sesión'),
+          content: const Text('Necesitas iniciar sesión para acceder a esta sección.'),
           actions: <Widget>[
             TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              child: const Text('Cancelar'),
+              onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
-              child: const Text('Login'),
+              child: const Text('Iniciar Sesión'),
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.pushReplacement(
@@ -200,6 +82,191 @@ class NavigationMenu extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Use NavigationRail for larger screens
+        if (constraints.maxWidth >= 600) {
+          return Scaffold(
+            body: Row(
+              children: [
+                NavigationRail(
+                  selectedIndex: _selectedIndex,
+                  onDestinationSelected: (index) {
+                    if (index == 2 || index == 3 || index == 4) {
+                      if (authController.isLoggedIn.value) {
+                        setState(() {
+                          _selectedIndex = index;
+                        });
+                      } else {
+                        _showLoginDialog();
+                      }
+                    } else {
+                      setState(() {
+                        _selectedIndex = index;
+                      });
+                    }
+                  },
+                  labelType: NavigationRailLabelType.all,
+                  leading: FloatingActionButton(
+                    onPressed: () {
+                      if (authController.isLoggedIn.value) {
+                        _onItemTapped(2);
+                      } else {
+                        _showLoginDialog();
+                      }
+                    },
+                    backgroundColor: Colors.black,
+                    child: SvgPicture.asset(
+                      'assets/icons/navBar/add.svg',
+                      width: 30,
+                      height: 30,
+                      color: Colors.white,
+                    ),
+                  ),
+                  destinations: [
+                    _buildRailDestination('home', 'home_selected', 'Catalogue'),
+                    _buildRailDestination('top', 'top_selected', 'Closet'),
+                    _buildRailDestination('chat', 'chat_selected', 'Chat'),
+                    _buildRailDestination('user', 'user_selected', authController.isLoggedIn.value ? 'Profile' : 'Login'),
+                  ],
+                ),
+                Expanded(
+                  child: WillPopScope(
+                    onWillPop: _onWillPop,
+                    child: Navigator(
+                      key: _navKeys[_selectedIndex],
+                      onGenerateInitialRoutes: (_, __) {
+                        return [
+                          MaterialPageRoute(
+                            builder: (context) => _pages[_selectedIndex],
+                          ),
+                        ];
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        } else {
+          // Use Bottom Navigation for smaller screens
+          return Scaffold(
+            body: WillPopScope(
+              onWillPop: _onWillPop,
+              child: IndexedStack(
+                index: _selectedIndex,
+                children: _pages
+                    .asMap()
+                    .entries
+                    .map((entry) => Navigator(
+                  key: _navKeys[entry.key],
+                  onGenerateInitialRoutes: (_, __) {
+                    return [
+                      MaterialPageRoute(
+                        builder: (context) => entry.value,
+                      ),
+                    ];
+                  },
+                ))
+                    .toList(),
+              ),
+            ),
+            floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+            floatingActionButton: Container(
+              margin: const EdgeInsets.only(top: 15),
+              height: 68,
+              width: 68,
+              child: FloatingActionButton(
+                backgroundColor: Colors.black,
+                elevation: 0,
+                onPressed: () {
+                  if (authController.isLoggedIn.value) {
+                    _onItemTapped(2);
+                  } else {
+                    _showLoginDialog();
+                  }
+                },
+                shape: RoundedRectangleBorder(
+                  side: const BorderSide(width: 3, color: Colors.black),
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: SvgPicture.asset(
+                  'assets/icons/navBar/add.svg',
+                  width: 30,
+                  height: 30,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            bottomNavigationBar: BottomAppBar(
+              shape: const CircularNotchedRectangle(),
+              notchMargin: 8.0,
+              child: Container(
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 20,
+                      spreadRadius: 5,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildNavBarItem('home', 0),
+                    _buildNavBarItem('top', 1),
+                    const SizedBox(width: 50), // Space for the floating action button
+                    _buildNavBarItem('chat', 3),
+                    _buildNavBarItem('user', 4),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  NavigationRailDestination _buildRailDestination(String icon, String selectedIcon, String label) {
+    final bool isSelected = _selectedIndex == _pages.indexWhere((element) => element.toString() == label);
+    return NavigationRailDestination(
+      icon: SvgPicture.asset(
+        'assets/icons/navBar/$icon.svg',
+        width: 30,
+        height: 30,
+        color: isSelected ? Colors.black : Colors.black.withOpacity(0.7),
+      ),
+      selectedIcon: SvgPicture.asset(
+        'assets/icons/navBar/$selectedIcon.svg',
+        width: 30,
+        height: 30,
+        color: Colors.black,
+      ),
+      label: Text(label),
+    );
+  }
+
+  Widget _buildNavBarItem(String icon, int index) {
+    final bool isSelected = _selectedIndex == index;
+    return IconButton(
+      icon: SvgPicture.asset(
+        'assets/icons/navBar/${isSelected ? '${icon}_selected' : icon}.svg',
+        width: 28,
+        height: 28,
+        color: isSelected ? Colors.black : Colors.black.withOpacity(0.7),
+      ),
+      onPressed: () => _onItemTapped(index),
     );
   }
 }
@@ -221,9 +288,6 @@ class AuthController extends GetxController {
     super.onInit();
     _auth.authStateChanges().listen((User? user) {
       isLoggedIn.value = user != null;
-      if (isLoggedIn.value) {
-        Get.find<NavigationController>().updateIndex(0);
-      }
     });
   }
 }
