@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart'; // Import GetX package
-import 'package:pin/features/catalogue/presentation/widgets/navigation_menu.dart';
+import 'package:pin/core/utils/NavigationMenu/NavigationMenu.dart';
 import 'package:pin/core/constants/constants.dart';
 
 class Swappy extends StatelessWidget {

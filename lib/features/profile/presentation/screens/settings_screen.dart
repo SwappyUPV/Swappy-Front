@@ -2,8 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:pin/core/services/authentication_service.dart';
-import '/features/catalogue/presentation/widgets/navigation_menu.dart';
+import '../../../../core/utils/NavigationMenu/NavigationMenu.dart';
 import 'package:get/get.dart';
+import 'package:pin/core/utils/NavigationMenu/controllers/navigationController.dart';
+
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);

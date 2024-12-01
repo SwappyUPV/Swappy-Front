@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:pin/core/utils/responsive.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
-import 'package:pin/features/catalogue/presentation/widgets/navigation_menu.dart';
+import 'package:pin/core/utils/NavigationMenu/NavigationMenu.dart';
 
 import '../../../../core/utils/background.dart';
 import '../widgets/forms/login_form.dart';
 import '../widgets/components/login_screen_top_image.dart';
+import 'package:pin/core/utils/NavigationMenu/controllers/navigationController.dart';
+
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);

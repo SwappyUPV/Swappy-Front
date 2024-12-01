@@ -8,7 +8,9 @@ import '/features/add_product/presentation/widgets/quality_selector_widget.dart'
 import '/features/add_product/presentation/widgets/sizes_selector_widget.dart';
 import '/features/add_product/presentation/widgets/styles_selector_widget.dart';
 import 'package:get/get.dart';
-import '/features/catalogue/presentation/widgets/navigation_menu.dart';
+import '../../../../core/utils/NavigationMenu/NavigationMenu.dart';
+import 'package:pin/core/utils/NavigationMenu/controllers/navigationController.dart';
+
 
 class AddProductForm extends StatefulWidget {
   const AddProductForm({super.key});

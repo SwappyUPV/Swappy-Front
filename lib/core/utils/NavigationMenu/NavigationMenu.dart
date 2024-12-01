@@ -8,6 +8,10 @@ import 'package:pin/features/chat/presentation/screens/chats/chats_screen.dart';
 import 'package:pin/features/profile/presentation/screens/profile_screen.dart';
 import 'package:pin/features/auth/presentation/screens/login_screen.dart';
 import 'package:pin/features/virtual_closet/presentation/screens/virtual_closet_screen.dart';
+import 'package:pin/core/utils/NavigationMenu/components/NavigationRailDestinationWidget.dart';
+import 'package:pin/core/utils/NavigationMenu/components/BottomNavBarItemWidget.dart';
+import 'package:pin/core/utils/NavigationMenu/controllers/navigationController.dart';
+import 'package:pin/core/utils/NavigationMenu/controllers/AuthController.dart';
 
 class NavigationMenu extends StatefulWidget {
   const NavigationMenu({Key? key}) : super(key: key);
@@ -19,9 +23,8 @@ class NavigationMenu extends StatefulWidget {
 class _NavigationMenuState extends State<NavigationMenu> {
   final NavigationController controller = Get.put(NavigationController());
   final AuthController authController = Get.put(AuthController());
-
-  final List<GlobalKey<NavigatorState>> _navKeys =
-      List.generate(5, (_) => GlobalKey<NavigatorState>());
+  int _selectedIndex = 0;
+  final List<GlobalKey<NavigatorState>> _navKeys = List.generate(5, (_) => GlobalKey<NavigatorState>());
   final List<Widget> _pages = [
     const Catalogue(),
     const VirtualCloset(),
@@ -30,68 +33,10 @@ class _NavigationMenuState extends State<NavigationMenu> {
     const Profile(),
   ];
 
-  int _selectedIndex = 0;
-
-  Future<bool> _onWillPop() async {
-    if (_navKeys[_selectedIndex].currentState?.canPop() ?? false) {
-      _navKeys[_selectedIndex].currentState?.pop();
-      return false;
-    }
-    return true;
-  }
-
-  void _onItemTapped(int index) {
-    if (_selectedIndex == index) {
-      _navKeys[index].currentState?.popUntil((route) => route.isFirst);
-    } else if (index == 1 || index == 2 || index == 3 || index == 4) {
-      if (authController.isLoggedIn.value) {
-        setState(() {
-          _selectedIndex = index;
-        });
-      } else {
-        _showLoginDialog();
-      }
-    } else {
-      setState(() {
-        _selectedIndex = index;
-      });
-    }
-  }
-
-  void _showLoginDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Inicio de Sesión'),
-          content: const Text(
-              'Necesitas iniciar sesión para acceder a esta sección.'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancelar'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: const Text('Iniciar Sesión'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Login()),
-                );
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Use NavigationRail for larger screens
         if (constraints.maxWidth >= 600) {
           return Scaffold(
             body: Row(
@@ -115,16 +60,11 @@ class _NavigationMenuState extends State<NavigationMenu> {
                   },
                   labelType: NavigationRailLabelType.all,
                   destinations: [
-                    _buildRailDestination('home', 'home_selected', 'Catálogo'),
-                    _buildRailDestination('top', 'top_selected', 'Armario'),
-                    _buildRailDestination('add', 'add_selected', 'Subir'),
-                    _buildRailDestination('chat', 'chat_selected', 'Chat'),
-                    _buildRailDestination(
-                        'user',
-                        'user_selected',
-                        authController.isLoggedIn.value
-                            ? 'Perfil'
-                            : 'Iniciar Sesión'),
+                    NavigationRailDestinationWidget.buildRailDestination('home', 'home_selected', 'Catálogo', _selectedIndex, _pages),
+                    NavigationRailDestinationWidget.buildRailDestination('top', 'top_selected', 'Armario', _selectedIndex, _pages),
+                    NavigationRailDestinationWidget.buildRailDestination('add', 'add_selected', 'Subir', _selectedIndex, _pages),
+                    NavigationRailDestinationWidget.buildRailDestination('chat', 'chat_selected', 'Chat', _selectedIndex, _pages),
+                    NavigationRailDestinationWidget.buildRailDestination('user', 'user_selected', authController.isLoggedIn.value ? 'Perfil' : 'Iniciar Sesión', _selectedIndex, _pages),
                   ],
                 ),
                 Expanded(
@@ -146,7 +86,6 @@ class _NavigationMenuState extends State<NavigationMenu> {
             ),
           );
         } else {
-          // Use Bottom Navigation for smaller screens
           return Scaffold(
             body: Stack(
               children: [
@@ -158,15 +97,15 @@ class _NavigationMenuState extends State<NavigationMenu> {
                         .asMap()
                         .entries
                         .map((entry) => Navigator(
-                              key: _navKeys[entry.key],
-                              onGenerateInitialRoutes: (_, __) {
-                                return [
-                                  MaterialPageRoute(
-                                    builder: (context) => entry.value,
-                                  ),
-                                ];
-                              },
-                            ))
+                      key: _navKeys[entry.key],
+                      onGenerateInitialRoutes: (_, __) {
+                        return [
+                          MaterialPageRoute(
+                            builder: (context) => entry.value,
+                          ),
+                        ];
+                      },
+                    ))
                         .toList(),
                   ),
                 ),
@@ -177,14 +116,13 @@ class _NavigationMenuState extends State<NavigationMenu> {
                   child: BottomAppBar(
                     shape: const CircularNotchedRectangle(),
                     notchMargin: 8.0,
-                    color: const Color.fromARGB(
-                        0, 187, 3, 3), // Make BottomAppBar transparent
-                    elevation: 0, // Remove shadow
+                    color: Colors.transparent,
+                    elevation: 0,
                     child: Container(
                       height: 98,
                       width: 390,
                       decoration: BoxDecoration(
-                        color: Colors.white, // Set the desired background color
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(30.0),
                         boxShadow: [
                           BoxShadow(
@@ -197,13 +135,11 @@ class _NavigationMenuState extends State<NavigationMenu> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          _buildNavBarItem('home', 0),
-                          _buildNavBarItem('top', 1),
-                          const SizedBox(
-                              width:
-                                  50), // Space for the floating action button
-                          _buildNavBarItem('chat', 3),
-                          _buildNavBarItem('user', 4),
+                          BottomNavBarItemWidget.buildNavBarItem('home', 0, _selectedIndex, _onItemTapped),
+                          BottomNavBarItemWidget.buildNavBarItem('top', 1, _selectedIndex, _onItemTapped),
+                          const SizedBox(width: 50),
+                          BottomNavBarItemWidget.buildNavBarItem('chat', 3, _selectedIndex, _onItemTapped),
+                          BottomNavBarItemWidget.buildNavBarItem('user', 4, _selectedIndex, _onItemTapped),
                         ],
                       ),
                     ),
@@ -211,11 +147,9 @@ class _NavigationMenuState extends State<NavigationMenu> {
                 ),
               ],
             ),
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerDocked,
+            floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
             floatingActionButton: Transform.translate(
-              offset:
-                  const Offset(0, -30), // Adjust the offset to raise the button
+              offset: const Offset(0, -30),
               child: Container(
                 height: 68,
                 width: 68,
@@ -248,58 +182,63 @@ class _NavigationMenuState extends State<NavigationMenu> {
     );
   }
 
-  NavigationRailDestination _buildRailDestination(
-      String icon, String selectedIcon, String label) {
-    final bool isSelected = _selectedIndex ==
-        _pages.indexWhere((element) => element.toString() == label);
-    return NavigationRailDestination(
-      icon: SvgPicture.asset(
-        'assets/icons/navBar/$icon.svg',
-        width: 30,
-        height: 30,
-        color: isSelected ? Colors.black : Colors.black.withOpacity(0.9),
-      ),
-      selectedIcon: SvgPicture.asset(
-        'assets/icons/navBar/$selectedIcon.svg',
-        width: 30,
-        height: 30,
-        color: Colors.black,
-      ),
-      label: Text(label),
+  //  -------------------------------------- Methods --------------------------------------------
+
+  /// Handles the back button press to navigate within the nested navigators.
+  Future<bool> _onWillPop() async {
+    if (_navKeys[_selectedIndex].currentState?.canPop() ?? false) {
+      _navKeys[_selectedIndex].currentState?.pop();
+      return false;
+    }
+    return true;
+  }
+
+  /// Handles the navigation item tap.
+  /// If the user is not logged in and tries to access restricted pages, it shows a login dialog.
+  void _onItemTapped(int index) {
+    if (_selectedIndex == index) {
+      _navKeys[index].currentState?.popUntil((route) => route.isFirst);
+    } else if (index == 1 || index == 2 || index == 3 || index == 4) {
+      if (authController.isLoggedIn.value) {
+        setState(() {
+          _selectedIndex = index;
+        });
+      } else {
+        _showLoginDialog();
+      }
+    } else {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
+  }
+
+  /// Shows a dialog prompting the user to log in.
+  void _showLoginDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Inicio de Sesión'),
+          content: const Text('Necesitas iniciar sesión para acceder a esta sección.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: const Text('Iniciar Sesión'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Login()),
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
-  }
-
-  Widget _buildNavBarItem(String icon, int index) {
-    final bool isSelected = _selectedIndex == index;
-    return IconButton(
-      icon: SvgPicture.asset(
-        'assets/icons/navBar/${isSelected ? '${icon}_selected' : icon}.svg',
-        width: 28,
-        height: 28,
-        color: isSelected ? Colors.black : Colors.black.withOpacity(0.9),
-      ),
-      onPressed: () => _onItemTapped(index),
-    );
-  }
-}
-
-class NavigationController extends GetxController {
-  final Rx<int> selectedIndex = 0.obs;
-
-  void updateIndex(int index) {
-    selectedIndex.value = index;
-  }
-}
-
-class AuthController extends GetxController {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final RxBool isLoggedIn = false.obs;
-
-  @override
-  void onInit() {
-    super.onInit();
-    _auth.authStateChanges().listen((User? user) {
-      isLoggedIn.value = user != null;
-    });
   }
 }

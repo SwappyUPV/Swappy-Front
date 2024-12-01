@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart'; // Import for handling SVG images
 import 'package:pin/core/services/authentication_service.dart'; // Your AuthMethod class
-import 'package:pin/features/catalogue/presentation/widgets/navigation_menu.dart';
+import 'package:pin/core/utils/NavigationMenu/NavigationMenu.dart';
 import 'package:pin/features/auth/data/models/user_model.dart'; // Import UserModel
 import '../components/already_have_an_account_acheck.dart';
 import '../../../../../core/constants/constants.dart';
