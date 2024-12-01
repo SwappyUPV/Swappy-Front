@@ -103,8 +103,19 @@ flutter:
     - family: UrbaneMedium
       fonts:
         - asset: assets/fonts/Urbane-Medium.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
+    - family: UrbaneBold
+      fonts:
+        - asset: assets/fonts/Urbane-Bold.ttf
+    - family: UrbaneLight
+      fonts:
+        - asset: assets/fonts/Urbane-Light.ttf
+    - family: OpenSans
+      fonts:
+        - asset: assets/fonts/OpenSans-Regular.ttf
+        - asset: assets/fonts/OpenSans-Bold.ttf
+          weight: 700
+
+
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf

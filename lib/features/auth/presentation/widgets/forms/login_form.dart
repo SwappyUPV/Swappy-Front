@@ -1,143 +1,81 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart'; // Import for handling SVG images
-import 'package:pin/core/services/authentication_service.dart'; // Your AuthMethod class
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:iconsax/iconsax.dart';
+import 'package:pin/core/services/authentication_service.dart';
 import 'package:pin/core/utils/NavigationMenu/NavigationMenu.dart';
-import 'package:pin/features/auth/data/models/user_model.dart'; // Import UserModel
-import '../components/already_have_an_account_acheck.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../../../../core/constants/constants.dart';
-import '../../screens/sign_up_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
 
 class LoginForm extends StatefulWidget {
-  const LoginForm({super.key});
+  final Function(String, String) onLogin;
+
+  const LoginForm({Key? key, required this.onLogin}) : super(key: key);
 
   @override
   _LoginFormState createState() => _LoginFormState();
 }
 
 class _LoginFormState extends State<LoginForm> {
-  final TextEditingController _emailController =
-  TextEditingController(text: 's@gmail.com');
-  final TextEditingController _passwordController =
-  TextEditingController(text: '123456');
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
   final AuthMethod _authMethod = AuthMethod();
 
-  // Method to save user ID in SharedPreferences
   Future<void> saveUserId(String userId) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('userId', userId);
   }
 
-  // Email/Password Login Method
-  // Email/Password Login Method
+  // Login Method
   void loginUser() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
 
-      String res;
-      try {
-        res = await _authMethod.loginUser(
-          email: _emailController.text,
-          password: _passwordController.text,
-        );
-
-        // Check if the widget is still mounted before updating state
-        if (!mounted) return; // Prevent setState if widget is disposed
-      } catch (error) {
-        // Handle any exceptions that may occur during login
-        if (mounted) {
-          setState(() {
-            _isLoading = false; // Stop loading if an error occurs
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: $error'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-        return; // Exit the method if an error occurred
-      }
+      String res = await _authMethod.loginUser(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
 
       setState(() {
-        _isLoading = false; // Stop loading after receiving a response
+        _isLoading = false;
       });
 
       if (res == 'success') {
-        // Get the user ID here
-        String userId = _authMethod.getCurrentUser()!.uid; // Get UID from the current user
-
-        // Save the user ID to SharedPreferences
+        String userId = _authMethod.getCurrentUser()!.uid;
         await saveUserId(userId);
-        // Save the user Model to SharedPreferences
         await _authMethod.saveUserModel(userId);
-
-        if (mounted) { // Check if still mounted before navigation
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => NavigationMenu()),
-          );
-        }
+        widget.onLogin(_emailController.text, _passwordController.text);
       } else {
-        if (mounted) { // Check if still mounted before showing snackbar
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(res),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(res), backgroundColor: Colors.red),
+        );
       }
     }
   }
 
-// Google Sign-In Method
+  // Google Sign-In Method
   void signInWithGoogle() async {
     try {
       String res = await _authMethod.signInWithGoogle();
-
-      // Check if the widget is still mounted before updating state
-      if (!mounted) return; // Prevent setState if widget is disposed
-
       if (res == "success") {
-        // If sign-in is successful, save user ID to SharedPreferences
-        String userId = _authMethod.getCurrentUser()!.uid; // Get UID from the current user
+        String userId = _authMethod.getCurrentUser()!.uid;
         await saveUserId(userId);
-
-        // Navigate to NavigationMenu
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => NavigationMenu()),
-        );
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => NavigationMenu()));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(res),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(res), backgroundColor: Colors.red),
         );
       }
     } catch (e) {
-      print('exception->$e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Google sign-in failed'),
-          backgroundColor: Colors.red,
-        ),
+        const SnackBar(content: Text('Google sign-in failed'), backgroundColor: Colors.red),
       );
     }
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
   }
 
   @override
@@ -146,92 +84,147 @@ class _LoginFormState extends State<LoginForm> {
       key: _formKey,
       child: Column(
         children: [
-          // Email Input Field
-          TextFormField(
-            controller: _emailController,
-            keyboardType: TextInputType.emailAddress,
-            textInputAction: TextInputAction.next,
-            cursorColor: kPrimaryColor,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your email';
-              }
-              return null;
-            },
-            decoration: const InputDecoration(
-              hintText: "Your email",
-              prefixIcon: Padding(
-                padding: EdgeInsets.all(defaultPadding),
-                child: Icon(Icons.person),
+          // Login Title
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Iniciar sesión',
+                style: TextStyle(fontSize: 24, fontFamily: 'UrbaneMedium', fontWeight: FontWeight.w900, color: Colors.black),
               ),
             ),
           ),
-          // Password Input Field
+          const SizedBox(height: 31),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: defaultPadding),
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            child: TextFormField(
+              controller: _emailController,
+              style: const TextStyle(
+                fontSize: 14,
+                fontFamily: 'OpenSans',
+                fontWeight: FontWeight.w400,
+                color: PrimaryColor,
+              ),
+              decoration: InputDecoration(
+                hintText: "Correo electrónico o teléfono",
+                hintStyle: TextStyle(
+                  fontFamily: 'OpenSans',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: PrimaryColor,
+                ),
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.all(8.0), // Adjust padding to center the icon
+                  child: SvgPicture.asset(
+                    'icons/@.svg',
+                    height: 35, // Set size to 35px
+                    width: 35,
+                  ),
+                ),
+                filled: true,
+                fillColor: const Color(0xFFE3E3E3),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              validator: (value) => value!.isEmpty ? 'Introduce tu correo electrónico' : null,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30),
             child: TextFormField(
               controller: _passwordController,
-              textInputAction: TextInputAction.done,
               obscureText: true,
-              cursorColor: kPrimaryColor,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your password';
-                }
-                return null;
-              },
-              decoration: const InputDecoration(
-                hintText: "Your password",
+              style: const TextStyle(
+                fontSize: 14,
+                fontFamily: 'OpenSans',
+                fontWeight: FontWeight.w400,
+                color: PrimaryColor,
+              ),
+              decoration: InputDecoration(
+                hintText: "Contraseña",
+                hintStyle: TextStyle(
+                  fontFamily: 'OpenSans',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: PrimaryColor,
+                ),
                 prefixIcon: Padding(
-                  padding: EdgeInsets.all(defaultPadding),
-                  child: Icon(Icons.lock),
+                  padding: const EdgeInsets.all(8.0), // Adjust padding to center the icon
+                  child: SvgPicture.asset(
+                    'icons/key.svg',
+                    height: 35, // Set size to 35px
+                    width: 35,
+                  ),
+                ),
+                filled: true,
+                fillColor: const Color(0xFFE3E3E3),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              validator: (value) => value!.isEmpty ? 'Introduce tu contraseña' : null,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            child: GestureDetector(
+              onTap: () {
+                // Add your forgot password logic here
+              },
+              child: Text(
+                'Has olvidado tu contraseña? Recupérala fácilmente aquí',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF000000),
+                  fontFamily: 'OpenSans',
+                  fontStyle: FontStyle.normal,
+                  letterSpacing: -0.26,
                 ),
               ),
             ),
           ),
-          const SizedBox(height: defaultPadding),
-
-          // Login Button
+          const SizedBox(height: 40),
           _isLoading
               ? const CircularProgressIndicator()
-              : ElevatedButton(
-            onPressed: loginUser,
-            child: Text(
-              "Login".toUpperCase(),
+              : Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            child: ElevatedButton(
+              onPressed: loginUser,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 30),
+              ),
+              child: const Text('Iniciar Sesión', style: TextStyle(fontSize: 17, fontFamily: 'UrbaneMedium', fontWeight: FontWeight.w500, color: SecondaryColor)),
             ),
           ),
-          const SizedBox(height: defaultPadding),
-
-          // Already Have an Account
-          AlreadyHaveAnAccountCheck(
-            press: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) {
-                    return const SignUp();
-                  },
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            child: GestureDetector(
+              onTap: signInWithGoogle,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.5), blurRadius: 5, offset: const Offset(0, 3))],
                 ),
-              );
-            },
-          ),
-          const SizedBox(height: defaultPadding),
-
-          // Google Sign-In Button
-          Center(
-            child: Card(
-              elevation: 5,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: IconButton(
-                iconSize: 40,
-                icon: SvgPicture.asset(
-                  'assets/icons/icons-google.svg', // Google icon from assets
-                  width: 40,
-                  height: 40,
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset('assets/icons/icons-google.svg', height: 20),
+                    const SizedBox(width: 10),
+                    const Text('Iniciar sesión con Google', style: TextStyle(fontSize: 16)),
+                  ],
                 ),
-                onPressed: signInWithGoogle,
               ),
             ),
           ),

@@ -5,8 +5,8 @@ import '../../../../core/utils/background.dart';
 import '../widgets/components/sign_up_top_image.dart';
 import '../widgets/forms/sign_up_form.dart';
 
-class SignUp extends StatelessWidget {
-  const SignUp({super.key});
+class SignUpScreen extends StatelessWidget {
+  const SignUpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

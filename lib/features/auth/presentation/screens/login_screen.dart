@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:pin/core/utils/responsive.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:pin/core/constants/constants.dart';
+import 'package:pin/core/utils/background.dart';
 import 'package:pin/core/utils/NavigationMenu/NavigationMenu.dart';
-
-import '../../../../core/utils/background.dart';
-import '../widgets/forms/login_form.dart';
 import '../widgets/components/login_screen_top_image.dart';
+import '../widgets/forms/login_form.dart';
+import 'package:pin/features/auth/presentation/screens/sign_up_screen.dart';
 import 'package:pin/core/utils/NavigationMenu/controllers/navigationController.dart';
-
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -19,29 +19,9 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final NavigationController navigationController =
-      Get.find<NavigationController>();
+  final NavigationController navigationController = Get.find<NavigationController>();
 
-  @override
-  void initState() {
-    super.initState();
-    // Comentamos el auto-login
-    // _autoLogin();
-  }
-
-  // Future<void> _autoLogin() async {
-  //   String email = 's@gmail.com'; // Reemplaza con el email predeterminado
-  //   String password = '123456'; // Reemplaza con la contraseña predeterminada
-  //
-  //   String res = await _loginUser(email: email, password: password);
-  //
-  //   if (res == 'success') {
-  //     _navigateToCatalogue();
-  //   }
-  // }
-
-  Future<String> _loginUser(
-      {required String email, required String password}) async {
+  Future<String> _loginUser({required String email, required String password}) async {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       return 'success';
@@ -57,7 +37,6 @@ class _LoginState extends State<Login> {
 
   void _handleLogin(String email, String password) async {
     String res = await _loginUser(email: email, password: password);
-
     if (res == 'success') {
       _navigateToCatalogue();
     } else {
@@ -72,59 +51,64 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    return Background(
-      child: SingleChildScrollView(
-        child: Responsive(
-          mobile: MobileLogin(onLogin: _handleLogin),
-          desktop: Row(
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 30.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: LoginScreenTopImage(),
-              ),
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 450,
-                      child: LoginForm(),
+              const SizedBox(height: 75),
+              // Top Logo and Register Link
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Logo
+                  SizedBox(
+                    height: 57, // Match the height of the Register text
+                    child: SvgPicture.asset(
+                      'assets/icons/logo.svg',
+                      height: 28,
+                      color: PrimaryColor,
                     ),
-                  ],
-                ),
+                  ),
+
+                  // Register Link
+                  GestureDetector(
+                    onTap: () {
+                      Get.to(() => const SignUpScreen()); // Replace with your signup screen
+                    },
+                    child: SizedBox(
+                      height: 57, // Match the height with logo container
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          '¿No tienes una cuenta?\nRegístrate',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            color: Color(0xFF000000),
+                            fontFamily: 'UrbaneMedium',
+                            fontSize: 13,
+                            fontStyle: FontStyle.normal,
+                            fontWeight: FontWeight.w300,
+                            letterSpacing: -0.26,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 192),
+
+              // Login Form
+              LoginForm(onLogin: _handleLogin),
+
             ],
           ),
         ),
       ),
-    );
-  }
-}
-
-class MobileLogin extends StatelessWidget {
-  final Function(String, String) onLogin;
-
-  const MobileLogin({
-    super.key,
-    required this.onLogin,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        LoginScreenTopImage(),
-        Row(
-          children: [
-            Spacer(),
-            Expanded(
-              flex: 8,
-              child: LoginForm(),
-            ),
-            Spacer(),
-          ],
-        ),
-      ],
     );
   }
 }
