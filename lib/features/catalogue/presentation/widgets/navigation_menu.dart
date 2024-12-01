@@ -112,27 +112,12 @@ class _NavigationMenuState extends State<NavigationMenu> {
                     }
                   },
                   labelType: NavigationRailLabelType.all,
-                  leading: FloatingActionButton(
-                    onPressed: () {
-                      if (authController.isLoggedIn.value) {
-                        _onItemTapped(2);
-                      } else {
-                        _showLoginDialog();
-                      }
-                    },
-                    backgroundColor: Colors.black,
-                    child: SvgPicture.asset(
-                      'assets/icons/navBar/add.svg',
-                      width: 30,
-                      height: 30,
-                      color: Colors.white,
-                    ),
-                  ),
                   destinations: [
-                    _buildRailDestination('home', 'home_selected', 'Catalogue'),
-                    _buildRailDestination('top', 'top_selected', 'Closet'),
+                    _buildRailDestination('home', 'home_selected', 'Catálogo'),
+                    _buildRailDestination('top', 'top_selected', 'Armario'),
+                    _buildRailDestination('add', 'add_selected', 'Subir'),
                     _buildRailDestination('chat', 'chat_selected', 'Chat'),
-                    _buildRailDestination('user', 'user_selected', authController.isLoggedIn.value ? 'Profile' : 'Login'),
+                    _buildRailDestination('user', 'user_selected', authController.isLoggedIn.value ? 'Perfil' : 'Iniciar Sesión'),
                   ],
                 ),
                 Expanded(
@@ -156,79 +141,92 @@ class _NavigationMenuState extends State<NavigationMenu> {
         } else {
           // Use Bottom Navigation for smaller screens
           return Scaffold(
-            body: WillPopScope(
-              onWillPop: _onWillPop,
-              child: IndexedStack(
-                index: _selectedIndex,
-                children: _pages
-                    .asMap()
-                    .entries
-                    .map((entry) => Navigator(
-                  key: _navKeys[entry.key],
-                  onGenerateInitialRoutes: (_, __) {
-                    return [
-                      MaterialPageRoute(
-                        builder: (context) => entry.value,
+            body: Stack(
+              children: [
+                WillPopScope(
+                  onWillPop: _onWillPop,
+                  child: IndexedStack(
+                    index: _selectedIndex,
+                    children: _pages
+                        .asMap()
+                        .entries
+                        .map((entry) => Navigator(
+                      key: _navKeys[entry.key],
+                      onGenerateInitialRoutes: (_, __) {
+                        return [
+                          MaterialPageRoute(
+                            builder: (context) => entry.value,
+                          ),
+                        ];
+                      },
+                    ))
+                        .toList(),
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: BottomAppBar(
+                    shape: const CircularNotchedRectangle(),
+                    notchMargin: 8.0,
+                    color: Colors.transparent, // Make BottomAppBar transparent
+                    elevation: 0, // Remove shadow
+                    child: Container(
+                      height: 98,
+                      width: 390,
+                      decoration: BoxDecoration(
+                        color: Colors.white, // Set the desired background color
+                        borderRadius: BorderRadius.circular(30.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.7),
+                            blurRadius: 15,
+                            spreadRadius: 5,
+                          ),
+                        ],
                       ),
-                    ];
-                  },
-                ))
-                    .toList(),
-              ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _buildNavBarItem('home', 0),
+                          _buildNavBarItem('top', 1),
+                          const SizedBox(width: 50), // Space for the floating action button
+                          _buildNavBarItem('chat', 3),
+                          _buildNavBarItem('user', 4),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-            floatingActionButton: Container(
-              margin: const EdgeInsets.only(top: 15),
-              height: 68,
-              width: 68,
-              child: FloatingActionButton(
-                backgroundColor: Colors.black,
-                elevation: 0,
-                onPressed: () {
-                  if (authController.isLoggedIn.value) {
-                    _onItemTapped(2);
-                  } else {
-                    _showLoginDialog();
-                  }
-                },
-                shape: RoundedRectangleBorder(
-                  side: const BorderSide(width: 3, color: Colors.black),
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: SvgPicture.asset(
-                  'assets/icons/navBar/add.svg',
-                  width: 30,
-                  height: 30,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            bottomNavigationBar: BottomAppBar(
-              shape: const CircularNotchedRectangle(),
-              notchMargin: 8.0,
+            floatingActionButton: Transform.translate(
+              offset: const Offset(0, -30), // Adjust the offset to raise the button
               child: Container(
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(30.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 20,
-                      spreadRadius: 5,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildNavBarItem('home', 0),
-                    _buildNavBarItem('top', 1),
-                    const SizedBox(width: 50), // Space for the floating action button
-                    _buildNavBarItem('chat', 3),
-                    _buildNavBarItem('user', 4),
-                  ],
+                height: 68,
+                width: 68,
+                child: FloatingActionButton(
+                  backgroundColor: Colors.black,
+                  elevation: 0,
+                  onPressed: () {
+                    if (authController.isLoggedIn.value) {
+                      _onItemTapped(2);
+                    } else {
+                      _showLoginDialog();
+                    }
+                  },
+                  shape: RoundedRectangleBorder(
+                    side: const BorderSide(width: 3, color: Colors.black),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  child: SvgPicture.asset(
+                    'assets/icons/navBar/add.svg',
+                    width: 30,
+                    height: 30,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
@@ -245,7 +243,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
         'assets/icons/navBar/$icon.svg',
         width: 30,
         height: 30,
-        color: isSelected ? Colors.black : Colors.black.withOpacity(0.7),
+        color: isSelected ? Colors.black : Colors.black.withOpacity(0.9),
       ),
       selectedIcon: SvgPicture.asset(
         'assets/icons/navBar/$selectedIcon.svg',
@@ -264,7 +262,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
         'assets/icons/navBar/${isSelected ? '${icon}_selected' : icon}.svg',
         width: 28,
         height: 28,
-        color: isSelected ? Colors.black : Colors.black.withOpacity(0.7),
+        color: isSelected ? Colors.black : Colors.black.withOpacity(0.9),
       ),
       onPressed: () => _onItemTapped(index),
     );
