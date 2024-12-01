@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class CategoryFilter extends StatelessWidget {
-  final List<String> categories;
-  final String selectedCategory;
+  final List<String?> categories; // Lista que puede contener valores null
+  final String? selectedCategory; // Categoría seleccionada puede ser null
   final Function(String) onCategorySelected;
 
   const CategoryFilter({
@@ -14,16 +14,20 @@ class CategoryFilter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Filtra categorías para excluir null y cadenas vacías
+    final List<String> filteredCategories = categories
+        .where((category) => category != null && category.isNotEmpty)
+        .cast<String>() // Convierte a List<String>
+        .toList();
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
           SizedBox(width: 16),
-          for (String category in categories)
+          for (String category in filteredCategories)
             GestureDetector(
               onTap: () {
-                print(
-                    'assets/images/$category.png'); // Imprime la ruta de la imagen
                 onCategorySelected(
                     category); // Llama al callback para seleccionar la categoría
               },

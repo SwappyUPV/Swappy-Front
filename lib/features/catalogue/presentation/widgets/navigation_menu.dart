@@ -20,7 +20,8 @@ class _NavigationMenuState extends State<NavigationMenu> {
   final NavigationController controller = Get.put(NavigationController());
   final AuthController authController = Get.put(AuthController());
 
-  final List<GlobalKey<NavigatorState>> _navKeys = List.generate(5, (_) => GlobalKey<NavigatorState>());
+  final List<GlobalKey<NavigatorState>> _navKeys =
+      List.generate(5, (_) => GlobalKey<NavigatorState>());
   final List<Widget> _pages = [
     const Catalogue(),
     const VirtualCloset(),
@@ -63,7 +64,8 @@ class _NavigationMenuState extends State<NavigationMenu> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Inicio de Sesión'),
-          content: const Text('Necesitas iniciar sesión para acceder a esta sección.'),
+          content: const Text(
+              'Necesitas iniciar sesión para acceder a esta sección.'),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancelar'),
@@ -117,7 +119,12 @@ class _NavigationMenuState extends State<NavigationMenu> {
                     _buildRailDestination('top', 'top_selected', 'Armario'),
                     _buildRailDestination('add', 'add_selected', 'Subir'),
                     _buildRailDestination('chat', 'chat_selected', 'Chat'),
-                    _buildRailDestination('user', 'user_selected', authController.isLoggedIn.value ? 'Perfil' : 'Iniciar Sesión'),
+                    _buildRailDestination(
+                        'user',
+                        'user_selected',
+                        authController.isLoggedIn.value
+                            ? 'Perfil'
+                            : 'Iniciar Sesión'),
                   ],
                 ),
                 Expanded(
@@ -151,15 +158,15 @@ class _NavigationMenuState extends State<NavigationMenu> {
                         .asMap()
                         .entries
                         .map((entry) => Navigator(
-                      key: _navKeys[entry.key],
-                      onGenerateInitialRoutes: (_, __) {
-                        return [
-                          MaterialPageRoute(
-                            builder: (context) => entry.value,
-                          ),
-                        ];
-                      },
-                    ))
+                              key: _navKeys[entry.key],
+                              onGenerateInitialRoutes: (_, __) {
+                                return [
+                                  MaterialPageRoute(
+                                    builder: (context) => entry.value,
+                                  ),
+                                ];
+                              },
+                            ))
                         .toList(),
                   ),
                 ),
@@ -170,7 +177,8 @@ class _NavigationMenuState extends State<NavigationMenu> {
                   child: BottomAppBar(
                     shape: const CircularNotchedRectangle(),
                     notchMargin: 8.0,
-                    color: Colors.transparent, // Make BottomAppBar transparent
+                    color: const Color.fromARGB(
+                        0, 187, 3, 3), // Make BottomAppBar transparent
                     elevation: 0, // Remove shadow
                     child: Container(
                       height: 98,
@@ -191,7 +199,9 @@ class _NavigationMenuState extends State<NavigationMenu> {
                         children: [
                           _buildNavBarItem('home', 0),
                           _buildNavBarItem('top', 1),
-                          const SizedBox(width: 50), // Space for the floating action button
+                          const SizedBox(
+                              width:
+                                  50), // Space for the floating action button
                           _buildNavBarItem('chat', 3),
                           _buildNavBarItem('user', 4),
                         ],
@@ -201,9 +211,11 @@ class _NavigationMenuState extends State<NavigationMenu> {
                 ),
               ],
             ),
-            floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerDocked,
             floatingActionButton: Transform.translate(
-              offset: const Offset(0, -30), // Adjust the offset to raise the button
+              offset:
+                  const Offset(0, -30), // Adjust the offset to raise the button
               child: Container(
                 height: 68,
                 width: 68,
@@ -236,8 +248,10 @@ class _NavigationMenuState extends State<NavigationMenu> {
     );
   }
 
-  NavigationRailDestination _buildRailDestination(String icon, String selectedIcon, String label) {
-    final bool isSelected = _selectedIndex == _pages.indexWhere((element) => element.toString() == label);
+  NavigationRailDestination _buildRailDestination(
+      String icon, String selectedIcon, String label) {
+    final bool isSelected = _selectedIndex ==
+        _pages.indexWhere((element) => element.toString() == label);
     return NavigationRailDestination(
       icon: SvgPicture.asset(
         'assets/icons/navBar/$icon.svg',
