@@ -1,59 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart'; // Use this Chat model
 import 'package:pin/core/services/chat_service.dart';
-import '../../../../constants.dart';
-import '../../messages/message_screen.dart';
+import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart';
 import 'chat_card.dart';
 
-class Body extends StatefulWidget {
+class Body extends StatelessWidget {
   final String searchQuery;
-  const Body({super.key, required this.searchQuery});
+  final Function(String) onDeleteChat;
 
-  @override
-  _BodyState createState() => _BodyState();
-}
-
-class _BodyState extends State<Body> {
-  final ChatService _chatService = ChatService();
-
-  Stream<List<Chat>> _getChatStream() {
-    return _chatService.fetchChats();
-  }
+  const Body({
+    Key? key,
+    required this.searchQuery,
+    required this.onDeleteChat,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: StreamBuilder<List<Chat>>(
-        stream: _getChatStream(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("No hay chats disponibles"));
-          }
-
-          final filteredChats = snapshot.data!
-              .where((chat) => chat.name1
-                  .toLowerCase()
-                  .contains(widget.searchQuery.toLowerCase()))
-              .toList();
-
-          return ListView.builder(
-            itemCount: filteredChats.length,
-            itemBuilder: (context, index) => ChatCard(
-              chat: filteredChats[index],
-              press: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      MessagesScreen(chat: filteredChats[index]),
-                ),
+    return StreamBuilder<List<Chat>>(
+      stream: ChatService().fetchChats(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        }
+        final chats = snapshot.data!;
+        return ListView.builder(
+          itemCount: chats.length,
+          itemBuilder: (context, index) {
+            final chat = chats[index];
+            return Dismissible(
+              key: Key(chat.uid),
+              direction: DismissDirection.endToStart,
+              onDismissed: (direction) {
+                onDeleteChat(chat.uid);
+              },
+              background: Container(
+                color: Colors.red,
+                alignment: Alignment.centerRight,
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Icon(Icons.delete, color: Colors.white),
               ),
-            ),
-          );
-        },
-      ),
+              child: ChatCard(
+                chat: chat,
+                press: () {},
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

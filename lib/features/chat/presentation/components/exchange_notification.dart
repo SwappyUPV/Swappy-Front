@@ -6,6 +6,8 @@ import 'package:pin/features/chat/presentation/screens/messages/model/ChatMessag
 import 'package:pin/features/exchanges/screens/home/exchanges.dart';
 import 'package:pin/features/auth/data/models/user_model.dart';
 
+import '../../../../core/constants/constants.dart';
+
 class ExchangeNotification extends StatelessWidget {
   final ChatMessageModel? exchange;
   final bool isClickable;
@@ -17,19 +19,6 @@ class ExchangeNotification extends StatelessWidget {
     required this.receiver,
     this.isClickable = true,
   });
-
-  String _timeElapsed(DateTime timestamp) {
-    final now = DateTime.now();
-    final difference = now.difference(timestamp);
-
-    if (difference.inDays > 0) {
-      return '${difference.inDays} ${difference.inDays == 1 ? 'día' : 'días'}';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours} ${difference.inHours == 1 ? 'hora' : 'horas'}';
-    } else {
-      return '${difference.inMinutes} ${difference.inMinutes == 1 ? 'minuto' : 'minutos'}';
-    }
-  }
 
   Future<String> _getUserName(String? uid) async {
     if (uid == null || uid.isEmpty) {
@@ -93,15 +82,15 @@ class ExchangeNotification extends StatelessWidget {
                 }
               : null,
           child: Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(6),
             margin: const EdgeInsets.symmetric(vertical: 5),
             decoration: BoxDecoration(
-              color: Colors.blueAccent.withOpacity(0.1),
+              color: PrimaryColor,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               children: [
-                const Icon(Icons.swap_horiz, color: Colors.blueAccent),
+                const Icon(Icons.swap_horiz, color: Colors.white),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -109,18 +98,10 @@ class ExchangeNotification extends StatelessWidget {
                     children: [
                       Text(
                         messageText,
-                        style: const TextStyle(color: Colors.blueAccent),
+                        style: const TextStyle(color: Colors.white, fontSize: 14),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 2,
                       ),
-                      if (exchange != null)
-                        Text(
-                          _timeElapsed(exchange!.timestamp),
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 12,
-                          ),
-                        ),
                     ],
                   ),
                 ),

@@ -19,15 +19,15 @@ class MessageStatus extends StatelessWidget {
 
     if (difference.inDays >= 30) {
       final months = (difference.inDays / 30).floor();
-      return '$months mes${months > 1 ? '' : ''} ';
+      return '$months mes';
     } else if (difference.inDays > 0) {
-      return '${difference.inDays} d${difference.inDays > 1 ? '' : ''} ';
+      return '${difference.inDays} d';
     } else if (difference.inHours > 0) {
-      return '${difference.inHours} h${difference.inHours > 1 ? '' : ''} ';
+      return '${difference.inHours} h';
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes} min${difference.inMinutes > 1 ? '' : ''} ';
+      return '${difference.inMinutes} min';
     } else {
-      return 'Ahora';
+      return '${difference.inSeconds}s';
     }
   }
 
@@ -37,25 +37,22 @@ class MessageStatus extends StatelessWidget {
       padding: const EdgeInsets.all(kDefaultPadding),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Opacity(
             opacity: 0.64,
-            child: Container(
-              width: 60,
-              height: 13,
-              child: Text(
-                latestMessage != null
-                    ? _getTimeSinceLastMessage(latestMessage!.timestamp)
-                    : "",
-                textAlign: TextAlign.right,
-                style: const TextStyle(
-                  color: Color(0xFF707070),
-                  fontFamily: 'OpenSans',
-                  fontSize: 12,
-                  fontStyle: FontStyle.normal,
-                  fontWeight: FontWeight.w400,
-                  height: 1.0, // line-height equivalent
-                ),
+            child: Text(
+              latestMessage != null
+                  ? _getTimeSinceLastMessage(latestMessage!.timestamp)
+                  : "",
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                color: Color(0xFF707070),
+                fontFamily: 'OpenSans',
+                fontSize: 12,
+                fontStyle: FontStyle.normal,
+                fontWeight: FontWeight.w400,
+                height: 1.0, // line-height equivalent
               ),
             ),
           ),

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:pin/core/constants/constants.dart';
 import 'package:pin/core/services/chat_service.dart';
 import '../../../../auth/data/models/user_model.dart';
 import 'components/ChatAppBar.dart';
@@ -14,7 +12,6 @@ class ChatsScreen extends StatefulWidget {
 class ChatsScreenState extends State<ChatsScreen> {
   TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  bool _isSearching = false;
   bool _showNewChatPopup = false;
 
   @override
@@ -24,11 +21,9 @@ class ChatsScreenState extends State<ChatsScreen> {
   }
 
   void _onSearchChanged() {
-    if (mounted) {
-      setState(() {
-        _searchQuery = _searchController.text;
-      });
-    }
+    setState(() {
+      _searchQuery = _searchController.text;
+    });
   }
 
   @override
@@ -38,23 +33,55 @@ class ChatsScreenState extends State<ChatsScreen> {
     super.dispose();
   }
 
+  void _toggleNewChatPopup() {
+    setState(() {
+      _showNewChatPopup = !_showNewChatPopup;
+      _searchController.clear();
+      _searchQuery = '';
+    });
+  }
+
+  void _closeNewChatPopup() {
+    setState(() {
+      _showNewChatPopup = false;
+      _searchController.clear();
+    });
+  }
+
+  void _handleNewChat(UserModel user) async {
+    final chatExists = await ChatService().doesChatExist(user.uid);
+    if (!chatExists) {
+      await ChatService().startNewChat(user.uid);
+      _closeNewChatPopup();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Chat ya existe con el usuario ${user.name}")),
+      );
+    }
+  }
+
+  Future<void> _deleteChat(String chatId) async {
+    try {
+      await ChatService().deleteChat(chatId);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Chat eliminado")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error eliminando chat: $e")),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ChatAppBar(
-        onIconPressed: () {
-          if (mounted) {
-            setState(() {
-              _showNewChatPopup = !_showNewChatPopup;
-              _searchController.clear();
-              _searchQuery = '';
-            });
-          }
-        },
+        onIconPressed: _toggleNewChatPopup,
       ),
       body: Stack(
         children: [
-          Body(searchQuery: _searchQuery),
+          Body(searchQuery: _searchQuery, onDeleteChat: _deleteChat),
           if (_showNewChatPopup) buildNewChatPopup(),
         ],
       ),
@@ -85,21 +112,16 @@ class ChatsScreenState extends State<ChatsScreen> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: "Crear nuevo chat mediante nickname",
+                fillColor: Colors.grey[300],
+                filled: true,
                 suffixIcon: IconButton(
                   icon: Icon(Icons.close),
-                  onPressed: () {
-                    if (mounted) {
-                      setState(() {
-                        _showNewChatPopup = false;
-                        _searchController.clear();
-                      });
-                    }
-                  },
+                  onPressed: _closeNewChatPopup,
                 ),
               ),
             ),
             const SizedBox(height: 10),
-            Expanded(
+            Flexible(
               child: StreamBuilder<List<UserModel>>(
                 stream: ChatService().searchUsersByName(_searchQuery),
                 builder: (context, snapshot) {
@@ -115,21 +137,7 @@ class ChatsScreenState extends State<ChatsScreen> {
                       return ListTile(
                         title: Text(user.name),
                         subtitle: Text(user.email),
-                        onTap: () async {
-                          final chatExists = await ChatService().doesChatExist(user.uid);
-                          if (!chatExists) {
-                            await ChatService().startNewChat(user.uid);
-                            if (mounted) {
-                              setState(() {
-                                _showNewChatPopup = false;
-                              });
-                            }
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("Chat ya existe con el usuario ${user.name}")),
-                            );
-                          }
-                        },
+                        onTap: () => _handleNewChat(user),
                       );
                     },
                   );

@@ -43,32 +43,43 @@ class _ChatCardState extends State<ChatCard> {
       return const PlaceholderWidget(); // Loads mock data when user details are not available
     }
 
-    return InkWell(
-      onTap: () async {
-        await Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => MessagesScreen(chat: widget.chat),
-        ));
-        await chatService.markChatAsRead(widget.chat.uid, userId!);
-        setState(() {
-          unreadMessagesCount = 0; // Reset unread count when chat is opened
-        });
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: kDefaultPadding,
-          vertical: kDefaultPadding * 0.75,
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: 90),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: Color(0xFFB4B3B3)),
+          ),
         ),
-        child: Row(
-          children: [
-            ProfileImage(profileImage: _profileImage),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: kDefaultPadding),
-                child: ChatDetails(displayName: _displayName, latestMessage: latestMessage),
-              ),
+        child: InkWell(
+          onTap: () async {
+            await Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => MessagesScreen(chat: widget.chat),
+            ));
+            await chatService.markChatAsRead(widget.chat.uid, userId!);
+            if (mounted) {
+              setState(() {
+                unreadMessagesCount = 0; // Reset unread count when chat is opened
+              });
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: kDefaultPadding,
             ),
-            msg_status.MessageStatus(unreadMessagesCount: unreadMessagesCount, latestMessage: latestMessage),
-          ],
+            child: Row(
+              children: [
+                ProfileImage(profileImage: _profileImage),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: kDefaultPadding),
+                    child: ChatDetails(displayName: _displayName, latestMessage: latestMessage, unreadMessagesCount: unreadMessagesCount),
+                  ),
+                ),
+                msg_status.MessageStatus(unreadMessagesCount: unreadMessagesCount, latestMessage: latestMessage),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -79,7 +90,7 @@ class _ChatCardState extends State<ChatCard> {
   Future<void> _initializeChatDetails() async {
     userId = await chatService.getUserId();
 
-    if (userId != null) {
+    if (userId != null && mounted) {
       setState(() {
         _setUserDetails();
       });
@@ -107,13 +118,14 @@ class _ChatCardState extends State<ChatCard> {
       final unreadCount = await chatService.getUnreadMessagesCount(widget.chat.uid);
       final latestMessage = await chatService.getLatestMessage(widget.chat.uid);
 
-      setState(() {
-        this.latestMessage = latestMessage;
-        if (unreadMessagesCount == 0) {
-          unreadMessagesCount = unreadCount; // Only update if not already set
-        }
-      });
-
+      if (mounted) {
+        setState(() {
+          this.latestMessage = latestMessage;
+          if (unreadMessagesCount == 0) {
+            unreadMessagesCount = unreadCount; // Only update if not already set
+          }
+        });
+      }
     } catch (e) {
       print("Error initializing chat details: $e");
     }

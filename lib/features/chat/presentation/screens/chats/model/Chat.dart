@@ -43,7 +43,9 @@ class Chat {
       isActive: data['isActive'] ?? false,
       isRecent: data['isRecent'] ?? true,
       users: List<String>.from(data['users'] ?? []),
-      unreadCount: Map<String, int>.from(data['unreadCount'] ?? {}),
+      unreadCount: data['unreadCount'] != null
+          ? Map<String, int>.from(data['unreadCount'])
+          : {},
     );
   }
 }

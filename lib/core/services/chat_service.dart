@@ -40,6 +40,25 @@ class ChatService {
     });
   }
 
+  Future<void> deleteChat(String chatId) async {
+    try {
+      final chatRef = _firestore.collection('chats').doc(chatId);
+      final messagesRef = chatRef.collection('messages');
+
+      // Delete all messages in the sub-collection
+      final messagesSnapshot = await messagesRef.get();
+      for (var doc in messagesSnapshot.docs) {
+        await doc.reference.delete();
+      }
+
+      // Delete the chat document
+      await chatRef.delete();
+    } catch (e) {
+      print("Error deleting chat: $e");
+      throw e;
+    }
+  }
+
 
   // Listen for only the latest incoming message
   Stream<ChatMessageModel?> listenForNewMessage(String chatId) async* {
@@ -168,7 +187,6 @@ class ChatService {
   }
 
   Stream<List<ChatMessageModel>> fetchMessages(String chatId) async* {
-    final String? userId = await getUserId();
     // Start streaming messages from Firestore
     yield* _firestore
         .collection('chats')
@@ -185,7 +203,7 @@ class ChatService {
 
       // Map the documents to ChatMessageModel objects
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         // Handle the possibility of a null timestamp
         Timestamp? timestamp = data['timestamp'] as Timestamp?;
         // Extract message properties
@@ -223,7 +241,7 @@ class ChatService {
     return _firestore
         .collection('users')
         .where('name', isGreaterThanOrEqualTo: name)
-        .where('name', isLessThanOrEqualTo: name + '\uf8ff')
+        .where('name', isLessThanOrEqualTo: '$name\uf8ff')
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) {
               return UserModel.fromFirestore(doc);
@@ -254,14 +272,6 @@ class ChatService {
       'users': [currentUserId, otherUserId],
     });
 
-    // Create the messages sub-collection within the newly created chat
-    await chatDocRef.collection('messages').add({
-      'content': 'Hola', // Initial message content
-      'sender': currentUserId, // Assuming the current user is the sender
-      'status': 'viewed', // Set initial status
-      'timestamp': FieldValue.serverTimestamp(),
-      'type': 'text', // Message type, assuming it's a text message
-    });
   }
 
 
