@@ -1,15 +1,17 @@
-import 'package:pin/core/services/chat_service.dart';
-import 'package:pin/features/auth/data/models/user_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pin/core/constants/constants.dart';
+import 'package:pin/core/services/chat_service.dart';
+import '../../../../auth/data/models/user_model.dart';
+import 'components/ChatAppBar.dart';
 import 'components/body.dart';
-import '../../../constants.dart';
 
 class ChatsScreen extends StatefulWidget {
   @override
   ChatsScreenState createState() => ChatsScreenState();
 }
 
-class ChatsScreenState extends State<ChatsScreen> with SingleTickerProviderStateMixin {
+class ChatsScreenState extends State<ChatsScreen> {
   TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   bool _isSearching = false;
@@ -39,58 +41,21 @@ class ChatsScreenState extends State<ChatsScreen> with SingleTickerProviderState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildAppBar(),
+      appBar: ChatAppBar(
+        onIconPressed: () {
+          if (mounted) {
+            setState(() {
+              _showNewChatPopup = !_showNewChatPopup;
+              _searchController.clear();
+              _searchQuery = '';
+            });
+          }
+        },
+      ),
       body: Stack(
         children: [
           Body(searchQuery: _searchQuery),
           if (_showNewChatPopup) buildNewChatPopup(),
-        ],
-      ),
-    );
-  }
-
-  AppBar buildAppBar() {
-    return AppBar(
-      backgroundColor: kPrimaryColor,
-      automaticallyImplyLeading: false,
-      title: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.chat),
-            onPressed: () {
-              if (mounted) {
-                setState(() {
-                  _showNewChatPopup = !_showNewChatPopup;
-                  _searchController.clear();
-                  _searchQuery = '';
-                });
-              }
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              if (mounted) {
-                setState(() {
-                  _isSearching = !_isSearching;
-                  if (!_isSearching) {
-                    _searchController.clear();
-                    _searchQuery = '';
-                  }
-                });
-              }
-            },
-          ),
-          if (_isSearching)
-            Expanded(
-              child: TextField(
-                controller: _searchController,
-                decoration: const InputDecoration(
-                  hintText: "Buscar...",
-                  border: InputBorder.none,
-                ),
-              ),
-            ),
         ],
       ),
     );
@@ -119,7 +84,7 @@ class ChatsScreenState extends State<ChatsScreen> with SingleTickerProviderState
             TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: "Search users by name...",
+                hintText: "Crear nuevo chat mediante nickname",
                 suffixIcon: IconButton(
                   icon: Icon(Icons.close),
                   onPressed: () {
@@ -138,11 +103,11 @@ class ChatsScreenState extends State<ChatsScreen> with SingleTickerProviderState
               child: StreamBuilder<List<UserModel>>(
                 stream: ChatService().searchUsersByName(_searchQuery),
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData) return Center(child: Text("No users found"));
+                  if (!snapshot.hasData) return Center(child: Text("No hay usuario con ese nickname"));
                   final users = snapshot.data!;
 
                   return users.isEmpty
-                      ? const Center(child: Text("No users found"))
+                      ? const Center(child: Text("No hay usuario con ese nickname"))
                       : ListView.builder(
                     itemCount: users.length,
                     itemBuilder: (context, index) {
@@ -161,7 +126,7 @@ class ChatsScreenState extends State<ChatsScreen> with SingleTickerProviderState
                             }
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("Chat already exists with this user")),
+                              SnackBar(content: Text("Chat ya existe con el usuario ${user.name}")),
                             );
                           }
                         },

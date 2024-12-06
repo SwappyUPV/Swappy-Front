@@ -12,6 +12,7 @@ class Chat {
   final bool isActive;
   final bool isRecent;
   final List<String> users;
+  final Map<String, int> unreadCount; // Unread count for each user
 
   Chat({
     required this.uid,
@@ -25,23 +26,24 @@ class Chat {
     required this.isActive,
     required this.isRecent,
     required this.users,
+    required this.unreadCount,
   });
 
-  // Create a factory method for converting Firebase documents into Chat objects
   factory Chat.fromDocument(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return Chat(
       uid: doc.id,
       name1: data['name1'] ?? 'Unknown',
       name2: data['name2'] ?? 'Unknown',
-      image1: data['image1'] ?? 'assets/images/user.png', // Default image path
-      image2: data['image2'] ?? 'assets/images/user.png', // Default image path
+      image1: data['image1'] ?? 'assets/images/user.png',
+      image2: data['image2'] ?? 'assets/images/user.png',
       user1: data['user1'] ?? 'Unknown',
       user2: data['user2'] ?? 'Unknown',
       timestamp: (data['timestamp'] as Timestamp).toDate(),
       isActive: data['isActive'] ?? false,
       isRecent: data['isRecent'] ?? true,
-      users: List<String>.from(data['users'] ?? []), // Ensure it's a List<String>
+      users: List<String>.from(data['users'] ?? []),
+      unreadCount: Map<String, int>.from(data['unreadCount'] ?? {}),
     );
   }
 }
