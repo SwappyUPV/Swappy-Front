@@ -29,27 +29,14 @@ class Messages extends StatelessWidget {
       child: Row(
         mainAxisAlignment: isSentByUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
-          // Show the other user's avatar if the message is not sent by the logged-in user
-          if (!isSentByUser)
-            CircleAvatar(
-              radius: 20, // Increased size for the avatar
-              backgroundImage: message.sender == user1
-                  ? _getImageProvider(userImage1)
-                  : _getImageProvider(userImage2), // Use userImage1 or userImage2 based on the sender
+          Flexible(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.5,
+              ),
+              child: _messageContent(message, isSentByUser),
             ),
-          const SizedBox(width: kDefaultPadding / 2),
-          // Display message content
-          _messageContent(message, isSentByUser),
-          // Show the logged-in user's avatar if the message is sent by the logged-in user
-          if (isSentByUser) ...[
-            const SizedBox(width: kDefaultPadding / 2),
-            CircleAvatar(
-              radius: 20, // Increased size for the avatar
-              backgroundImage: message.sender == user1
-                  ? _getImageProvider(userImage1)
-                  : _getImageProvider(userImage2), // Use userImage1 or userImage2 based on the sender
-            ),
-          ],
+          ),
         ],
       ),
     );
@@ -57,22 +44,34 @@ class Messages extends StatelessWidget {
 
   Widget _messageContent(ChatMessageModel message, bool isSentByUser) {
     return Container(
-      padding: const EdgeInsets.all(12), // Increased padding for the message bubble
+      padding: const EdgeInsets.all(16), // Adjusted padding for the message bubble
       decoration: BoxDecoration(
-        color: isSentByUser ? Colors.blueAccent : Colors.grey[300], // Change colors based on sender
-        borderRadius: BorderRadius.circular(12),
+        color: isSentByUser ? Color(0xFF1E1E1E) : Color(0xFFC2C2C2), // Change colors based on sender
+        borderRadius: isSentByUser
+            ? BorderRadius.only(
+          topLeft: Radius.circular(45),
+          topRight: Radius.circular(45),
+          bottomLeft: Radius.circular(45),
+          bottomRight: Radius.circular(12),
+        )
+            : BorderRadius.only(
+          topLeft: Radius.circular(12),
+          topRight: Radius.circular(45),
+          bottomLeft: Radius.circular(45),
+          bottomRight: Radius.circular(45),
+        ),
       ),
       child: Text(
         message.content,
-        style: TextStyle(fontSize: 16, color: isSentByUser ? Colors.white : Colors.black), // Increased font size
+        style: TextStyle(
+          color: isSentByUser ? Colors.white : Colors.black,
+          fontFamily: "OpenSans",
+          fontSize: 16,
+          fontStyle: FontStyle.normal,
+          fontWeight: FontWeight.normal,
+          height: 1.0, // line-height equivalent
+        ),
       ),
     );
-  }
-
-  ImageProvider _getImageProvider(String imagePath) {
-    if (imagePath.isNotEmpty) {
-      return AssetImage(imagePath);
-    }
-    return const AssetImage("assets/images/user.png");
   }
 }

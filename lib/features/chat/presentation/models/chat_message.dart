@@ -36,12 +36,14 @@ class ChatMessage {
   final String messageContent; // For text, image, or audio
   final bool isSender; // If the message was sent by the user
   final MessageStatus messageStatus;
+  final Timestamp timestamp; // Add timestamp field
 
   ChatMessage({
     required this.messageType,
     required this.messageContent,
     required this.isSender,
     required this.messageStatus,
+    required this.timestamp, // Add timestamp to constructor
   });
 
   // Factory method to create a ChatMessage from a Map
@@ -51,6 +53,7 @@ class ChatMessage {
       messageContent: data['content'] ?? '',
       isSender: data['isSender'] ?? false,
       messageStatus: MessageStatus.values.firstWhere((e) => e.value == data['status'], orElse: () => MessageStatus.notSent), // Default to notSent
+      timestamp: data['timestamp'] ?? Timestamp.now(), // Handle timestamp
     );
   }
 
@@ -61,7 +64,7 @@ class ChatMessage {
       'content': messageContent,
       'isSender': isSender,
       'status': messageStatus.value, // Use the string value of the enum
-      'timestamp': FieldValue.serverTimestamp(),
+      'timestamp': timestamp, // Include timestamp
     };
   }
 }

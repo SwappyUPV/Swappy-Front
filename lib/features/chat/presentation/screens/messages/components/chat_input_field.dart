@@ -11,6 +11,7 @@ class ChatInputField extends StatefulWidget {
 
 class ChatInputFieldState extends State<ChatInputField> {
   final TextEditingController _controller = TextEditingController();
+
   void _sendMessage() {
     final messageText = _controller.text.trim();
     if (messageText.isNotEmpty) {
@@ -22,22 +23,59 @@ class ChatInputFieldState extends State<ChatInputField> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(8.0),
+      margin: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 35.0),
+      color: Colors.transparent, // No background color
       child: Row(
         children: [
+          // Input Field with Camera Icon
           Expanded(
-            child: TextField(
-              controller: _controller,
-              onSubmitted: (_) => _sendMessage(),
-              decoration: const InputDecoration(
-                hintText: "Escribe un mensaje...",
-                border: OutlineInputBorder(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24.0),
+                border: Border.all(color: Colors.grey),
+              ),
+              child: Row(
+                children: [
+                  // Camera Icon
+                  IconButton(
+                    icon: const Icon(Icons.camera_alt, color: Colors.grey),
+                    onPressed: () {
+                      // Add camera functionality here
+                    },
+                  ),
+                  // Input Field
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      onSubmitted: (_) => _sendMessage(),
+                      decoration: const InputDecoration(
+                        hintText: "Escribe un mensaje...",
+                        fillColor: Colors.transparent, // No background color
+                        filled: true,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.send),
-            onPressed: _sendMessage,
+          SizedBox(width: 20),
+          // Microphone Icon with black circle background and size 40x40
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              shape: BoxShape.circle,
+
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.mic, color: Colors.white),
+              onPressed: () {
+                // Add microphone functionality here
+              },
+            ),
           ),
         ],
       ),
