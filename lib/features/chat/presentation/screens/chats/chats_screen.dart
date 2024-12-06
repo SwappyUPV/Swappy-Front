@@ -4,6 +4,16 @@ import '../../../../auth/data/models/user_model.dart';
 import 'components/ChatAppBar.dart';
 import 'components/body.dart';
 
+// todo: chatService refactoring to use RealTimeDatabase
+// todo: use less read calls to the database
+// todo: use of constants and components: code refactoring and clean up
+// todo: Populate database with the demo users chats inside demo@gmail.com
+
+// todo: removal of BottomNavBar in nested message class (complex to implement since the current routing isn't detecting the screens in)
+// todo: Make camera functional
+// todo: Add message sent time: Day grouping for message collection. Cache messages by day and scroll to fetch previous days from firebase into cached.
+
+
 class ChatsScreen extends StatefulWidget {
   @override
   ChatsScreenState createState() => ChatsScreenState();
