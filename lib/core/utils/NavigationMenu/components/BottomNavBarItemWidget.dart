@@ -7,8 +7,8 @@ class BottomNavBarItemWidget {
     return IconButton(
       icon: SvgPicture.asset(
         'assets/icons/navBar/${isSelected ? '${icon}_selected' : icon}.svg',
-        width: 28,
-        height: 28,
+        width: 30,
+        height: 30,
         color: isSelected ? Colors.black : Colors.black.withOpacity(0.9),
       ),
       onPressed: () => onItemTapped(index),

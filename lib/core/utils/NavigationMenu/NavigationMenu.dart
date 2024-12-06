@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pin/features/add_product/presentation/screens/add_product_screen.dart';
 import 'package:pin/features/catalogue/presentation/screens/catalogue_screen.dart';
 import 'package:pin/features/chat/presentation/screens/chats/chats_screen.dart';
@@ -89,55 +88,60 @@ class _NavigationMenuState extends State<NavigationMenu> {
           return Scaffold(
             body: Stack(
               children: [
-                WillPopScope(
-                  onWillPop: _onWillPop,
-                  child: IndexedStack(
-                    index: _selectedIndex,
-                    children: _pages
-                        .asMap()
-                        .entries
-                        .map((entry) => Navigator(
-                      key: _navKeys[entry.key],
-                      onGenerateInitialRoutes: (_, __) {
-                        return [
-                          MaterialPageRoute(
-                            builder: (context) => entry.value,
-                          ),
-                        ];
-                      },
-                    ))
-                        .toList(),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 68), // Add padding to the bottom
+                  child: WillPopScope(
+                    onWillPop: _onWillPop,
+                    child: IndexedStack(
+                      index: _selectedIndex,
+                      children: _pages
+                          .asMap()
+                          .entries
+                          .map((entry) => Navigator(
+                        key: _navKeys[entry.key],
+                        onGenerateInitialRoutes: (_, __) {
+                          return [
+                            MaterialPageRoute(
+                              builder: (context) => entry.value,
+                            ),
+                          ];
+                        },
+                      ))
+                          .toList(),
+                    ),
                   ),
                 ),
                 Positioned(
                   bottom: 0,
                   left: 0,
                   right: 0,
-                  child: BottomAppBar(
-                    shape: const CircularNotchedRectangle(),
-                    notchMargin: 8.0,
-                    color: Colors.transparent,
-                    elevation: 0,
-                    child: Container(
-                      height: 98,
-                      width: 390,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.7),
-                            blurRadius: 15,
-                            spreadRadius: 5,
-                          ),
-                        ],
+                  child: Container(
+                    height: 68,
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(150.0),
+                        topRight: Radius.circular(150.0),
+                        bottomLeft: Radius.circular(150.0),
+                        bottomRight: Radius.circular(150.0),
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.6),
+                          blurRadius: 15,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 42),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           BottomNavBarItemWidget.buildNavBarItem('home', 0, _selectedIndex, _onItemTapped),
                           BottomNavBarItemWidget.buildNavBarItem('top', 1, _selectedIndex, _onItemTapped),
-                          const SizedBox(width: 50),
+                          SizedBox(width: 60), // Space for FloatingActionButton
                           BottomNavBarItemWidget.buildNavBarItem('chat', 3, _selectedIndex, _onItemTapped),
                           BottomNavBarItemWidget.buildNavBarItem('user', 4, _selectedIndex, _onItemTapped),
                         ],
@@ -150,12 +154,12 @@ class _NavigationMenuState extends State<NavigationMenu> {
             floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
             floatingActionButton: Transform.translate(
               offset: const Offset(0, -30),
-              child: Container(
-                height: 68,
-                width: 68,
+              child: SizedBox(
+                height: 70,
+                width: 70,
                 child: FloatingActionButton(
                   backgroundColor: Colors.black,
-                  elevation: 0,
+                  elevation: 5,
                   onPressed: () {
                     if (authController.isLoggedIn.value) {
                       _onItemTapped(2);
@@ -163,14 +167,13 @@ class _NavigationMenuState extends State<NavigationMenu> {
                       _showLoginDialog();
                     }
                   },
-                  shape: RoundedRectangleBorder(
-                    side: const BorderSide(width: 3, color: Colors.black),
-                    borderRadius: BorderRadius.circular(100),
+                  shape: CircleBorder(
+                    side: BorderSide(color: Colors.black, width: 2),
                   ),
                   child: SvgPicture.asset(
                     'assets/icons/navBar/add.svg',
-                    width: 30,
-                    height: 30,
+                    width: 25,
+                    height: 25,
                     color: Colors.white,
                   ),
                 ),
