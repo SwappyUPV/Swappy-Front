@@ -73,7 +73,7 @@ class _ProfileState extends State<Profile> {
           mainAxisAlignment: MainAxisAlignment.start, // Align title to the left
           children: const [
             Text(
-              'Profile',
+              'Perfil',
               style: TextStyle(color: Colors.black),
             ),
           ],

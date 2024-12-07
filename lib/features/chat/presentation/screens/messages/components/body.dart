@@ -34,9 +34,9 @@ class BodyState extends State<Body> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return const Center(child: Text("Error loading messages"));
+                  return const Center(child: Text("Error cargando mensajes"));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text("No messages yet"));
+                  return const Center(child: Text("Sin mensajes todavía"));
                 }
 
                 final messages = snapshot.data!.reversed.toList();
@@ -75,7 +75,7 @@ class BodyState extends State<Body> {
                   widget.chat.uid, messageText, widget.userId!);
             } else {
               print(
-                  "Message not sent: messageText is empty or userId is null.");
+                  "Mensaje no enviado, campo vacío o usuario no loggeado.");
             }
           },
         ),

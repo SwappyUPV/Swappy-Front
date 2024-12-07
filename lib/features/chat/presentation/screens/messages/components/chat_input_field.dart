@@ -42,6 +42,12 @@ class ChatInputFieldState extends State<ChatInputField> {
                     icon: const Icon(Icons.camera_alt, color: Colors.grey),
                     onPressed: () {
                       // Add camera functionality here
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                'Fotos no implementado'),
+                          ),
+                      );
                     },
                   ),
                   // Input Field
@@ -74,6 +80,12 @@ class ChatInputFieldState extends State<ChatInputField> {
               icon: const Icon(Icons.mic, color: Colors.white),
               onPressed: () {
                 // Add microphone functionality here
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                          'Microfono no implementado'),
+                    ),
+                );
               },
             ),
           ),
