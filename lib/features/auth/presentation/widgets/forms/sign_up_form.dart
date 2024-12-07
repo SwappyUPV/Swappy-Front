@@ -1,9 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:pin/core/services/create_user_service.dart';
 import '../../screens/login_screen.dart';
-import 'package:pin/features/add_product/presentation/widgets/image_picker.dart'; // Import ImagePickerWidget
+import 'package:pin/features/auth/presentation/widgets/components/image_picker_widget.dart'; // Import ImagePickerWidget
 
 class SignUpForm extends StatefulWidget {
   const SignUpForm({super.key});
@@ -18,12 +16,11 @@ class _SignUpFormState extends State<SignUpForm> {
   final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _pointsController = TextEditingController();
   final CreateUserService _createUserService = CreateUserService();
   final _formKey = GlobalKey<FormState>();
 
   DateTime? _selectedBirthday;
-  String? _selectedGender;
+  String? _selectedGender = 'Hombre';
   List<String> preferredSizes = [];
   bool _showPassword = false;
   bool _showConfirmPassword = false;
@@ -31,157 +28,256 @@ class _SignUpFormState extends State<SignUpForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          TextFormField(
-            controller: _nameController,
-            decoration: const InputDecoration(
-              hintText: "Nombre de usuario",
-              prefixIcon: Icon(Icons.person),
+    return SingleChildScrollView(
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Foto de perfil',
+                  style: TextStyle(
+                    fontFamily: 'UrbaneMedium',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                ImagePickerWidget(
+                  pickedImage: _pickedImage,
+                  onImagePicked: (image) {
+                    setState(() {
+                      _pickedImage = image;
+                    });
+                  },
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 10),
-          TextFormField(
-            controller: _emailController,
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-              hintText: "Correo electrónico",
-              prefixIcon: Icon(Icons.email),
-            ),
-          ),
-          const SizedBox(height: 10),
-          TextFormField(
-            controller: _passwordController,
-            obscureText: !_showPassword,
-            decoration: InputDecoration(
-              hintText: "Introducir contraseña",
-              prefixIcon: const Icon(Icons.lock),
-              suffixIcon: IconButton(
-                icon: Icon(_showPassword ? Icons.visibility : Icons.visibility_off),
-                onPressed: () {
-                  setState(() {
-                    _showPassword = !_showPassword;
-                  });
-                },
+            const Divider(height: 30, thickness: 2),
+            const Text(
+              'Información Personal',
+              style: TextStyle(
+                fontFamily: 'UrbaneMedium',
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
               ),
             ),
-          ),
-          const SizedBox(height: 10),
-          TextFormField(
-            controller: _confirmPasswordController,
-            obscureText: !_showConfirmPassword,
-            decoration: InputDecoration(
-              hintText: "Confirmar contraseña",
-              prefixIcon: const Icon(Icons.lock),
-              suffixIcon: IconButton(
-                icon: Icon(_showConfirmPassword ? Icons.visibility : Icons.visibility_off),
-                onPressed: () {
-                  setState(() {
-                    _showConfirmPassword = !_showConfirmPassword;
-                  });
-                },
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: _nameController,
+              style: TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                hintText: "Nombre de usuario",
+                prefixIcon: Icon(Icons.person),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 10),
-          TextFormField(
-            controller: _addressController,
-            decoration: const InputDecoration(
-              hintText: "Localidad",
-              prefixIcon: Icon(Icons.home),
-            ),
-          ),
-          const SizedBox(height: 10),
-          TextFormField(
-            controller: _pointsController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              hintText: "Puntos",
-              prefixIcon: Icon(Icons.score),
-            ),
-          ),
-          const SizedBox(height: 10),
-          DropdownButtonFormField<String>(
-            value: _selectedGender,
-            decoration: const InputDecoration(
-              hintText: "Gender",
-              prefixIcon: Icon(Icons.person),
-            ),
-            items: ['Hombre', 'Mujer', 'Otro']
-                .map((gender) => DropdownMenuItem(
-              value: gender,
-              child: Text(gender),
-            ))
-                .toList(),
-            onChanged: (String? newValue) {
-              setState(() {
-                _selectedGender = newValue;
-              });
-            },
-          ),
-          const SizedBox(height: 10),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              const Text("Cumpleaños: "),
-              TextButton(
-                onPressed: _pickBirthday,
-                child: Text(_selectedBirthday == null
-                    ? "Selecciona fecha"
-                    : "${_selectedBirthday!.toLocal()}".split(' ')[0]),
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              style: TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                hintText: "Correo electrónico",
+                prefixIcon: Icon(Icons.email),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              const Text("Tallas preferidas: "),
-              Checkbox(
-                value: preferredSizes.contains("M"),
-                onChanged: (bool? value) {
-                  setState(() {
-                    if (value == true) {
-                      preferredSizes.add("M");
-                    } else {
-                      preferredSizes.remove("M");
-                    }
-                  });
-                },
+            ),
+            const Divider(height: 30, thickness: 2),
+            const Text(
+              'Contraseña',
+              style: TextStyle(
+                fontFamily: 'UrbaneMedium',
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
               ),
-              const Text("M"),
-              Checkbox(
-                value: preferredSizes.contains("L"),
-                onChanged: (bool? value) {
-                  setState(() {
-                    if (value == true) {
-                      preferredSizes.add("L");
-                    } else {
-                      preferredSizes.remove("L");
-                    }
-                  });
-                },
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: !_showPassword,
+              style: TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                hintText: "Introducir contraseña",
+                prefixIcon: const Icon(Icons.lock),
+                suffixIcon: IconButton(
+                  icon: Icon(_showPassword ? Icons.visibility : Icons.visibility_off),
+                  onPressed: () {
+                    setState(() {
+                      _showPassword = !_showPassword;
+                    });
+                  },
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
-              const Text("L"),
-            ],
-          ),
-          const SizedBox(height: 20),
-          ImagePickerWidget(
-            pickedImage: _pickedImage,
-            onImagePicked: (image) {
-              setState(() {
-                _pickedImage = image;
-              });
-            },
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () => signUpUser(context),
-            child: Text("Registrarse".toUpperCase()),
-          ),
-        ],
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: _confirmPasswordController,
+              obscureText: !_showConfirmPassword,
+              style: TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                hintText: "Confirmar contraseña",
+                prefixIcon: const Icon(Icons.lock),
+                suffixIcon: IconButton(
+                  icon: Icon(_showConfirmPassword ? Icons.visibility : Icons.visibility_off),
+                  onPressed: () {
+                    setState(() {
+                      _showConfirmPassword = !_showConfirmPassword;
+                    });
+                  },
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const Divider(height: 30, thickness: 2),
+            const Text(
+              'Detalles Adicionales',
+              style: TextStyle(
+                fontFamily: 'UrbaneMedium',
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: _addressController,
+              style: TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                hintText: "Localidad",
+                prefixIcon: Icon(Icons.home),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            DropdownButtonFormField<String>(
+              value: _selectedGender,
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.person),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              items: ['Hombre', 'Mujer', 'Otro']
+                  .map((gender) => DropdownMenuItem(
+                value: gender,
+                child: Text(gender),
+              ))
+                  .toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedGender = newValue;
+                });
+              },
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const Text(
+                  'Cumpleaños',
+                  style: TextStyle(
+                    fontFamily: 'UrbaneMedium',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Center(
+                    child: OutlinedButton(
+                      onPressed: _pickBirthday,
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: Colors.black, width: 1.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.calendar_today, color: Colors.black),
+                          const SizedBox(width: 8),
+                          Text(
+                            _selectedBirthday == null
+                                ? "Selecciona fecha"
+                                : "${_selectedBirthday!.toLocal()}".split(' ')[0],
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const Text(
+                  'Tallas preferidas',
+                  style: TextStyle(
+                    fontFamily: 'UrbaneMedium',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  children: [
+                    _buildSizeCheckbox("XS"),
+                    _buildSizeCheckbox("S"),
+                    _buildSizeCheckbox("M"),
+                    _buildSizeCheckbox("L"),
+                    _buildSizeCheckbox("XL"),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => signUpUser(context),
+              child: Text("Registrarse".toUpperCase()),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildSizeCheckbox(String size) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Checkbox(
+          value: preferredSizes.contains(size),
+          onChanged: (bool? value) {
+            setState(() {
+              if (value == true) {
+                preferredSizes.add(size);
+              } else {
+                preferredSizes.remove(size);
+              }
+            });
+          },
+        ),
+        Text(size),
+      ],
     );
   }
 
@@ -192,7 +288,6 @@ class _SignUpFormState extends State<SignUpForm> {
     _confirmPasswordController.dispose();
     _nameController.dispose();
     _addressController.dispose();
-    _pointsController.dispose();
     super.dispose();
   }
 
@@ -233,11 +328,9 @@ class _SignUpFormState extends State<SignUpForm> {
         return;
       }
 
+      // Use default image URL if no image is picked
       if (_pickedImage == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Por favor, seleccione una imagen')),
-        );
-        return;
+        _pickedImage = "https://firebasestorage.googleapis.com/v0/b/swappy-pin.appspot.com/o/profile_images%2Fdefault_user.png?alt=media&token=92bbfc56-8927-41a0-b81c-2394b90bf38c";
       }
 
       String res = await _createUserService.createUser(
@@ -248,7 +341,7 @@ class _SignUpFormState extends State<SignUpForm> {
           'address': _addressController.text,
           'birthday': _selectedBirthday,
           'gender': _selectedGender,
-          'points': int.parse(_pointsController.text),
+          'points': 0,
           'preferredSizes': preferredSizes,
         },
         profileImage: _pickedImage,

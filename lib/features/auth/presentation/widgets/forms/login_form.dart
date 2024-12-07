@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:pin/core/services/authentication_service.dart';
 import 'package:pin/core/utils/NavigationMenu/NavigationMenu.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,7 +9,7 @@ import '../../../../../core/constants/constants.dart';
 class LoginForm extends StatefulWidget {
   final Function(String, String) onLogin;
 
-  const LoginForm({Key? key, required this.onLogin}) : super(key: key);
+  const LoginForm({super.key, required this.onLogin});
 
   @override
   _LoginFormState createState() => _LoginFormState();
@@ -20,6 +19,7 @@ class _LoginFormState extends State<LoginForm> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _isHoveredRecuperar = false;
   bool _isLoading = false;
 
   final AuthMethod _authMethod = AuthMethod();
@@ -107,7 +107,7 @@ class _LoginFormState extends State<LoginForm> {
                 color: PrimaryColor,
               ),
               decoration: InputDecoration(
-                hintText: "Correo electrónico o teléfono",
+                hintText: "Correo electrónico",
                 hintStyle: TextStyle(
                   fontFamily: 'OpenSans',
                   fontSize: 14,
@@ -117,7 +117,7 @@ class _LoginFormState extends State<LoginForm> {
                 prefixIcon: Padding(
                   padding: const EdgeInsets.all(8.0), // Adjust padding to center the icon
                   child: SvgPicture.asset(
-                    'icons/@.svg',
+                    'icons/mail.svg',
                     height: 35, // Set size to 35px
                     width: 35,
                   ),
@@ -173,22 +173,35 @@ class _LoginFormState extends State<LoginForm> {
           const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: GestureDetector(
-              onTap: () {
-                // Add your forgot password logic here
+            child: // Recuperar Contraseña Link
+            MouseRegion(
+              onEnter: (_) {
+                setState(() {
+                  _isHoveredRecuperar = true;
+                });
               },
-              child: Text(
-                'Has olvidado tu contraseña? Recupérala fácilmente aquí',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF000000),
-                  fontFamily: 'OpenSans',
-                  fontStyle: FontStyle.normal,
-                  letterSpacing: -0.26,
+              onExit: (_) {
+                setState(() {
+                  _isHoveredRecuperar = false;
+                });
+              },
+              child: GestureDetector(
+                onTap: () {
+                  // Add your onTap logic here
+                },
+                child: Text(
+                  'Ha olvidado la contraseña? Recuperar contraseña',
+                  style: TextStyle(
+                    color: _isHoveredRecuperar ? Colors.grey : Color(0xFF000000),
+                    fontFamily: 'UrbaneMedium',
+                    fontSize: 13,
+                    fontStyle: FontStyle.normal,
+                    fontWeight: FontWeight.w300,
+                    letterSpacing: -0.26,
+                  ),
                 ),
               ),
-            ),
+            )
           ),
           const SizedBox(height: 40),
           _isLoading
@@ -208,26 +221,27 @@ class _LoginFormState extends State<LoginForm> {
           const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: GestureDetector(
-              onTap: signInWithGoogle,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.5), blurRadius: 5, offset: const Offset(0, 3))],
-                ),
+            child: ElevatedButton(
+              onPressed: signInWithGoogle,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                 padding: const EdgeInsets.symmetric(vertical: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SvgPicture.asset('assets/icons/icons-google.svg', height: 20),
-                    const SizedBox(width: 10),
-                    const Text('Iniciar sesión con Google', style: TextStyle(fontSize: 16)),
-                  ],
-                ),
+                shadowColor: Colors.grey.withOpacity(0.85),
+                elevation: 5,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset('assets/icons/icons-google.svg', height: 20),
+                  const SizedBox(width: 10),
+                  const Text(
+                      'Iniciar sesión con Google',
+                      style: TextStyle(fontSize: 16, color: Colors.black)),
+                ],
               ),
             ),
-          ),
+          )
         ],
       ),
     );

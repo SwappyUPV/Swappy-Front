@@ -78,7 +78,7 @@ class AuthMethod {
         });
         res = "success";
       } else {
-        res = "Please fill in all fields";
+        res = "Por favor rellena todos los campos";
       }
     } catch (err) {
       print('Error in signupUser: $err');

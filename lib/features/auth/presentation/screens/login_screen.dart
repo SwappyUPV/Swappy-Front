@@ -20,6 +20,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final NavigationController navigationController = Get.find<NavigationController>();
+  bool _isHovered = false;
 
   Future<String> _loginUser({required String email, required String password}) async {
     try {
@@ -69,35 +70,47 @@ class _LoginState extends State<Login> {
                     height: 57, // Match the height of the Register text
                     child: SvgPicture.asset(
                       'assets/icons/logo.svg',
-                      height: 28,
+                      height: 45,
                       color: PrimaryColor,
                     ),
                   ),
 
                   // Register Link
-                  GestureDetector(
-                    onTap: () {
-                      Get.to(() => const SignUpScreen()); // Replace with your signup screen
+                  MouseRegion(
+                    onEnter: (_) {
+                      setState(() {
+                        _isHovered = true;
+                      });
                     },
-                    child: SizedBox(
-                      height: 57, // Match the height with logo container
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          '¿No tienes una cuenta?\nRegístrate',
-                          textAlign: TextAlign.right,
-                          style: TextStyle(
-                            color: Color(0xFF000000),
-                            fontFamily: 'UrbaneMedium',
-                            fontSize: 13,
-                            fontStyle: FontStyle.normal,
-                            fontWeight: FontWeight.w300,
-                            letterSpacing: -0.26,
+                    onExit: (_) {
+                      setState(() {
+                        _isHovered = false;
+                      });
+                    },
+                    child: GestureDetector(
+                      onTap: () {
+                        Get.to(() => const SignUpScreen());
+                      },
+                      child: SizedBox(
+                        height: 57,
+                        child: Align(
+                          alignment: Alignment.bottomRight,
+                          child: Text(
+                            '¿No tienes una cuenta?\nRegístrate',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              color: _isHovered ? Colors.grey : Color(0xFF000000),
+                              fontFamily: 'UrbaneMedium',
+                              fontSize: 13,
+                              fontStyle: FontStyle.normal,
+                              fontWeight: FontWeight.w300,
+                              letterSpacing: -0.26,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
+                  )
                 ],
               ),
               const SizedBox(height: 192),

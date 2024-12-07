@@ -27,21 +27,27 @@ class CreateUserService {
         // Upload profile image to Firebase Storage
         String profileImageUrl = "";
         if (profileImage != null) {
-          String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-          Reference ref = _storage.ref().child('profile_images').child(fileName);
-
-          if (kIsWeb) {
-            UploadTask uploadTask = ref.putData(
-              await profileImage.readAsBytes(),
-              SettableMetadata(contentType: 'image/png'),
-            );
-            TaskSnapshot snapshot = await uploadTask;
-            profileImageUrl = await snapshot.ref.getDownloadURL();
+          if (profileImage is String) {
+            // If profileImage is a URL string, use it directly
+            profileImageUrl = profileImage;
           } else {
-            File file = File(profileImage.path); // profileImage must be a File
-            UploadTask uploadTask = ref.putFile(file);
-            TaskSnapshot snapshot = await uploadTask;
-            profileImageUrl = await snapshot.ref.getDownloadURL();
+            // Otherwise, upload the file to Firebase Storage
+            String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+            Reference ref = _storage.ref().child('profile_images').child(fileName);
+
+            if (kIsWeb) {
+              UploadTask uploadTask = ref.putData(
+                await profileImage.readAsBytes(),
+                SettableMetadata(contentType: 'image/png'),
+              );
+              TaskSnapshot snapshot = await uploadTask;
+              profileImageUrl = await snapshot.ref.getDownloadURL();
+            } else {
+              File file = File(profileImage.path); // profileImage must be a File
+              UploadTask uploadTask = ref.putFile(file);
+              TaskSnapshot snapshot = await uploadTask;
+              profileImageUrl = await snapshot.ref.getDownloadURL();
+            }
           }
         }
 
