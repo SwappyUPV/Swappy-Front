@@ -12,25 +12,24 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: PrimaryColor,
       automaticallyImplyLeading: false,
-      title: const Center(
-        child: Text(
-          'MENSAJES',
-          style: TextStyle(
-            color: Color(0xFFFFFFFF),
-            fontFamily: 'UrbaneMedium',
-            fontSize: 16,
-            fontStyle: FontStyle.normal,
-            fontWeight: FontWeight.w500,
-            letterSpacing: -0.32,
-          ),
+      title: Text(
+        'MENSAJES',
+        style: const TextStyle(
+          color: Color(0xFFFFFFFF),
+          fontFamily: 'UrbaneMedium',
+          fontSize: 16,
+          fontStyle: FontStyle.normal,
+          fontWeight: FontWeight.w500,
+          letterSpacing: -0.32,
         ),
       ),
+      centerTitle: true, // Centra el título automáticamente
       actions: [
         Padding(
-          padding: const EdgeInsets.only(right: 32.0),
+          padding: const EdgeInsets.only(right: 32),
           child: IconButton(
             icon: SvgPicture.asset(
-              'icons/new_chat.svg',
+              'assets/icons/new_chat.svg',
               height: 24,
               width: 24,
               color: Colors.white, // Set the icon color to white
