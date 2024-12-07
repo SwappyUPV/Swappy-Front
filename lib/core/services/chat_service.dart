@@ -36,7 +36,23 @@ class ChatService {
         .where('users', arrayContains: userId)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) => Chat.fromDocument(doc)).toList();
+      final chats = snapshot.docs.map((doc) => Chat.fromDocument(doc)).toList();
+
+      // Sort chats: unread messages first, then by timestamp descending
+      chats.sort((a, b) {
+        final unreadCountA = a.unreadCount[userId] ?? 0;
+        final unreadCountB = b.unreadCount[userId] ?? 0;
+
+        if (unreadCountA > 0 && unreadCountB == 0) {
+          return -1;
+        } else if (unreadCountA == 0 && unreadCountB > 0) {
+          return 1;
+        } else {
+          return b.timestamp.compareTo(a.timestamp);
+        }
+      });
+
+      return chats;
     });
   }
 
@@ -157,6 +173,22 @@ class ChatService {
     return snapshot.docs.isNotEmpty
         ? _mapToChatMessageModel(snapshot.docs.first)
         : null;
+
+  }
+
+  Stream<ChatMessageModel?> fetchLatestMessage(String chatId) async* {
+    yield* _firestore
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .limit(1)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.isNotEmpty
+          ? _mapToChatMessageModel(snapshot.docs.first)
+          : null;
+    });
   }
 
   Future<Chat?> getChatById(String chatId) async {

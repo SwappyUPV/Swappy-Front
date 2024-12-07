@@ -25,11 +25,11 @@ class ChatCard extends StatefulWidget {
 
 class _ChatCardState extends State<ChatCard> {
   final ChatService chatService = ChatService();
-  ChatMessageModel? latestMessage;
   String _displayName = "";
   String _profileImage = "";
   String? userId;
   int unreadMessagesCount = 0;
+  ChatMessageModel? latestMessage;
 
   @override
   void initState() {
@@ -73,10 +73,26 @@ class _ChatCardState extends State<ChatCard> {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: kDefaultPadding),
-                    child: ChatDetails(displayName: _displayName, latestMessage: latestMessage, unreadMessagesCount: unreadMessagesCount),
+                    child: StreamBuilder<ChatMessageModel?>(
+                      stream: chatService.fetchLatestMessage(widget.chat.uid),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        }
+                        latestMessage = snapshot.data;
+                        return ChatDetails(
+                          displayName: _displayName,
+                          latestMessage: latestMessage,
+                          unreadMessagesCount: unreadMessagesCount,
+                        );
+                      },
+                    ),
                   ),
                 ),
-                msg_status.MessageStatus(unreadMessagesCount: unreadMessagesCount, latestMessage: latestMessage),
+                msg_status.MessageStatus(
+                  unreadMessagesCount: unreadMessagesCount,
+                  latestMessage: latestMessage,
+                ),
               ],
             ),
           ),
@@ -96,7 +112,7 @@ class _ChatCardState extends State<ChatCard> {
       });
     }
 
-    await _fetchChatDetails();
+    await _fetchUnreadMessagesCount();
   }
 
   void _setUserDetails() {
@@ -113,21 +129,16 @@ class _ChatCardState extends State<ChatCard> {
     }
   }
 
-  Future<void> _fetchChatDetails() async {
+  Future<void> _fetchUnreadMessagesCount() async {
     try {
       final unreadCount = await chatService.getUnreadMessagesCount(widget.chat.uid);
-      final latestMessage = await chatService.getLatestMessage(widget.chat.uid);
-
       if (mounted) {
         setState(() {
-          this.latestMessage = latestMessage;
-          if (unreadMessagesCount == 0) {
-            unreadMessagesCount = unreadCount; // Only update if not already set
-          }
+          unreadMessagesCount = unreadCount;
         });
       }
     } catch (e) {
-      print("Error initializing chat details: $e");
+      print("Error fetching unread messages count: $e");
     }
   }
 }
