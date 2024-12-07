@@ -12,14 +12,13 @@ class SignUpScreenTopImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-
         const SizedBox(height: defaultPadding),
         Row(
           children: [
             const Spacer(),
             Expanded(
               flex: 8,
-              child:Image.asset("swappy.png"),
+              child: Image.asset("assets/images/swappy.png"),
             ),
             const Spacer(),
           ],
