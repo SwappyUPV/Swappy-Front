@@ -65,7 +65,8 @@ class _LoginFormState extends State<LoginForm> {
       if (res == "success") {
         String userId = _authMethod.getCurrentUser()!.uid;
         await saveUserId(userId);
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => NavigationMenu()));
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => NavigationMenu()));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(res), backgroundColor: Colors.red),
@@ -73,7 +74,9 @@ class _LoginFormState extends State<LoginForm> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Google sign-in failed'), backgroundColor: Colors.red),
+        const SnackBar(
+            content: Text('Google sign-in failed'),
+            backgroundColor: Colors.red),
       );
     }
   }
@@ -91,7 +94,11 @@ class _LoginFormState extends State<LoginForm> {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Iniciar sesión',
-                style: TextStyle(fontSize: 24, fontFamily: 'UrbaneMedium', fontWeight: FontWeight.w900, color: Colors.black),
+                style: TextStyle(
+                    fontSize: 24,
+                    fontFamily: 'UrbaneMedium',
+                    fontWeight: FontWeight.w900,
+                    color: Colors.black),
               ),
             ),
           ),
@@ -115,9 +122,10 @@ class _LoginFormState extends State<LoginForm> {
                   color: PrimaryColor,
                 ),
                 prefixIcon: Padding(
-                  padding: const EdgeInsets.all(8.0), // Adjust padding to center the icon
+                  padding: const EdgeInsets.all(
+                      8.0), // Adjust padding to center the icon
                   child: SvgPicture.asset(
-                    'icons/mail.svg',
+                    'assets/icons/mail.svg',
                     height: 35, // Set size to 35px
                     width: 35,
                   ),
@@ -129,7 +137,8 @@ class _LoginFormState extends State<LoginForm> {
                   borderSide: BorderSide.none,
                 ),
               ),
-              validator: (value) => value!.isEmpty ? 'Introduce tu correo electrónico' : null,
+              validator: (value) =>
+                  value!.isEmpty ? 'Introduce tu correo electrónico' : null,
             ),
           ),
           const SizedBox(height: 10),
@@ -153,9 +162,10 @@ class _LoginFormState extends State<LoginForm> {
                   color: PrimaryColor,
                 ),
                 prefixIcon: Padding(
-                  padding: const EdgeInsets.all(8.0), // Adjust padding to center the icon
+                  padding: const EdgeInsets.all(
+                      8.0), // Adjust padding to center the icon
                   child: SvgPicture.asset(
-                    'icons/key.svg',
+                    'assets/icons/key.svg',
                     height: 35, // Set size to 35px
                     width: 35,
                   ),
@@ -167,57 +177,65 @@ class _LoginFormState extends State<LoginForm> {
                   borderSide: BorderSide.none,
                 ),
               ),
-              validator: (value) => value!.isEmpty ? 'Introduce tu contraseña' : null,
+              validator: (value) =>
+                  value!.isEmpty ? 'Introduce tu contraseña' : null,
             ),
           ),
           const SizedBox(height: 20),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: // Recuperar Contraseña Link
-            MouseRegion(
-              onEnter: (_) {
-                setState(() {
-                  _isHoveredRecuperar = true;
-                });
-              },
-              onExit: (_) {
-                setState(() {
-                  _isHoveredRecuperar = false;
-                });
-              },
-              child: GestureDetector(
-                onTap: () {
-                  // Add your onTap logic here
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: // Recuperar Contraseña Link
+                  MouseRegion(
+                onEnter: (_) {
+                  setState(() {
+                    _isHoveredRecuperar = true;
+                  });
                 },
-                child: Text(
-                  'Ha olvidado la contraseña? Recuperar contraseña',
-                  style: TextStyle(
-                    color: _isHoveredRecuperar ? Colors.grey : Color(0xFF000000),
-                    fontFamily: 'UrbaneMedium',
-                    fontSize: 13,
-                    fontStyle: FontStyle.normal,
-                    fontWeight: FontWeight.w300,
-                    letterSpacing: -0.26,
+                onExit: (_) {
+                  setState(() {
+                    _isHoveredRecuperar = false;
+                  });
+                },
+                child: GestureDetector(
+                  onTap: () {
+                    // Add your onTap logic here
+                  },
+                  child: Text(
+                    'Ha olvidado la contraseña? Recuperar contraseña',
+                    style: TextStyle(
+                      color:
+                          _isHoveredRecuperar ? Colors.grey : Color(0xFF000000),
+                      fontFamily: 'UrbaneMedium',
+                      fontSize: 13,
+                      fontStyle: FontStyle.normal,
+                      fontWeight: FontWeight.w300,
+                      letterSpacing: -0.26,
+                    ),
                   ),
                 ),
-              ),
-            )
-          ),
+              )),
           const SizedBox(height: 40),
           _isLoading
               ? const CircularProgressIndicator()
               : Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: ElevatedButton(
-              onPressed: loginUser,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 30),
-              ),
-              child: const Text('Iniciar Sesión', style: TextStyle(fontSize: 17, fontFamily: 'UrbaneMedium', fontWeight: FontWeight.w500, color: SecondaryColor)),
-            ),
-          ),
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                  child: ElevatedButton(
+                    onPressed: loginUser,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30)),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 13, horizontal: 30),
+                    ),
+                    child: const Text('Iniciar Sesión',
+                        style: TextStyle(
+                            fontSize: 17,
+                            fontFamily: 'UrbaneMedium',
+                            fontWeight: FontWeight.w500,
+                            color: SecondaryColor)),
+                  ),
+                ),
           const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30),
@@ -225,7 +243,8 @@ class _LoginFormState extends State<LoginForm> {
               onPressed: signInWithGoogle,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30)),
                 padding: const EdgeInsets.symmetric(vertical: 15),
                 shadowColor: Colors.grey.withOpacity(0.85),
                 elevation: 5,
@@ -235,8 +254,7 @@ class _LoginFormState extends State<LoginForm> {
                 children: [
                   SvgPicture.asset('assets/icons/icons-google.svg', height: 20),
                   const SizedBox(width: 10),
-                  const Text(
-                      'Iniciar sesión con Google',
+                  const Text('Iniciar sesión con Google',
                       style: TextStyle(fontSize: 16, color: Colors.black)),
                 ],
               ),

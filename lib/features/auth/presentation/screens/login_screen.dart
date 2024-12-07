@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:pin/core/constants/constants.dart';
-import 'package:pin/core/utils/background.dart';
 import 'package:pin/core/utils/NavigationMenu/NavigationMenu.dart';
-import '../widgets/components/login_screen_top_image.dart';
 import '../widgets/forms/login_form.dart';
 import 'package:pin/features/auth/presentation/screens/sign_up_screen.dart';
 import 'package:pin/core/utils/NavigationMenu/controllers/navigationController.dart';
@@ -19,10 +17,12 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final NavigationController navigationController = Get.find<NavigationController>();
+  final NavigationController navigationController =
+      Get.find<NavigationController>();
   bool _isHovered = false;
 
-  Future<String> _loginUser({required String email, required String password}) async {
+  Future<String> _loginUser(
+      {required String email, required String password}) async {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       return 'success';
@@ -52,75 +52,76 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
+
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 75),
-              // Top Logo and Register Link
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 20.0 : 50.0,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Logo
-                  SizedBox(
-                    height: 57, // Match the height of the Register text
-                    child: SvgPicture.asset(
-                      'assets/icons/logo.svg',
-                      height: 45,
-                      color: PrimaryColor,
-                    ),
-                  ),
+                  SizedBox(height: isMobile ? 50 : 75),
+                  // Top Logo and Register Link
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Logo
+                      SvgPicture.asset(
+                        'assets/icons/logo.svg',
+                        height: isMobile ? 30 : 35,
+                        color: PrimaryColor,
+                      ),
 
-                  // Register Link
-                  MouseRegion(
-                    onEnter: (_) {
-                      setState(() {
-                        _isHovered = true;
-                      });
-                    },
-                    onExit: (_) {
-                      setState(() {
-                        _isHovered = false;
-                      });
-                    },
-                    child: GestureDetector(
-                      onTap: () {
-                        Get.to(() => const SignUpScreen());
-                      },
-                      child: SizedBox(
-                        height: 57,
-                        child: Align(
-                          alignment: Alignment.bottomRight,
-                          child: Text(
-                            '¿No tienes una cuenta?\nRegístrate',
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              color: _isHovered ? Colors.grey : Color(0xFF000000),
-                              fontFamily: 'UrbaneMedium',
-                              fontSize: 13,
-                              fontStyle: FontStyle.normal,
-                              fontWeight: FontWeight.w300,
-                              letterSpacing: -0.26,
+                      // Register Link
+                      MouseRegion(
+                        onEnter: (_) {
+                          setState(() {
+                            _isHovered = true;
+                          });
+                        },
+                        onExit: (_) {
+                          setState(() {
+                            _isHovered = false;
+                          });
+                        },
+                        child: GestureDetector(
+                          onTap: () {
+                            Get.to(() => const SignUpScreen());
+                          },
+                          child: Align(
+                            alignment: Alignment.bottomRight,
+                            child: Text(
+                              '¿No tienes una cuenta?\nRegístrate',
+                              style: TextStyle(
+                                color: _isHovered
+                                    ? Colors.grey
+                                    : const Color(0xFF000000),
+                                fontFamily: 'UrbaneMedium',
+                                fontSize: isMobile ? 14 : 15,
+                                fontWeight: FontWeight.w300,
+                                letterSpacing: -0.26,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  )
+                    ],
+                  ),
+                  SizedBox(height: isMobile ? 120 : 192),
+
+                  // Login Form
+                  LoginForm(onLogin: _handleLogin),
                 ],
               ),
-              const SizedBox(height: 192),
-
-              // Login Form
-              LoginForm(onLogin: _handleLogin),
-
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

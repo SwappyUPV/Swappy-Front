@@ -26,7 +26,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: true, // Centra el título automáticamente
       actions: [
         Padding(
-          padding: const EdgeInsets.only(right: 32),
+          padding: const EdgeInsets.only(right: 35),
           child: IconButton(
             icon: SvgPicture.asset(
               'assets/icons/new_chat.svg',
