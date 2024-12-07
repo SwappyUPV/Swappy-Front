@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart';
 import 'package:pin/features/chat/presentation/screens/messages/model/ChatMessageModel.dart';
 import 'package:pin/features/chat/presentation/components/exchange_notification.dart';
-import 'package:pin/core/services/chat_service.dart';
+import 'package:pin/core/services/chat_service_2.dart';
 import '../../../../constants.dart';
 import 'chat_input_field.dart';
 import 'message.dart';
@@ -19,7 +19,7 @@ class Body extends StatefulWidget {
 }
 
 class BodyState extends State<Body> {
-  final ChatService _chatService = ChatService();
+  final ChatService2 _chatService = ChatService2();
 
   @override
   Widget build(BuildContext context) {

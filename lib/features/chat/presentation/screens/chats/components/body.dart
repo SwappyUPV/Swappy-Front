@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pin/core/services/chat_service.dart';
+import 'package:pin/core/services/chat_service_2.dart';
 import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart';
 import 'chat_card.dart';
 
@@ -13,15 +13,19 @@ class Body extends StatelessWidget {
     required this.onDeleteChat,
   }) : super(key: key);
 
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<Chat>>(
-      stream: ChatService().fetchChats(),
+      stream: ChatService2().fetchChats(),
       builder: (context, snapshot) {
+        //print("StreamBuilder snapshot: ${snapshot.connectionState}");
         if (!snapshot.hasData) {
+          //print("No data in snapshot");
           return Center(child: CircularProgressIndicator());
         }
         final chats = snapshot.data!;
+       //print("Number of chats: ${chats.length}");
         return ListView.builder(
           itemCount: chats.length,
           itemBuilder: (context, index) {

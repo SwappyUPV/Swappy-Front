@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart';
-import 'package:pin/core/services/chat_service.dart';
+import 'package:pin/core/services/chat_service_2.dart';
 import 'components/body.dart';
 import 'components/message_app_bar.dart';
 
@@ -14,7 +14,7 @@ class MessagesScreen extends StatefulWidget {
 }
 
 class MessagesScreenState extends State<MessagesScreen> {
-  final ChatService _chatService = ChatService();
+  final ChatService2 _chatService = ChatService2();
   String? _userId;
   String? _name;
   bool _isLoading = true; // Track loading state

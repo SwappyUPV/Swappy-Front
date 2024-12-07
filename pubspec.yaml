@@ -53,6 +53,7 @@ dependencies:
   intl: ^0.17.0
   cached_network_image: ^3.4.1
   google_fonts: ^6.2.1
+  firebase_database: ^11.1.6  # Add this line
 
 
 dev_dependencies:

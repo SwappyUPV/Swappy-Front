@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:pin/core/services/chat_service.dart';
+import 'package:pin/core/services/chat_service_2.dart';
 import '../../../../auth/data/models/user_model.dart';
 import 'components/ChatAppBar.dart';
 import 'components/body.dart';
+import 'components/new_chat_PopUp.dart';
 
-// todo: chatService refactoring to use RealTimeDatabase
-// todo: use less read calls to the database
+
 // todo: use of constants and components: code refactoring and clean up
-// todo: Populate database with the demo users chats inside demo@gmail.com
+// todo: Add message sent time: Day grouping for message collection. Cache messages by day and scroll to fetch previous days from firebase into cached.
 
 // todo: removal of BottomNavBar in nested message class (complex to implement since the current routing isn't detecting the screens in)
 // todo: Make camera functional
-// todo: Add message sent time: Day grouping for message collection. Cache messages by day and scroll to fetch previous days from firebase into cached.
 
+//todo: allow google sign in to work with chats
 
 class ChatsScreen extends StatefulWidget {
   @override
@@ -30,17 +30,41 @@ class ChatsScreenState extends State<ChatsScreen> {
     _searchController.addListener(_onSearchChanged);
   }
 
-  void _onSearchChanged() {
-    setState(() {
-      _searchQuery = _searchController.text;
-    });
-  }
-
   @override
   void dispose() {
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: ChatAppBar(
+        onIconPressed: _toggleNewChatPopup,
+      ),
+      body: Stack(
+        children: [
+          Body(searchQuery: _searchQuery, onDeleteChat: _deleteChat),
+          if (_showNewChatPopup)
+            NewChatPopup(
+              searchController: _searchController,
+              searchQuery: _searchQuery,
+              onClose: _closeNewChatPopup,
+              onNewChat: _handleNewChat,
+            ),
+        ],
+      ),
+    );
+  }
+
+  //--------------------------------------------- HELPER METHODS --------------------------------------
+
+  void _onSearchChanged() {
+    setState(() {
+      _searchQuery = _searchController.text;
+    });
   }
 
   void _toggleNewChatPopup() {
@@ -59,9 +83,9 @@ class ChatsScreenState extends State<ChatsScreen> {
   }
 
   void _handleNewChat(UserModel user) async {
-    final chatExists = await ChatService().doesChatExist(user.uid);
+    final chatExists = await ChatService2().doesChatExist(user.uid);
     if (!chatExists) {
-      await ChatService().startNewChat(user.uid);
+      await ChatService2().startNewChat(user.uid);
       _closeNewChatPopup();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -72,7 +96,7 @@ class ChatsScreenState extends State<ChatsScreen> {
 
   Future<void> _deleteChat(String chatId) async {
     try {
-      await ChatService().deleteChat(chatId);
+      await ChatService2().deleteChat(chatId);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Chat eliminado")),
       );
@@ -83,80 +107,4 @@ class ChatsScreenState extends State<ChatsScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: ChatAppBar(
-        onIconPressed: _toggleNewChatPopup,
-      ),
-      body: Stack(
-        children: [
-          Body(searchQuery: _searchQuery, onDeleteChat: _deleteChat),
-          if (_showNewChatPopup) buildNewChatPopup(),
-        ],
-      ),
-    );
-  }
-
-  /// Builds a popup window to search and start a new chat
-  Widget buildNewChatPopup() {
-    return Center(
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              spreadRadius: 2,
-              blurRadius: 5,
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: "Crear nuevo chat mediante nickname",
-                fillColor: Colors.grey[300],
-                filled: true,
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.close),
-                  onPressed: _closeNewChatPopup,
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Flexible(
-              child: StreamBuilder<List<UserModel>>(
-                stream: ChatService().searchUsersByName(_searchQuery),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) return Center(child: Text("No hay usuario con ese nickname"));
-                  final users = snapshot.data!;
-
-                  return users.isEmpty
-                      ? const Center(child: Text("No hay usuario con ese nickname"))
-                      : ListView.builder(
-                    itemCount: users.length,
-                    itemBuilder: (context, index) {
-                      final user = users[index];
-                      return ListTile(
-                        title: Text(user.name),
-                        subtitle: Text(user.email),
-                        onTap: () => _handleNewChat(user),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

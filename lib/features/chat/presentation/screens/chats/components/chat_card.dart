@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:pin/core/services/chat_service_2.dart';
 import 'package:pin/features/chat/presentation/screens/chats/components/placeholder.dart';
 import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart';
-import 'package:pin/core/services/chat_service.dart';
 import 'package:pin/features/chat/presentation/screens/messages/message_screen.dart';
 import 'package:pin/features/chat/presentation/screens/messages/model/ChatMessageModel.dart';
 import 'profile_image.dart';
@@ -24,7 +24,7 @@ class ChatCard extends StatefulWidget {
 }
 
 class _ChatCardState extends State<ChatCard> {
-  final ChatService chatService = ChatService();
+  final ChatService2 chatService = ChatService2();
   String _displayName = "";
   String _profileImage = "";
   String? userId;

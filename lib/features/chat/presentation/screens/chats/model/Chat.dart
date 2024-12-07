@@ -48,4 +48,23 @@ class Chat {
           : {},
     );
   }
+
+  factory Chat.fromJson(Map<String, dynamic> json) {
+    return Chat(
+      uid: json['uid'],
+      name1: json['name1'] ?? 'Unknown',
+      name2: json['name2'] ?? 'Unknown',
+      image1: json['image1'] ?? 'assets/images/user.png',
+      image2: json['image2'] ?? 'assets/images/user.png',
+      user1: json['user1'] ?? 'Unknown',
+      user2: json['user2'] ?? 'Unknown',
+      timestamp: DateTime.fromMillisecondsSinceEpoch(json['timestamp']),
+      isActive: json['isActive'] ?? false,
+      isRecent: json['isRecent'] ?? true,
+      users: List<String>.from(json['users'] ?? []),
+      unreadCount: json['unreadCount'] != null
+          ? Map<String, int>.from(json['unreadCount'])
+          : {},
+    );
+  }
 }
