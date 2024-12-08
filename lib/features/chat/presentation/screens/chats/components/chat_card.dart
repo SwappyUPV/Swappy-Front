@@ -54,10 +54,16 @@ class _ChatCardState extends State<ChatCard> {
         ),
         child: InkWell(
             onTap: () async {
+              // Navegar a la nueva pantalla sin barra de navegación
               await Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => MessagesScreen(chat: widget.chat),
+                fullscreenDialog: true, // Esto oculta la barra de navegación
               ));
+
+              // Marcar el chat como leído después de la navegación
               await chatService.markChatAsRead(widget.chat.uid, userId!);
+
+              // Actualizar el contador de mensajes no leídos si el widget sigue montado
               if (mounted) {
                 setState(() {
                   unreadMessagesCount =

@@ -53,9 +53,6 @@ class ChatsScreenState extends State<ChatsScreen> {
                 child:
                     Body(searchQuery: _searchQuery, onDeleteChat: _deleteChat),
               ),
-              SizedBox(
-                height: 85, // Espacio al final de la ventana
-              ),
             ],
           ),
           if (_showNewChatPopup)
