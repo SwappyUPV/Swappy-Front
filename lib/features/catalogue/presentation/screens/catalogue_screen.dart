@@ -97,6 +97,7 @@ class _CatalogueState extends State<Catalogue> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  SizedBox(height: 20),
                   // Row con logo y botón
                   Padding(
                     padding: const EdgeInsets.symmetric(
@@ -138,11 +139,6 @@ class _CatalogueState extends State<Catalogue> {
                                       ),
                                     );
                                   },
-                                ),
-                                Icon(
-                                  Icons.menu,
-                                  color: Colors.white,
-                                  size: 35.0,
                                 ),
                               ],
                             ),
