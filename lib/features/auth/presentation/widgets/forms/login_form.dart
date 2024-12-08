@@ -83,14 +83,17 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    final horizontalPadding = isMobile ? 20.0 : 50.0;
+
     return Form(
       key: _formKey,
-      child: Column(
-        children: [
-          // Login Title
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: Align(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+        child: Column(
+          children: [
+            // Login Title
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'Iniciar sesión',
@@ -101,11 +104,8 @@ class _LoginFormState extends State<LoginForm> {
                     color: Colors.black),
               ),
             ),
-          ),
-          const SizedBox(height: 31),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: TextFormField(
+            const SizedBox(height: 31),
+            TextFormField(
               controller: _emailController,
               style: const TextStyle(
                 fontSize: 14,
@@ -138,13 +138,10 @@ class _LoginFormState extends State<LoginForm> {
                 ),
               ),
               validator: (value) =>
-                  value!.isEmpty ? 'Introduce tu correo electrónico' : null,
+              value!.isEmpty ? 'Introduce tu correo electrónico' : null,
             ),
-          ),
-          const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: TextFormField(
+            const SizedBox(height: 10),
+            TextFormField(
               controller: _passwordController,
               obscureText: true,
               style: const TextStyle(
@@ -178,68 +175,60 @@ class _LoginFormState extends State<LoginForm> {
                 ),
               ),
               validator: (value) =>
-                  value!.isEmpty ? 'Introduce tu contraseña' : null,
+              value!.isEmpty ? 'Introduce tu contraseña' : null,
             ),
-          ),
-          const SizedBox(height: 20),
-          Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: // Recuperar Contraseña Link
-                  MouseRegion(
-                onEnter: (_) {
-                  setState(() {
-                    _isHoveredRecuperar = true;
-                  });
+            const SizedBox(height: 20),
+            // Recuperar Contraseña Link
+            MouseRegion(
+              onEnter: (_) {
+                setState(() {
+                  _isHoveredRecuperar = true;
+                });
+              },
+              onExit: (_) {
+                setState(() {
+                  _isHoveredRecuperar = false;
+                });
+              },
+              child: GestureDetector(
+                onTap: () {
+                  // Add your onTap logic here
                 },
-                onExit: (_) {
-                  setState(() {
-                    _isHoveredRecuperar = false;
-                  });
-                },
-                child: GestureDetector(
-                  onTap: () {
-                    // Add your onTap logic here
-                  },
-                  child: Text(
-                    'Ha olvidado la contraseña? Recuperar contraseña',
-                    style: TextStyle(
-                      color:
-                          _isHoveredRecuperar ? Colors.grey : Color(0xFF000000),
+                child: Text(
+                  'Ha olvidado la contraseña? Recuperar contraseña',
+                  style: TextStyle(
+                    color:
+                    _isHoveredRecuperar ? Colors.grey : Color(0xFF000000),
+                    fontFamily: 'UrbaneMedium',
+                    fontSize: 13,
+                    fontStyle: FontStyle.normal,
+                    fontWeight: FontWeight.w300,
+                    letterSpacing: -0.26,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 40),
+            _isLoading
+                ? const CircularProgressIndicator()
+                : ElevatedButton(
+              onPressed: loginUser,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30)),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 13, horizontal: 30),
+              ),
+              child: const Text('Iniciar Sesión',
+                  style: TextStyle(
+                      fontSize: 17,
                       fontFamily: 'UrbaneMedium',
-                      fontSize: 13,
-                      fontStyle: FontStyle.normal,
-                      fontWeight: FontWeight.w300,
-                      letterSpacing: -0.26,
-                    ),
-                  ),
-                ),
-              )),
-          const SizedBox(height: 40),
-          _isLoading
-              ? const CircularProgressIndicator()
-              : Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30),
-                  child: ElevatedButton(
-                    onPressed: loginUser,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 13, horizontal: 30),
-                    ),
-                    child: const Text('Iniciar Sesión',
-                        style: TextStyle(
-                            fontSize: 17,
-                            fontFamily: 'UrbaneMedium',
-                            fontWeight: FontWeight.w500,
-                            color: SecondaryColor)),
-                  ),
-                ),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: ElevatedButton(
+                      fontWeight: FontWeight.w500,
+                      color: SecondaryColor)),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
               onPressed: signInWithGoogle,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
@@ -258,9 +247,9 @@ class _LoginFormState extends State<LoginForm> {
                       style: TextStyle(fontSize: 16, color: Colors.black)),
                 ],
               ),
-            ),
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }

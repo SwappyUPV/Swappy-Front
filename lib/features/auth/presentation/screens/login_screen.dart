@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:pin/core/constants/constants.dart';
 import 'package:pin/core/utils/NavigationMenu/NavigationMenu.dart';
 import '../widgets/forms/login_form.dart';
 import 'package:pin/features/auth/presentation/screens/sign_up_screen.dart';
@@ -53,6 +52,7 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 600;
+    final horizontalPadding = isMobile ? 20.0 : 50.0;
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -60,63 +60,63 @@ class _LoginState extends State<Login> {
         builder: (context, constraints) {
           return SingleChildScrollView(
             child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: isMobile ? 20.0 : 50.0,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: isMobile ? 50 : 75),
                   // Top Logo and Register Link
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Logo
-                      SvgPicture.asset(
-                        'assets/icons/logo.svg',
-                        height: isMobile ? 30 : 35,
-                        color: PrimaryColor,
-                      ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Logo
+                        SvgPicture.asset(
+                          'assets/icons/logo.svg',
+                          height: isMobile ? 30 : 35,
+                        ),
 
-                      // Register Link
-                      MouseRegion(
-                        onEnter: (_) {
-                          setState(() {
-                            _isHovered = true;
-                          });
-                        },
-                        onExit: (_) {
-                          setState(() {
-                            _isHovered = false;
-                          });
-                        },
-                        child: GestureDetector(
-                          onTap: () {
-                            Get.to(() => const SignUpScreen());
+                        // Register Link
+                        MouseRegion(
+                          onEnter: (_) {
+                            setState(() {
+                              _isHovered = true;
+                            });
                           },
-                          child: Column(
+                          onExit: (_) {
+                            setState(() {
+                              _isHovered = false;
+                            });
+                          },
+                          child: GestureDetector(
+                            onTap: () {
+                              Get.to(() => const SignUpScreen());
+                            },
+                            child: Column(
                               children: [
-                              SizedBox(height: 15), // Adjust the height as needed
-                              Align(
-                                alignment: Alignment.bottomRight,
-                                child: Text(
-                                  '¿No tienes una cuenta?\nRegístrate',
-                                  style: TextStyle(
-                                    color: _isHovered
-                                        ? Colors.grey
-                                        : const Color(0xFF000000),
-                                    fontFamily: 'UrbaneMedium',
-                                    fontSize: isMobile ? 14 : 15,
-                                    fontWeight: FontWeight.w300,
-                                    letterSpacing: -0.26,
+                                SizedBox(height: 15), // Adjust the height as needed
+                                Align(
+                                  alignment: Alignment.bottomRight,
+                                  child: Text(
+                                    '¿No tienes una cuenta?\nRegístrate',
+                                    style: TextStyle(
+                                      color: _isHovered
+                                          ? Colors.grey
+                                          : const Color(0xFF000000),
+                                      fontFamily: 'UrbaneMedium',
+                                      fontSize: isMobile ? 14 : 15,
+                                      fontWeight: FontWeight.w300,
+                                      letterSpacing: -0.26,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   SizedBox(height: isMobile ? 120 : 192),
 
