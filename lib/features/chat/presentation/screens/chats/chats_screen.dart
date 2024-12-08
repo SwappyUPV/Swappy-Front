@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pin/core/services/chat_service_2.dart';
 import '../../../../auth/data/models/user_model.dart';
-import 'components/ChatAppBar.dart';
+import '../../../../CustomAppBar.dart';
 import 'components/body.dart';
 import 'components/new_chat_PopUp.dart';
-
 
 // todo: use of constants and components: code refactoring and clean up
 // todo: Add message sent time: Day grouping for message collection. Cache messages by day and scroll to fetch previous days from firebase into cached.
@@ -37,12 +36,14 @@ class ChatsScreenState extends State<ChatsScreen> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: ChatAppBar(
+      appBar: CustomAppBar(
+        title: 'Mensajes',
+        iconPath: 'assets/icons/new_chat.svg',
         onIconPressed: _toggleNewChatPopup,
+        iconPosition: IconPosition.right, // Para icono a la izquierda
       ),
       body: Stack(
         children: [
@@ -106,5 +107,4 @@ class ChatsScreenState extends State<ChatsScreen> {
       );
     }
   }
-
 }
