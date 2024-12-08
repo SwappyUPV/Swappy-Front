@@ -63,11 +63,8 @@ class _ChatCardState extends State<ChatCard> {
               });
             }
           },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: kDefaultPadding,
-            ),
-            child: Row(
+          child:
+            Row(
               children: [
                 ProfileImage(profileImage: _profileImage),
                 Expanded(
@@ -94,7 +91,6 @@ class _ChatCardState extends State<ChatCard> {
                   latestMessage: latestMessage,
                 ),
               ],
-            ),
           ),
         ),
       ),

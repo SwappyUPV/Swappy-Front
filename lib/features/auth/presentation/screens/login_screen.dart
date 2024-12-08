@@ -94,20 +94,25 @@ class _LoginState extends State<Login> {
                           onTap: () {
                             Get.to(() => const SignUpScreen());
                           },
-                          child: Align(
-                            alignment: Alignment.bottomRight,
-                            child: Text(
-                              '¿No tienes una cuenta?\nRegístrate',
-                              style: TextStyle(
-                                color: _isHovered
-                                    ? Colors.grey
-                                    : const Color(0xFF000000),
-                                fontFamily: 'UrbaneMedium',
-                                fontSize: isMobile ? 14 : 15,
-                                fontWeight: FontWeight.w300,
-                                letterSpacing: -0.26,
+                          child: Column(
+                              children: [
+                              SizedBox(height: 15), // Adjust the height as needed
+                              Align(
+                                alignment: Alignment.bottomRight,
+                                child: Text(
+                                  '¿No tienes una cuenta?\nRegístrate',
+                                  style: TextStyle(
+                                    color: _isHovered
+                                        ? Colors.grey
+                                        : const Color(0xFF000000),
+                                    fontFamily: 'UrbaneMedium',
+                                    fontSize: isMobile ? 14 : 15,
+                                    fontWeight: FontWeight.w300,
+                                    letterSpacing: -0.26,
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ),
                       ),
