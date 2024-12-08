@@ -24,7 +24,7 @@ class _AddProductState extends State<AddProduct> {
       ),
       body: Container(
         color: Color.fromARGB(255, 12, 2, 2), // Fondo gris claro
-        child: const SingleChildScrollView(
+        child: SingleChildScrollView(
           child: AddProductForm(),
         ),
       ),

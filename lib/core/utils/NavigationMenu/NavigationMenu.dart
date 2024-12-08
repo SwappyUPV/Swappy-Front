@@ -98,6 +98,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
           );
         } else {
           return Scaffold(
+              resizeToAvoidBottomInset: false,
               body: Stack(
                 children: [
                   Padding(

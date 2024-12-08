@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pin/features/add_product/presentation/widgets/filters.dart';
 import '/core/services/product.dart';
 import '/features/add_product/presentation/widgets/category_dropdown_widget.dart';
 import '/features/add_product/presentation/widgets/custom_text_field_widget.dart';
@@ -166,6 +167,70 @@ class _AddProductFormState extends State<AddProductForm> {
     }
   }
 
+  // Función para mostrar el Popup para estilos y tamaños
+  void _showPopup(String type) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Selecciona $type'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: type == 'Estilos'
+                ? predefinedStyles
+                    .map((style) => ListTile(
+                          title: Text(style),
+                          onTap: () {
+                            setState(() {
+                              if (!selectedStyles.contains(style)) {
+                                selectedStyles.add(style);
+                              }
+                            });
+                            Navigator.pop(context);
+                          },
+                        ))
+                    .toList()
+                : type == 'Categoria'
+                    ? clothingCategories
+                        .map((category) => ListTile(
+                              title: Text(category),
+                              onTap: () {
+                                setState(() {
+                                  selectedCategory = category;
+                                });
+                                Navigator.pop(context);
+                              },
+                            ))
+                        .toList()
+                    : type == 'Calidad'
+                        ? qualityOptions
+                            .map((quality) => ListTile(
+                                  title: Text(quality),
+                                  onTap: () {
+                                    setState(() {
+                                      selectedQuality = quality;
+                                    });
+                                    Navigator.pop(context);
+                                  },
+                                ))
+                            .toList()
+                        : predefinedSizes
+                            .map((size) => ListTile(
+                                  title: Text(size),
+                                  onTap: () {
+                                    setState(() {
+                                      selectedSize = size;
+                                    });
+                                    Navigator.pop(context);
+                                  },
+                                ))
+                            .toList(),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -174,13 +239,11 @@ class _AddProductFormState extends State<AddProductForm> {
 
     return Container(
       color: Color(0xFFD9D9D9), // Fondo gris claro para toda la ventana
-      // Margen alrededor de los elementos
       child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Primera sección
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16.0),
@@ -208,9 +271,8 @@ class _AddProductFormState extends State<AddProductForm> {
                 ],
               ),
             ),
-            const SizedBox(height: 16), // Espacio entre secciones
+            const SizedBox(height: 16),
 
-            // Nombre
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16.0),
@@ -230,7 +292,6 @@ class _AddProductFormState extends State<AddProductForm> {
             ),
             const SizedBox(height: 16),
 
-            // Descripción
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16.0),
@@ -250,99 +311,90 @@ class _AddProductFormState extends State<AddProductForm> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Estilo
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: StylesSelectorWidget(
-                predefinedStyles: predefinedStyles,
-                selectedStyles: selectedStyles,
-                onStylesChanged: (styles) =>
-                    setState(() => selectedStyles = styles),
-                productService: _productService,
-              ),
-            ),
-            const SizedBox(height: 16),
-
             // Categoría
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: CategoryDropdownWidget(
-                selectedCategory: selectedCategory,
-                categories: clothingCategories,
-                onCategorySelected: (category) {
-                  setState(() {
-                    selectedCategory = category;
-                    _loadSizes(category);
-                  });
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Tamaños
-            if (selectedCategory.isNotEmpty)
-              Container(
+            GestureDetector(
+              onTap: () => _showPopup('Categoria'),
+              child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: SizesSelectorWidget(
-                  predefinedSizes: predefinedSizes,
-                  selectedSize: selectedSize,
-                  onSizesChanged: (size) => setState(() => selectedSize = size),
-                  productService: _productService,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Categoría:'),
+                    Text(selectedCategory ?? 'Seleccionar'),
+                  ],
                 ),
               ),
-            const SizedBox(height: 16),
+            ),
+            SizedBox(height: 16),
 
             // Precio
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: PriceInputWidget(
-                isExchangeOnly: isExchangeOnly,
-                onPriceChanged: (price) => setState(() => this.price = price),
-                onExchangeOnlyChanged: (isExchangeOnly) =>
-                    setState(() => this.isExchangeOnly = isExchangeOnly),
+            GestureDetector(
+              onTap: () => _showPopup('Precio'),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Precio:'),
+                    Text(price != null ? '\$${price}' : 'Seleccionar'),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
 
             // Calidad
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: QualitySelectorWidget(
-                selectedQuality: selectedQuality,
-                qualityOptions: qualityOptions,
-                onQualityChanged: (quality) =>
-                    setState(() => selectedQuality = quality),
+            GestureDetector(
+              onTap: () => _showPopup('Calidad'),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Calidad:'),
+                    Text(selectedQuality ?? 'Seleccionar'),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 20),
-
-            // Botón
+            SizedBox(height: 16),
+            // Estilo
+            GestureDetector(
+              onTap: () => _showPopup('Estilos'),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Estilos:'),
+                    Text(selectedStyles.isNotEmpty
+                        ? selectedStyles.join(', ')
+                        : 'Seleccionar'),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 26),
             ElevatedButton(
               onPressed: _uploadProduct,
               style: ElevatedButton.styleFrom(
@@ -350,7 +402,7 @@ class _AddProductFormState extends State<AddProductForm> {
               ),
               child: const Text('Finalizar y publicar'),
             ),
-            const SizedBox(height: 105),
+            const SizedBox(height: 106),
           ],
         ),
       ),
