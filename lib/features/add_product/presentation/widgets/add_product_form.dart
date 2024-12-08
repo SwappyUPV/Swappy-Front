@@ -34,6 +34,7 @@ class _AddProductFormState extends State<AddProductForm> {
   String selectedCategory = '';
   bool isExchangeOnly = false;
   bool _isLoading = true;
+  bool isPromoted = false; // Variable para controlar si está promocionada o no
 
   // Listas predefinidas
   List<String> predefinedStyles = [];
@@ -46,6 +47,10 @@ class _AddProductFormState extends State<AddProductForm> {
     'Bastante usado',
     'Muy desgastado'
   ];
+  bool showCategoryOptions = false;
+  bool showPriceOptions = false;
+  bool showQualityOptions = false;
+  bool showStyleOptions = false;
 
   @override
   void initState() {
@@ -349,7 +354,11 @@ class _AddProductFormState extends State<AddProductForm> {
             const SizedBox(height: 16),
             // Categoría
             GestureDetector(
-              onTap: () => _showPopup('Categoria'),
+              onTap: () {
+                setState(() {
+                  showCategoryOptions = !showCategoryOptions;
+                });
+              },
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16.0),
@@ -366,11 +375,37 @@ class _AddProductFormState extends State<AddProductForm> {
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            if (showCategoryOptions)
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: clothingCategories
+                      .map((category) => ListTile(
+                            title: Text(category),
+                            trailing: selectedCategory == category
+                                ? Icon(Icons.check,
+                                    color: Colors
+                                        .green) // Flecha de check si está seleccionado
+                                : null,
+                            onTap: () {
+                              setState(() {
+                                selectedCategory = category;
+                                showCategoryOptions = false;
+                              });
+                            },
+                          ))
+                      .toList(),
+                ),
+              ),
 
+            SizedBox(height: 16),
             // Precio
             GestureDetector(
-              onTap: _showPricePopup,
+              onTap: () {
+                setState(() {
+                  showPriceOptions = !showPriceOptions;
+                });
+              },
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16.0),
@@ -382,12 +417,129 @@ class _AddProductFormState extends State<AddProductForm> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Precio:'),
-                    // El precio se muestra en la siguiente línea
                     Text(price != null ? '\$${price}' : 'Seleccionar'),
+                    // Aquí puedes agregar la flecha de check si es necesario, dependiendo del diseño.
                   ],
                 ),
               ),
             ),
+
+            if (showPriceOptions)
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                child: TextField(
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Precio',
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      price = int.tryParse(value);
+                    });
+                  },
+                ),
+              ),
+            SizedBox(height: 16),
+            // Calidad
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  showQualityOptions = !showQualityOptions;
+                });
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Calidad:'),
+                    Text(selectedQuality ?? 'Seleccionar'),
+                  ],
+                ),
+              ),
+            ),
+            if (showQualityOptions)
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: qualityOptions
+                      .map((quality) => ListTile(
+                            title: Text(quality),
+                            trailing: selectedQuality == quality
+                                ? Icon(Icons.check,
+                                    color: Colors
+                                        .green) // Flecha de check si está seleccionado
+                                : null,
+                            onTap: () {
+                              setState(() {
+                                selectedQuality = quality;
+                                showQualityOptions = false;
+                              });
+                            },
+                          ))
+                      .toList(),
+                ),
+              ),
+
+            SizedBox(height: 16),
+            // Estilos
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  showStyleOptions = !showStyleOptions;
+                });
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Estilo(s):'),
+                    Text(selectedStyles.isNotEmpty
+                        ? selectedStyles.join(', ')
+                        : 'Seleccionar'),
+                  ],
+                ),
+              ),
+            ),
+            if (showStyleOptions)
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: predefinedStyles
+                      .map((style) => ListTile(
+                            title: Text(style),
+                            trailing: selectedStyles.contains(style)
+                                ? Icon(Icons.check,
+                                    color: Colors
+                                        .green) // Flecha de check si está seleccionado
+                                : null,
+                            onTap: () {
+                              setState(() {
+                                if (selectedStyles.contains(style)) {
+                                  selectedStyles.remove(style);
+                                } else {
+                                  selectedStyles.add(style);
+                                }
+                              });
+                            },
+                          ))
+                      .toList(),
+                ),
+              ),
+
+            SizedBox(height: 16),
 
             SizedBox(height: 16),
             GestureDetector(
@@ -427,10 +579,7 @@ class _AddProductFormState extends State<AddProductForm> {
               ),
             ),
             SizedBox(height: 16),
-            // Calidad
-            GestureDetector(
-              onTap: () => _showPopup('Calidad'),
-              child: Container(
+            Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
@@ -438,37 +587,61 @@ class _AddProductFormState extends State<AddProductForm> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Calidad:'),
-                    Text(selectedQuality ?? 'Seleccionar'),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 16),
-            // Estilo
-            GestureDetector(
-              onTap: () => _showPopup('Estilos'),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Estilos:'),
-                    Text(selectedStyles.isNotEmpty
-                        ? selectedStyles.join(', ')
-                        : 'Seleccionar'),
-                  ],
-                ),
-              ),
-            ),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Primero, añade una foto de la prenda que vas a vender o intercambiar, ¡Asegúrate de que aparezca nítida, de frente y bien iluminada!",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ])),
             const SizedBox(height: 26),
+
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  isPromoted = !isPromoted; // Cambia el estado del interruptor
+                });
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Promocionar prenda (1 euro)'),
+                    SizedBox(height: 8), // Espacio entre el título y el texto
+                    Text(
+                      'Destaca su prenda en búsquedas y secciones principales para aumentar su visibilidad y llegar a más usuarios.',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    SizedBox(height: 16), // Espacio antes del interruptor
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(isPromoted ? 'ON' : 'OFF'),
+                        Switch(
+                          value: isPromoted,
+                          onChanged: (bool value) {
+                            setState(() {
+                              isPromoted = value;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
             ElevatedButton(
               onPressed: _uploadProduct,
               style: ElevatedButton.styleFrom(
