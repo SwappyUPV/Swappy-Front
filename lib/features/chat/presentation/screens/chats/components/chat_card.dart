@@ -6,7 +6,8 @@ import 'package:pin/features/chat/presentation/screens/messages/message_screen.d
 import 'package:pin/features/chat/presentation/screens/messages/model/ChatMessageModel.dart';
 import 'profile_image.dart';
 import 'chat_details.dart';
-import 'package:pin/features/chat/presentation/screens/chats/components/message_status.dart' as msg_status;
+import 'package:pin/features/chat/presentation/screens/chats/components/message_status.dart'
+    as msg_status;
 import '../../../../constants.dart';
 
 class ChatCard extends StatefulWidget {
@@ -52,47 +53,52 @@ class _ChatCardState extends State<ChatCard> {
           ),
         ),
         child: InkWell(
-          onTap: () async {
-            await Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => MessagesScreen(chat: widget.chat),
-            ));
-            await chatService.markChatAsRead(widget.chat.uid, userId!);
-            if (mounted) {
-              setState(() {
-                unreadMessagesCount = 0; // Reset unread count when chat is opened
-              });
-            }
-          },
-          child:
-            Row(
-              children: [
-                ProfileImage(profileImage: _profileImage),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: kDefaultPadding),
-                    child: StreamBuilder<ChatMessageModel?>(
-                      stream: chatService.fetchLatestMessage(widget.chat.uid),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
-                        }
-                        latestMessage = snapshot.data;
-                        return ChatDetails(
-                          displayName: _displayName,
-                          latestMessage: latestMessage,
-                          unreadMessagesCount: unreadMessagesCount,
-                        );
-                      },
+            onTap: () async {
+              await Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => MessagesScreen(chat: widget.chat),
+              ));
+              await chatService.markChatAsRead(widget.chat.uid, userId!);
+              if (mounted) {
+                setState(() {
+                  unreadMessagesCount =
+                      0; // Reset unread count when chat is opened
+                });
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(
+                  left: 15), // Padding de 15 a la izquierda
+              child: Row(
+                children: [
+                  ProfileImage(profileImage: _profileImage),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: kDefaultPadding),
+                      child: StreamBuilder<ChatMessageModel?>(
+                        stream: chatService.fetchLatestMessage(widget.chat.uid),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          }
+                          latestMessage = snapshot.data;
+                          return ChatDetails(
+                            displayName: _displayName,
+                            latestMessage: latestMessage,
+                            unreadMessagesCount: unreadMessagesCount,
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
-                msg_status.MessageStatus(
-                  unreadMessagesCount: unreadMessagesCount,
-                  latestMessage: latestMessage,
-                ),
-              ],
-          ),
-        ),
+                  msg_status.MessageStatus(
+                    unreadMessagesCount: unreadMessagesCount,
+                    latestMessage: latestMessage,
+                  ),
+                ],
+              ),
+            )),
       ),
     );
   }
@@ -127,7 +133,8 @@ class _ChatCardState extends State<ChatCard> {
 
   Future<void> _fetchUnreadMessagesCount() async {
     try {
-      final unreadCount = await chatService.getUnreadMessagesCount(widget.chat.uid);
+      final unreadCount =
+          await chatService.getUnreadMessagesCount(widget.chat.uid);
       if (mounted) {
         setState(() {
           unreadMessagesCount = unreadCount;

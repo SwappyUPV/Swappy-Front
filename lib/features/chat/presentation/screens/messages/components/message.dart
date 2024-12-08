@@ -27,7 +27,8 @@ class Messages extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: kDefaultPadding),
       child: Row(
-        mainAxisAlignment: isSentByUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isSentByUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           Flexible(
             child: ConstrainedBox(
@@ -44,22 +45,25 @@ class Messages extends StatelessWidget {
 
   Widget _messageContent(ChatMessageModel message, bool isSentByUser) {
     return Container(
-      padding: const EdgeInsets.all(16), // Adjusted padding for the message bubble
+      padding:
+          const EdgeInsets.all(16), // Adjusted padding for the message bubble
       decoration: BoxDecoration(
-        color: isSentByUser ? Color(0xFF1E1E1E) : Color(0xFFC2C2C2), // Change colors based on sender
+        color: isSentByUser
+            ? Color(0xFF1E1E1E)
+            : Color(0xFFC2C2C2), // Change colors based on sender
         borderRadius: isSentByUser
             ? BorderRadius.only(
-          topLeft: Radius.circular(45),
-          topRight: Radius.circular(45),
-          bottomLeft: Radius.circular(45),
-          bottomRight: Radius.circular(12),
-        )
+                topLeft: Radius.circular(45),
+                topRight: Radius.circular(45),
+                bottomLeft: Radius.circular(45),
+                bottomRight: Radius.circular(12),
+              )
             : BorderRadius.only(
-          topLeft: Radius.circular(12),
-          topRight: Radius.circular(45),
-          bottomLeft: Radius.circular(45),
-          bottomRight: Radius.circular(45),
-        ),
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(45),
+                bottomLeft: Radius.circular(45),
+                bottomRight: Radius.circular(45),
+              ),
       ),
       child: Text(
         message.content,
