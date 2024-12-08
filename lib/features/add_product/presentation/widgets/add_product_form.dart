@@ -11,7 +11,6 @@ import 'package:get/get.dart';
 import '../../../../core/utils/NavigationMenu/NavigationMenu.dart';
 import 'package:pin/core/utils/NavigationMenu/controllers/navigationController.dart';
 
-
 class AddProductForm extends StatefulWidget {
   const AddProductForm({super.key});
 
@@ -173,78 +172,187 @@ class _AddProductFormState extends State<AddProductForm> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CustomTextFieldWidget(
-            label: 'Título*',
-            onSaved: (value) => title = value!,
-            validator: (value) =>
-                value!.isEmpty ? 'Este campo es obligatorio' : null,
-          ),
-          const SizedBox(height: 16),
-          CustomTextFieldWidget(
-            label: 'Descripción',
-            onSaved: (value) => description = value ?? '',
-            maxLines: 3,
-          ),
-          const SizedBox(height: 16),
-          StylesSelectorWidget(
-            predefinedStyles: predefinedStyles,
-            selectedStyles: selectedStyles,
-            onStylesChanged: (styles) =>
-                setState(() => selectedStyles = styles),
-            productService: _productService,
-          ),
-          const SizedBox(height: 16),
-          CategoryDropdownWidget(
-            selectedCategory: selectedCategory,
-            categories: clothingCategories,
-            onCategorySelected: (category) {
-              setState(() {
-                selectedCategory = category;
-                _loadSizes(category);
-              });
-            },
-          ),
-          const SizedBox(height: 16),
-          if (selectedCategory.isNotEmpty)
-            SizesSelectorWidget(
-              predefinedSizes: predefinedSizes,
-              selectedSize: selectedSize,
-              onSizesChanged: (size) => setState(() => selectedSize = size),
-              productService: _productService,
+    return Container(
+      color: Color(0xFFD9D9D9), // Fondo gris claro para toda la ventana
+      // Margen alrededor de los elementos
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Primera sección
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Primero, añade una foto de la prenda que vas a vender o intercambiar, ¡Asegúrate de que aparezca nítida, de frente y bien iluminada!",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ImagePickerWidget(
+                    pickedImage: _pickedImage,
+                    onImagePicked: (image) =>
+                        setState(() => _pickedImage = image),
+                  ),
+                ],
+              ),
             ),
-          const SizedBox(height: 16),
-          PriceInputWidget(
-            isExchangeOnly: isExchangeOnly,
-            onPriceChanged: (price) => setState(() => this.price = price),
-            onExchangeOnlyChanged: (isExchangeOnly) =>
-                setState(() => this.isExchangeOnly = isExchangeOnly),
-          ),
-          const SizedBox(height: 16),
-          QualitySelectorWidget(
-            selectedQuality: selectedQuality,
-            qualityOptions: qualityOptions,
-            onQualityChanged: (quality) =>
-                setState(() => selectedQuality = quality),
-          ),
-          const SizedBox(height: 20),
-          ImagePickerWidget(
-            pickedImage: _pickedImage,
-            onImagePicked: (image) => setState(() => _pickedImage = image),
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: _uploadProduct,
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 50),
+            const SizedBox(height: 16), // Espacio entre secciones
+
+            // Nombre
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: CustomTextFieldWidget(
+                label: 'Nombre',
+                placeholder: 'ej., Camiseta Blanca Nike',
+                enableCharacterCounter: false,
+                onSaved: (value) => print('Valor guardado: $value'),
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Este campo no puede estar vacío'
+                    : null,
+              ),
             ),
-            child: const Text('Guardar Producto'),
-          ),
-        ],
+            const SizedBox(height: 16),
+
+            // Descripción
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: CustomTextFieldWidget(
+                label: 'Descripción',
+                placeholder:
+                    'ej., con etiqueta, a estrenar, busco intercambiar por unas zapatillas',
+                enableCharacterCounter: true,
+                onSaved: (value) => print('Valor guardado: $value'),
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Este campo no puede estar vacío'
+                    : null,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Estilo
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: StylesSelectorWidget(
+                predefinedStyles: predefinedStyles,
+                selectedStyles: selectedStyles,
+                onStylesChanged: (styles) =>
+                    setState(() => selectedStyles = styles),
+                productService: _productService,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Categoría
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: CategoryDropdownWidget(
+                selectedCategory: selectedCategory,
+                categories: clothingCategories,
+                onCategorySelected: (category) {
+                  setState(() {
+                    selectedCategory = category;
+                    _loadSizes(category);
+                  });
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Tamaños
+            if (selectedCategory.isNotEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: SizesSelectorWidget(
+                  predefinedSizes: predefinedSizes,
+                  selectedSize: selectedSize,
+                  onSizesChanged: (size) => setState(() => selectedSize = size),
+                  productService: _productService,
+                ),
+              ),
+            const SizedBox(height: 16),
+
+            // Precio
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: PriceInputWidget(
+                isExchangeOnly: isExchangeOnly,
+                onPriceChanged: (price) => setState(() => this.price = price),
+                onExchangeOnlyChanged: (isExchangeOnly) =>
+                    setState(() => this.isExchangeOnly = isExchangeOnly),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Calidad
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: QualitySelectorWidget(
+                selectedQuality: selectedQuality,
+                qualityOptions: qualityOptions,
+                onQualityChanged: (quality) =>
+                    setState(() => selectedQuality = quality),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Botón
+            ElevatedButton(
+              onPressed: _uploadProduct,
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
+              ),
+              child: const Text('Finalizar y publicar'),
+            ),
+            const SizedBox(height: 105),
+          ],
+        ),
       ),
     );
   }

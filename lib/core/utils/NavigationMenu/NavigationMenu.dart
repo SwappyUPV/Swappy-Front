@@ -98,106 +98,109 @@ class _NavigationMenuState extends State<NavigationMenu> {
           );
         } else {
           return Scaffold(
-            body: Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(
-                      bottom: 68), // Add padding to the bottom
-                  child: WillPopScope(
-                    onWillPop: _onWillPop,
-                    child: IndexedStack(
-                      index: _selectedIndex,
-                      children: _pages
-                          .asMap()
-                          .entries
-                          .map((entry) => Navigator(
-                                key: _navKeys[entry.key],
-                                onGenerateInitialRoutes: (_, __) {
-                                  return [
-                                    MaterialPageRoute(
-                                      builder: (context) => entry.value,
-                                    ),
-                                  ];
-                                },
-                              ))
-                          .toList(),
+              body: Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        bottom: 0), // Add padding to the bottom
+                    child: WillPopScope(
+                      onWillPop: _onWillPop,
+                      child: IndexedStack(
+                        index: _selectedIndex,
+                        children: _pages
+                            .asMap()
+                            .entries
+                            .map((entry) => Navigator(
+                                  key: _navKeys[entry.key],
+                                  onGenerateInitialRoutes: (_, __) {
+                                    return [
+                                      MaterialPageRoute(
+                                        builder: (context) => entry.value,
+                                      ),
+                                    ];
+                                  },
+                                ))
+                            .toList(),
+                      ),
                     ),
                   ),
-                ),
-                Positioned(
-                  bottom: 0,
-                  left: -3,
-                  right: -3,
-                  child: Container(
-                    height: 56,
-                    width: MediaQuery.of(context).size.width,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(35.0),
-                        topRight: Radius.circular(35.0),
-                        bottomLeft: Radius.circular(0),
-                        bottomRight: Radius.circular(0),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.6),
-                          blurRadius: 10,
-                          spreadRadius: 0.4,
+                  Positioned(
+                    bottom: 0,
+                    left: -3,
+                    right: -3,
+                    child: Container(
+                      height: 56,
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(35.0),
+                          topRight: Radius.circular(35.0),
+                          bottomLeft: Radius.circular(0),
+                          bottomRight: Radius.circular(0),
                         ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 42),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          BottomNavBarItemWidget.buildNavBarItem(
-                              'home', 0, _selectedIndex, _onItemTapped),
-                          BottomNavBarItemWidget.buildNavBarItem(
-                              'top', 1, _selectedIndex, _onItemTapped),
-                          SizedBox(width: 60), // Space for FloatingActionButton
-                          BottomNavBarItemWidget.buildNavBarItem(
-                              'chat', 3, _selectedIndex, _onItemTapped),
-                          BottomNavBarItemWidget.buildNavBarItem(
-                              'user', 4, _selectedIndex, _onItemTapped),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.6),
+                            blurRadius: 10,
+                            spreadRadius: 0.4,
+                          ),
                         ],
                       ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 42),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            BottomNavBarItemWidget.buildNavBarItem(
+                                'home', 0, _selectedIndex, _onItemTapped),
+                            BottomNavBarItemWidget.buildNavBarItem(
+                                'top', 1, _selectedIndex, _onItemTapped),
+                            SizedBox(
+                                width: 60), // Space for FloatingActionButton
+                            BottomNavBarItemWidget.buildNavBarItem(
+                                'chat', 3, _selectedIndex, _onItemTapped),
+                            BottomNavBarItemWidget.buildNavBarItem(
+                                'user', 4, _selectedIndex, _onItemTapped),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              floatingActionButtonLocation:
+                  FloatingActionButtonLocation.centerDocked,
+              floatingActionButton:
+                  Stack(alignment: Alignment.center, children: [
+                Positioned(
+                  bottom: 30,
+                  child: SizedBox(
+                    height: 53, // Extiende el área interactiva.
+                    width: 53,
+                    child: FloatingActionButton(
+                      backgroundColor: Colors.black,
+                      elevation: 5,
+                      onPressed: () {
+                        if (authController.isLoggedIn.value) {
+                          _onItemTapped(2);
+                        } else {
+                          _showLoginDialog();
+                        }
+                      },
+                      shape: CircleBorder(
+                        side: BorderSide(color: Colors.black, width: 2),
+                      ),
+                      child: SvgPicture.asset(
+                        'assets/icons/navBar/add.svg',
+                        width: 20,
+                        height: 20,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
-              ],
-            ),
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerDocked,
-            floatingActionButton: Transform.translate(
-              offset: const Offset(0, -30),
-              child: SizedBox(
-                height: 50,
-                width: 50,
-                child: FloatingActionButton(
-                  backgroundColor: Colors.black,
-                  elevation: 5,
-                  onPressed: () {
-                    if (authController.isLoggedIn.value) {
-                      _onItemTapped(2);
-                    } else {
-                      _showLoginDialog();
-                    }
-                  },
-                  shape: CircleBorder(
-                    side: BorderSide(color: Colors.black, width: 2),
-                  ),
-                  child: SvgPicture.asset(
-                    'assets/icons/navBar/add.svg',
-                    width: 20,
-                    height: 20,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          );
+              ]));
         }
       },
     );

@@ -40,14 +40,24 @@ class ChatsScreenState extends State<ChatsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Mensajes',
+        title: 'MENSAJES',
         iconPath: 'assets/icons/new_chat.svg',
         onIconPressed: _toggleNewChatPopup,
         iconPosition: IconPosition.right, // Para icono a la izquierda
       ),
       body: Stack(
         children: [
-          Body(searchQuery: _searchQuery, onDeleteChat: _deleteChat),
+          Column(
+            children: [
+              Expanded(
+                child:
+                    Body(searchQuery: _searchQuery, onDeleteChat: _deleteChat),
+              ),
+              SizedBox(
+                height: 85, // Espacio al final de la ventana
+              ),
+            ],
+          ),
           if (_showNewChatPopup)
             NewChatPopup(
               searchController: _searchController,
