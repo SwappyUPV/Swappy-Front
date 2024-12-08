@@ -10,21 +10,22 @@ class SignUpScreenTopImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: defaultPadding),
-        Row(
-          children: [
-            const Spacer(),
-            Expanded(
-              flex: 8,
-              child: Image.asset("assets/images/swappy.png"),
+    final isMobile = MediaQuery.of(context).size.width < 600;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 30), // Padding en la parte superior
+      child: Column(
+        children: [
+          const SizedBox(height: defaultPadding),
+          Center(
+            child: SvgPicture.asset(
+              'assets/icons/logo.svg',
+              height: isMobile ? 25 : 35,
             ),
-            const Spacer(),
-          ],
-        ),
-        const SizedBox(height: defaultPadding),
-      ],
+          ),
+          const SizedBox(height: defaultPadding),
+        ],
+      ),
     );
   }
 }

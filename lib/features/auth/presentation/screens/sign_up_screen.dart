@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pin/core/constants/constants.dart';
 import 'package:pin/core/utils/responsive.dart';
-import '../../../../core/utils/background.dart';
 import '../widgets/components/sign_up_top_image.dart';
 import '../widgets/forms/sign_up_form.dart';
 
@@ -10,29 +9,29 @@ class SignUpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Background(
-      child: SingleChildScrollView(
+    return Scaffold(
+      backgroundColor: Colors.white, // Color de fondo, opcional
+      body: SingleChildScrollView(
         child: Responsive(
-          mobile: const MobileSignup(), // MobileSignup can be const
+          mobile: const MobileSignup(),
           desktop: Row(
             children: [
               const Expanded(
+                  child: Center(
                 child: SignUpScreenTopImage(),
-              ),
+              )),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     SizedBox(
                       width: 450,
-                      child:
-                          SignUpForm(), // SignUpForm can't be const if it's stateful
+                      child: SignUpForm(),
                     ),
                     const SizedBox(height: defaultPadding / 2),
-                    // SocalSignUp()
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -57,12 +56,11 @@ class MobileSignup extends StatelessWidget {
             const Spacer(),
             Expanded(
               flex: 8,
-              child: SignUpForm(), // This cannot be const
+              child: SignUpForm(),
             ),
             const Spacer(),
           ],
         ),
-        // const SocalSignUp()
       ],
     );
   }

@@ -67,14 +67,15 @@ class _LoginState extends State<Login> {
                   SizedBox(height: isMobile ? 50 : 75),
                   // Top Logo and Register Link
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: horizontalPadding),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         // Logo
                         SvgPicture.asset(
                           'assets/icons/logo.svg',
-                          height: isMobile ? 30 : 35,
+                          height: isMobile ? 17 : 35,
                         ),
 
                         // Register Link
@@ -95,18 +96,19 @@ class _LoginState extends State<Login> {
                             },
                             child: Column(
                               children: [
-                                SizedBox(height: 15), // Adjust the height as needed
+                                SizedBox(
+                                    height: 15), // Adjust the height as needed
                                 Align(
                                   alignment: Alignment.bottomRight,
                                   child: Text(
+                                    textAlign: TextAlign.right,
                                     '¿No tienes una cuenta?\nRegístrate',
                                     style: TextStyle(
                                       color: _isHovered
                                           ? Colors.grey
                                           : const Color(0xFF000000),
-                                      fontFamily: 'UrbaneMedium',
+                                      fontFamily: 'UrbaneLight',
                                       fontSize: isMobile ? 14 : 15,
-                                      fontWeight: FontWeight.w300,
                                       letterSpacing: -0.26,
                                     ),
                                   ),

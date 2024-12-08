@@ -100,7 +100,6 @@ class _LoginFormState extends State<LoginForm> {
                 style: TextStyle(
                     fontSize: 24,
                     fontFamily: 'UrbaneMedium',
-                    fontWeight: FontWeight.w900,
                     color: Colors.black),
               ),
             ),
@@ -138,7 +137,7 @@ class _LoginFormState extends State<LoginForm> {
                 ),
               ),
               validator: (value) =>
-              value!.isEmpty ? 'Introduce tu correo electrónico' : null,
+                  value!.isEmpty ? 'Introduce tu correo electrónico' : null,
             ),
             const SizedBox(height: 10),
             TextFormField(
@@ -175,7 +174,7 @@ class _LoginFormState extends State<LoginForm> {
                 ),
               ),
               validator: (value) =>
-              value!.isEmpty ? 'Introduce tu contraseña' : null,
+                  value!.isEmpty ? 'Introduce tu contraseña' : null,
             ),
             const SizedBox(height: 20),
             // Recuperar Contraseña Link
@@ -195,14 +194,15 @@ class _LoginFormState extends State<LoginForm> {
                   // Add your onTap logic here
                 },
                 child: Text(
-                  'Ha olvidado la contraseña? Recuperar contraseña',
+                  textAlign: TextAlign.left,
+                  '¿Has olvidado tu contraseña? Recupérala aquí',
                   style: TextStyle(
                     color:
-                    _isHoveredRecuperar ? Colors.grey : Color(0xFF000000),
-                    fontFamily: 'UrbaneMedium',
-                    fontSize: 13,
+                        _isHoveredRecuperar ? Colors.grey : Color(0xFF000000),
+                    fontFamily: 'OpenSans-Bold',
+                    fontSize: 15,
                     fontStyle: FontStyle.normal,
-                    fontWeight: FontWeight.w300,
+                    fontWeight: FontWeight.w500,
                     letterSpacing: -0.26,
                   ),
                 ),
@@ -212,21 +212,20 @@ class _LoginFormState extends State<LoginForm> {
             _isLoading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
-              onPressed: loginUser,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30)),
-                padding: const EdgeInsets.symmetric(
-                    vertical: 13, horizontal: 30),
-              ),
-              child: const Text('Iniciar Sesión',
-                  style: TextStyle(
-                      fontSize: 17,
-                      fontFamily: 'UrbaneMedium',
-                      fontWeight: FontWeight.w500,
-                      color: SecondaryColor)),
-            ),
+                    onPressed: loginUser,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30)),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 13, horizontal: 30),
+                    ),
+                    child: const Text('Iniciar Sesión',
+                        style: TextStyle(
+                            fontSize: 17,
+                            fontFamily: 'UrbaneMedium',
+                            color: SecondaryColor)),
+                  ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: signInWithGoogle,

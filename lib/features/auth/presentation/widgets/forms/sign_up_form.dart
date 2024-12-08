@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pin/core/services/create_user_service.dart';
 import '../../screens/login_screen.dart';
 import 'package:pin/features/auth/presentation/widgets/components/image_picker_widget.dart'; // Import ImagePickerWidget
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 class SignUpForm extends StatefulWidget {
   const SignUpForm({super.key});
@@ -13,11 +14,14 @@ class SignUpForm extends StatefulWidget {
 class _SignUpFormState extends State<SignUpForm> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final CreateUserService _createUserService = CreateUserService();
   final _formKey = GlobalKey<FormState>();
+
+  final List<String> allSizes = ['XS', 'S', 'M', 'L', 'XL'];
 
   DateTime? _selectedBirthday;
   String? _selectedGender = 'Hombre';
@@ -38,14 +42,6 @@ class _SignUpFormState extends State<SignUpForm> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  'Foto de perfil',
-                  style: TextStyle(
-                    fontFamily: 'UrbaneMedium',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
                 const SizedBox(width: 10),
                 ImagePickerWidget(
                   pickedImage: _pickedImage,
@@ -109,7 +105,8 @@ class _SignUpFormState extends State<SignUpForm> {
                 hintText: "Introducir contraseña",
                 prefixIcon: const Icon(Icons.lock),
                 suffixIcon: IconButton(
-                  icon: Icon(_showPassword ? Icons.visibility : Icons.visibility_off),
+                  icon: Icon(
+                      _showPassword ? Icons.visibility : Icons.visibility_off),
                   onPressed: () {
                     setState(() {
                       _showPassword = !_showPassword;
@@ -130,7 +127,9 @@ class _SignUpFormState extends State<SignUpForm> {
                 hintText: "Confirmar contraseña",
                 prefixIcon: const Icon(Icons.lock),
                 suffixIcon: IconButton(
-                  icon: Icon(_showConfirmPassword ? Icons.visibility : Icons.visibility_off),
+                  icon: Icon(_showConfirmPassword
+                      ? Icons.visibility
+                      : Icons.visibility_off),
                   onPressed: () {
                     setState(() {
                       _showConfirmPassword = !_showConfirmPassword;
@@ -174,9 +173,9 @@ class _SignUpFormState extends State<SignUpForm> {
               ),
               items: ['Hombre', 'Mujer', 'Otro']
                   .map((gender) => DropdownMenuItem(
-                value: gender,
-                child: Text(gender),
-              ))
+                        value: gender,
+                        child: Text(gender),
+                      ))
                   .toList(),
               onChanged: (String? newValue) {
                 setState(() {
@@ -215,7 +214,8 @@ class _SignUpFormState extends State<SignUpForm> {
                           Text(
                             _selectedBirthday == null
                                 ? "Selecciona fecha"
-                                : "${_selectedBirthday!.toLocal()}".split(' ')[0],
+                                : "${_selectedBirthday!.toLocal()}"
+                                    .split(' ')[0],
                             style: TextStyle(color: Colors.black),
                           ),
                         ],
@@ -226,34 +226,36 @@ class _SignUpFormState extends State<SignUpForm> {
               ],
             ),
             const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const Text(
-                  'Tallas preferidas',
-                  style: TextStyle(
-                    fontFamily: 'UrbaneMedium',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  children: [
-                    _buildSizeCheckbox("XS"),
-                    _buildSizeCheckbox("S"),
-                    _buildSizeCheckbox("M"),
-                    _buildSizeCheckbox("L"),
-                    _buildSizeCheckbox("XL"),
-                  ],
-                ),
-              ],
+            MultiSelectDialogField(
+              items: allSizes
+                  .map((size) => MultiSelectItem<String>(size, size))
+                  .toList(),
+              title: Text("Selecciona las tallas"),
+              selectedColor: Colors.blue,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.black),
+              ),
+              buttonIcon: Icon(Icons.arrow_drop_down),
+              buttonText: Text(
+                preferredSizes.isEmpty
+                    ? 'Selecciona tallas'
+                    : 'Tallas seleccionadas',
+              ),
+              onConfirm: (selectedSizes) {
+                setState(() {
+                  preferredSizes = selectedSizes.cast<String>();
+                });
+              },
+              initialValue: preferredSizes,
+              dialogHeight: 300,
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => signUpUser(context),
               child: Text("Registrarse".toUpperCase()),
             ),
+            const SizedBox(height: 40),
           ],
         ),
       ),
@@ -330,7 +332,8 @@ class _SignUpFormState extends State<SignUpForm> {
 
       // Use default image URL if no image is picked
       if (_pickedImage == null) {
-        _pickedImage = "https://firebasestorage.googleapis.com/v0/b/swappy-pin.appspot.com/o/profile_images%2Fdefault_user.png?alt=media&token=92bbfc56-8927-41a0-b81c-2394b90bf38c";
+        _pickedImage =
+            "https://firebasestorage.googleapis.com/v0/b/swappy-pin.appspot.com/o/profile_images%2Fdefault_user.png?alt=media&token=92bbfc56-8927-41a0-b81c-2394b90bf38c";
       }
 
       String res = await _createUserService.createUser(

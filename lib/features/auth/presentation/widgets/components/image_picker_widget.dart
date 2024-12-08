@@ -35,27 +35,37 @@ class ImagePickerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Ink(
-          decoration: const ShapeDecoration(
-            color: Colors.black,
-            shape: CircleBorder(),
+    return Center(
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // IconButton en la esquina inferior derecha
+          Positioned(
+            bottom: -10, // Ajusta el valor para solapar más o menos
+            right: -29, // Ajusta el valor para solapar más o menos
+            child: Ink(
+              decoration: const ShapeDecoration(
+                color: Color.fromARGB(255, 255, 255, 255),
+                shape: CircleBorder(),
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.photo_library,
+                    color: Color.fromARGB(255, 0, 0, 0)),
+                onPressed: _pickImage,
+                iconSize: 28, // Tamaño del ícono
+              ),
+            ),
           ),
-          child: IconButton(
-            icon: const Icon(Icons.photo_library, color: Colors.white),
-            onPressed: _pickImage,
+          CircleAvatar(
+            radius: 50,
+            backgroundImage: pickedImage != null
+                ? (kIsWeb
+                    ? NetworkImage(pickedImage.path)
+                    : FileImage(pickedImage) as ImageProvider)
+                : const AssetImage('assets/images/default_user.png'),
           ),
-        ),
-        const SizedBox(width: 10),
-        CircleAvatar(
-          radius: 60,
-          backgroundImage: pickedImage != null
-              ? (kIsWeb ? NetworkImage(pickedImage.path) : FileImage(pickedImage) as ImageProvider)
-              : const AssetImage('assets/images/default_user.png'),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
