@@ -44,10 +44,36 @@ class SettingsScreen extends StatelessWidget {
             Get.offAll(() => NavigationMenu());
           }),
           _buildSettingsItem(Iconsax.profile_delete, 'Eliminar cuenta y datos', () async {
-            await AuthMethod().deleteUser();
-            final NavigationController navigationController = Get.find<NavigationController>();
-            navigationController.updateIndex(0);
-            Get.offAll(() => NavigationMenu());
+              bool? confirm = await showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('Borrar cuenta'),
+                    content: Text('¿Estás seguro que quieres eliminar la cuenta y los datos de esta?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(false); // User pressed No
+                        },
+                        child: Text('No'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(true); // User pressed Yes
+                        },
+                        child: Text('Sí'),
+                      ),
+                    ],
+                  );
+                },
+              );
+
+              if (confirm == true) {
+                await AuthMethod().deleteUser();
+                final NavigationController navigationController = Get.find<NavigationController>();
+                navigationController.updateIndex(0);
+                Get.offAll(() => NavigationMenu());
+              }
           }),
         ],
       ),
