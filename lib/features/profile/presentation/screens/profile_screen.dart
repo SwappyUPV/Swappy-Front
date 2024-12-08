@@ -127,8 +127,10 @@ class _ProfileState extends State<Profile> {
                         userModel:
                             _userModel!), // Pass the userModel to the profile header
                     const Divider(),
-                    const Expanded(
-                        child: PostGrid()), // Use the post grid widget
+                    const Expanded(child: PostGrid()),
+                    const SizedBox(
+                      height: 55,
+                    ) // Use the post grid widget
                   ],
                 ),
     );
