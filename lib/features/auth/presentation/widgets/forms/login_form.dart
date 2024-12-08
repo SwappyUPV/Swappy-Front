@@ -193,17 +193,32 @@ class _LoginFormState extends State<LoginForm> {
                 onTap: () {
                   // Add your onTap logic here
                 },
-                child: Text(
+                child: RichText(
                   textAlign: TextAlign.left,
-                  '¿Has olvidado tu contraseña? Recupérala aquí',
-                  style: TextStyle(
-                    color:
-                        _isHoveredRecuperar ? Colors.grey : Color(0xFF000000),
-                    fontFamily: 'OpenSans-Bold',
-                    fontSize: 15,
-                    fontStyle: FontStyle.normal,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: -0.26,
+                  text: TextSpan(
+                    style: TextStyle(
+                      color:
+                          _isHoveredRecuperar ? Colors.grey : Color(0xFF000000),
+                      fontFamily: 'OpenSans-Bold',
+                      fontSize: 15,
+                      fontStyle: FontStyle.normal,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: -0.26,
+                    ),
+                    children: [
+                      TextSpan(
+                          text: '¿Has olvidado tu contraseña? Recupérala '),
+                      TextSpan(
+                        text: 'aquí',
+                        style: TextStyle(
+                          decoration: TextDecoration
+                              .underline, // Esto subraya la palabra "aquí"
+                          color: _isHoveredRecuperar
+                              ? Colors.grey
+                              : Color(0xFF000000), // Color opcional
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

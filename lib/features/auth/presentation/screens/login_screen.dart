@@ -100,16 +100,28 @@ class _LoginState extends State<Login> {
                                     height: 15), // Adjust the height as needed
                                 Align(
                                   alignment: Alignment.bottomRight,
-                                  child: Text(
+                                  child: RichText(
                                     textAlign: TextAlign.right,
-                                    '¿No tienes una cuenta?\nRegístrate',
-                                    style: TextStyle(
-                                      color: _isHovered
-                                          ? Colors.grey
-                                          : const Color(0xFF000000),
-                                      fontFamily: 'UrbaneLight',
-                                      fontSize: isMobile ? 14 : 15,
-                                      letterSpacing: -0.26,
+                                    text: TextSpan(
+                                      style: TextStyle(
+                                        color: _isHovered
+                                            ? Colors.grey
+                                            : const Color(0xFF000000),
+                                        fontFamily: 'UrbaneLight',
+                                        fontSize: isMobile ? 14 : 15,
+                                        letterSpacing: -0.26,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                            text: '¿No tienes una cuenta?\n'),
+                                        TextSpan(
+                                          text: 'Regístrate',
+                                          style: TextStyle(
+                                            decoration: TextDecoration
+                                                .underline, // Subraya "Regístrate"
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
