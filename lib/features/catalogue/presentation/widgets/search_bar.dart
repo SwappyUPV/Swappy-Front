@@ -51,7 +51,7 @@ class _SearchBarState extends State<SearchBar> {
                     controller: _controller,
                     style: TextStyle(
                       fontFamily: 'UrbaneExtraLight',
-                      fontSize: 14, // Usar la fuente personalizada
+                      fontSize: 15, // Usar la fuente personalizada
                     ),
                     decoration: InputDecoration(
                       hintText: 'Busca una prenda o estilo...',

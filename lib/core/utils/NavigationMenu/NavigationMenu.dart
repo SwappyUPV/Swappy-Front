@@ -23,7 +23,8 @@ class _NavigationMenuState extends State<NavigationMenu> {
   final NavigationController controller = Get.put(NavigationController());
   final AuthController authController = Get.put(AuthController());
   int _selectedIndex = 0;
-  final List<GlobalKey<NavigatorState>> _navKeys = List.generate(5, (_) => GlobalKey<NavigatorState>());
+  final List<GlobalKey<NavigatorState>> _navKeys =
+      List.generate(5, (_) => GlobalKey<NavigatorState>());
   final List<Widget> _pages = [
     const Catalogue(),
     const VirtualCloset(),
@@ -59,11 +60,22 @@ class _NavigationMenuState extends State<NavigationMenu> {
                   },
                   labelType: NavigationRailLabelType.all,
                   destinations: [
-                    NavigationRailDestinationWidget.buildRailDestination('home', 'home_selected', 'Catálogo', _selectedIndex, _pages),
-                    NavigationRailDestinationWidget.buildRailDestination('top', 'top_selected', 'Armario', _selectedIndex, _pages),
-                    NavigationRailDestinationWidget.buildRailDestination('add', 'add_selected', 'Subir', _selectedIndex, _pages),
-                    NavigationRailDestinationWidget.buildRailDestination('chat', 'chat_selected', 'Chat', _selectedIndex, _pages),
-                    NavigationRailDestinationWidget.buildRailDestination('user', 'user_selected', authController.isLoggedIn.value ? 'Perfil' : 'Iniciar Sesión', _selectedIndex, _pages),
+                    NavigationRailDestinationWidget.buildRailDestination('home',
+                        'home_selected', 'Catálogo', _selectedIndex, _pages),
+                    NavigationRailDestinationWidget.buildRailDestination('top',
+                        'top_selected', 'Armario', _selectedIndex, _pages),
+                    NavigationRailDestinationWidget.buildRailDestination(
+                        'add', 'add_selected', 'Subir', _selectedIndex, _pages),
+                    NavigationRailDestinationWidget.buildRailDestination('chat',
+                        'chat_selected', 'Chat', _selectedIndex, _pages),
+                    NavigationRailDestinationWidget.buildRailDestination(
+                        'user',
+                        'user_selected',
+                        authController.isLoggedIn.value
+                            ? 'Perfil'
+                            : 'Iniciar Sesión',
+                        _selectedIndex,
+                        _pages),
                   ],
                 ),
                 Expanded(
@@ -89,7 +101,8 @@ class _NavigationMenuState extends State<NavigationMenu> {
             body: Stack(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 68), // Add padding to the bottom
+                  padding: const EdgeInsets.only(
+                      bottom: 68), // Add padding to the bottom
                   child: WillPopScope(
                     onWillPop: _onWillPop,
                     child: IndexedStack(
@@ -98,39 +111,39 @@ class _NavigationMenuState extends State<NavigationMenu> {
                           .asMap()
                           .entries
                           .map((entry) => Navigator(
-                        key: _navKeys[entry.key],
-                        onGenerateInitialRoutes: (_, __) {
-                          return [
-                            MaterialPageRoute(
-                              builder: (context) => entry.value,
-                            ),
-                          ];
-                        },
-                      ))
+                                key: _navKeys[entry.key],
+                                onGenerateInitialRoutes: (_, __) {
+                                  return [
+                                    MaterialPageRoute(
+                                      builder: (context) => entry.value,
+                                    ),
+                                  ];
+                                },
+                              ))
                           .toList(),
                     ),
                   ),
                 ),
                 Positioned(
                   bottom: 0,
-                  left: 0,
-                  right: 0,
+                  left: -3,
+                  right: -3,
                   child: Container(
-                    height: 68,
+                    height: 56,
                     width: MediaQuery.of(context).size.width,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(150.0),
-                        topRight: Radius.circular(150.0),
-                        bottomLeft: Radius.circular(150.0),
-                        bottomRight: Radius.circular(150.0),
+                        topLeft: Radius.circular(35.0),
+                        topRight: Radius.circular(35.0),
+                        bottomLeft: Radius.circular(0),
+                        bottomRight: Radius.circular(0),
                       ),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.6),
-                          blurRadius: 15,
-                          spreadRadius: 5,
+                          blurRadius: 10,
+                          spreadRadius: 0.4,
                         ),
                       ],
                     ),
@@ -139,11 +152,15 @@ class _NavigationMenuState extends State<NavigationMenu> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          BottomNavBarItemWidget.buildNavBarItem('home', 0, _selectedIndex, _onItemTapped),
-                          BottomNavBarItemWidget.buildNavBarItem('top', 1, _selectedIndex, _onItemTapped),
+                          BottomNavBarItemWidget.buildNavBarItem(
+                              'home', 0, _selectedIndex, _onItemTapped),
+                          BottomNavBarItemWidget.buildNavBarItem(
+                              'top', 1, _selectedIndex, _onItemTapped),
                           SizedBox(width: 60), // Space for FloatingActionButton
-                          BottomNavBarItemWidget.buildNavBarItem('chat', 3, _selectedIndex, _onItemTapped),
-                          BottomNavBarItemWidget.buildNavBarItem('user', 4, _selectedIndex, _onItemTapped),
+                          BottomNavBarItemWidget.buildNavBarItem(
+                              'chat', 3, _selectedIndex, _onItemTapped),
+                          BottomNavBarItemWidget.buildNavBarItem(
+                              'user', 4, _selectedIndex, _onItemTapped),
                         ],
                       ),
                     ),
@@ -151,12 +168,13 @@ class _NavigationMenuState extends State<NavigationMenu> {
                 ),
               ],
             ),
-            floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerDocked,
             floatingActionButton: Transform.translate(
               offset: const Offset(0, -30),
               child: SizedBox(
-                height: 70,
-                width: 70,
+                height: 50,
+                width: 50,
                 child: FloatingActionButton(
                   backgroundColor: Colors.black,
                   elevation: 5,
@@ -172,8 +190,8 @@ class _NavigationMenuState extends State<NavigationMenu> {
                   ),
                   child: SvgPicture.asset(
                     'assets/icons/navBar/add.svg',
-                    width: 25,
-                    height: 25,
+                    width: 20,
+                    height: 20,
                     color: Colors.white,
                   ),
                 ),
@@ -223,7 +241,8 @@ class _NavigationMenuState extends State<NavigationMenu> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Inicio de Sesión'),
-          content: const Text('Necesitas iniciar sesión para acceder a esta sección.'),
+          content: const Text(
+              'Necesitas iniciar sesión para acceder a esta sección.'),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancelar'),
