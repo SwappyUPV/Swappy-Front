@@ -231,6 +231,42 @@ class _AddProductFormState extends State<AddProductForm> {
     );
   }
 
+  void _showPricePopup() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Configura el precio'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Precio',
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    price = int.tryParse(value);
+                  });
+                },
+              )
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Aceptar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -334,7 +370,7 @@ class _AddProductFormState extends State<AddProductForm> {
 
             // Precio
             GestureDetector(
-              onTap: () => _showPopup('Precio'),
+              onTap: _showPricePopup,
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16.0),
@@ -346,13 +382,51 @@ class _AddProductFormState extends State<AddProductForm> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Precio:'),
+                    // El precio se muestra en la siguiente línea
                     Text(price != null ? '\$${price}' : 'Seleccionar'),
                   ],
                 ),
               ),
             ),
-            SizedBox(height: 16),
 
+            SizedBox(height: 16),
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  isExchangeOnly =
+                      !isExchangeOnly; // Cambia el estado del interruptor
+                });
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Solo intercambio'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(isExchangeOnly ? 'ON' : 'OFF'),
+                        Switch(
+                          value: isExchangeOnly,
+                          onChanged: (bool value) {
+                            setState(() {
+                              isExchangeOnly = value;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
             // Calidad
             GestureDetector(
               onTap: () => _showPopup('Calidad'),
