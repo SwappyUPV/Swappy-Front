@@ -62,9 +62,11 @@ class _LoginFormState extends State<LoginForm> {
   void signInWithGoogle() async {
     try {
       String res = await _authMethod.signInWithGoogle();
+
       if (res == "success") {
         String userId = _authMethod.getCurrentUser()!.uid;
         await saveUserId(userId);
+        await _authMethod.saveUserModel(userId);
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (context) => NavigationMenu()));
       } else {
@@ -137,7 +139,7 @@ class _LoginFormState extends State<LoginForm> {
                 ),
               ),
               validator: (value) =>
-                  value!.isEmpty ? 'Introduce tu correo electrónico' : null,
+              value!.isEmpty ? 'Introduce tu correo electrónico' : null,
             ),
             const SizedBox(height: 10),
             TextFormField(
@@ -174,7 +176,7 @@ class _LoginFormState extends State<LoginForm> {
                 ),
               ),
               validator: (value) =>
-                  value!.isEmpty ? 'Introduce tu contraseña' : null,
+              value!.isEmpty ? 'Introduce tu contraseña' : null,
             ),
             const SizedBox(height: 20),
             // Recuperar Contraseña Link
@@ -198,7 +200,7 @@ class _LoginFormState extends State<LoginForm> {
                   text: TextSpan(
                     style: TextStyle(
                       color:
-                          _isHoveredRecuperar ? Colors.grey : Color(0xFF000000),
+                      _isHoveredRecuperar ? Colors.grey : Color(0xFF000000),
                       fontFamily: 'OpenSans-Bold',
                       fontSize: 15,
                       fontStyle: FontStyle.normal,
@@ -227,20 +229,20 @@ class _LoginFormState extends State<LoginForm> {
             _isLoading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
-                    onPressed: loginUser,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 13, horizontal: 30),
-                    ),
-                    child: const Text('Iniciar Sesión',
-                        style: TextStyle(
-                            fontSize: 17,
-                            fontFamily: 'UrbaneMedium',
-                            color: SecondaryColor)),
-                  ),
+              onPressed: loginUser,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30)),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 13, horizontal: 30),
+              ),
+              child: const Text('Iniciar Sesión',
+                  style: TextStyle(
+                      fontSize: 17,
+                      fontFamily: 'UrbaneMedium',
+                      color: SecondaryColor)),
+            ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: signInWithGoogle,

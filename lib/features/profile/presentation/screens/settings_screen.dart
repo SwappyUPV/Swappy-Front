@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:pin/core/services/authentication_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/utils/NavigationMenu/NavigationMenu.dart';
 import 'package:get/get.dart';
 import 'package:pin/core/utils/NavigationMenu/controllers/navigationController.dart';
@@ -30,21 +31,24 @@ class SettingsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildSettingsItem(Iconsax.user_edit, 'Change Name', () {}),
-          _buildSettingsItem(Iconsax.size, 'Change Preferred Sizes', () {}),
-          _buildSettingsItem(Iconsax.calendar, 'Change Birthday', () {}),
-          _buildSettingsItem(Iconsax.map, 'Change Address', () {}),
-          _buildSettingsItem(Iconsax.lock, 'Change Password', () {}),
-          _buildSettingsItem(Iconsax.message, 'Change Email', () {}),
-          _buildSettingsItem(Iconsax.logout, 'Logout', () async {
+          _buildSettingsItem(Iconsax.user_edit, 'Nombre', () {}),
+          _buildSettingsItem(Iconsax.size, 'Tallas', () {}),
+          _buildSettingsItem(Iconsax.calendar, 'Fecha Nacimiento', () {}),
+          _buildSettingsItem(Iconsax.map, 'Localidad', () {}),
+          _buildSettingsItem(Iconsax.lock, 'Contraseña', () {}),
+          _buildSettingsItem(Iconsax.message, 'Correo', () {}),
+          _buildSettingsItem(Iconsax.logout, 'Cerrar sesión', () async {
             await AuthMethod().logout();
-            Navigator.of(context).pop();
-            final NavigationController navigationController =
-                Get.find<NavigationController>();
-            navigationController.updateIndex(4);
-            Get.off(() => NavigationMenu());
+            final NavigationController navigationController = Get.find<NavigationController>();
+            navigationController.updateIndex(0);
+            Get.offAll(() => NavigationMenu());
           }),
-          _buildSettingsItem(Iconsax.profile_delete, 'Delete account', () {}),
+          _buildSettingsItem(Iconsax.profile_delete, 'Eliminar cuenta y datos', () async {
+            await AuthMethod().deleteUser();
+            final NavigationController navigationController = Get.find<NavigationController>();
+            navigationController.updateIndex(0);
+            Get.offAll(() => NavigationMenu());
+          }),
         ],
       ),
     );

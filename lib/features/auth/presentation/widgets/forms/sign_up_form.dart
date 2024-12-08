@@ -188,7 +188,7 @@ class _SignUpFormState extends State<SignUpForm> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 const Text(
-                  'Cumpleaños',
+                  'Fecha de Nacimiento',
                   style: TextStyle(
                     fontFamily: 'UrbaneMedium',
                     fontWeight: FontWeight.bold,
@@ -197,7 +197,8 @@ class _SignUpFormState extends State<SignUpForm> {
                 ),
                 const SizedBox(width: 6),
                 Expanded(
-                  child: Center(
+                  child: Align(
+                    alignment: Alignment.centerRight,
                     child: OutlinedButton(
                       onPressed: _pickBirthday,
                       style: OutlinedButton.styleFrom(
@@ -214,8 +215,7 @@ class _SignUpFormState extends State<SignUpForm> {
                           Text(
                             _selectedBirthday == null
                                 ? "Selecciona fecha"
-                                : "${_selectedBirthday!.toLocal()}"
-                                    .split(' ')[0],
+                                : "${_selectedBirthday!.toLocal()}".split(' ')[0],
                             style: TextStyle(color: Colors.black),
                           ),
                         ],
