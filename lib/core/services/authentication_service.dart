@@ -51,12 +51,13 @@ class AuthMethod {
               ? userCredential.user!.email!.split('@')[0]
               : googleUser.displayName ?? 'Default Name',
           'address': 'Valencia',
-          'birthday': 'Timestamp.fromDate(DateTime(2024, 12, 2)',
+          'birthday': Timestamp.fromDate(DateTime(2024, 12, 2)),
           'gender': 'Hombre',
           'points': '0', // Store points as string
           'preferredSizes': ['S'],
-          'profilePicture': googleUser.photoUrl ?? '"https://firebasestorage.googleapis.com/v0/b/swappy-pin.appspot.com/o/profile_images%2Fdefault_user.png?alt=media&token=92bbfc56-8927-41a0-b81c-2394b90bf38c"',
+          'profilePicture': 'https://firebasestorage.googleapis.com/v0/b/swappy-pin.appspot.com/o/profile_images%2Fdefault_user.png?alt=media&token=92bbfc56-8927-41a0-b81c-2394b90bf38c',
         });
+        //googleUser.photoUrl ?? fails due to too many requests
       }
 
       res = "success";
@@ -196,10 +197,10 @@ class AuthMethod {
 
   // Logout
   Future<void> logout() async {
-    await _auth.signOut();
-    await _auth.authStateChanges().first;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.clear();
+    await _auth.signOut();
+    await _auth.authStateChanges().first;
   }
 
   //Reset Password with email
