@@ -5,10 +5,14 @@ import 'package:pin/features/exchanges/screens/details/details_screen.dart';
 
 class CatalogueGrid extends StatelessWidget {
   final List<Product> filteredCatalogo;
+  final Function(Product) toggleFavorite; // Función para manejar favoritos
+  final Set<Product> favoriteProducts; // Lista de productos favoritos
 
   const CatalogueGrid({
     super.key,
     required this.filteredCatalogo,
+    required this.toggleFavorite, // Parámetro de la función toggleFavorite
+    required this.favoriteProducts, // Parámetro de la lista de favoritos
   });
 
   @override
@@ -32,6 +36,11 @@ class CatalogueGrid extends StatelessWidget {
           final item = filteredCatalogo[index];
           return CatalogueItemCard(
             product: item,
+            isFavorite: favoriteProducts
+                .toList()
+                .contains(item), // Determina si el producto es favorito
+            toggleFavorite: () =>
+                toggleFavorite(item), // Llama a la función toggleFavorite
             press: () {
               Navigator.push(
                 context,

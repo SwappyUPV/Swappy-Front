@@ -5,11 +5,15 @@ import 'package:pin/features/exchanges/screens/home/exchanges.dart';
 class CatalogueItemCard extends StatelessWidget {
   final Product product;
   final VoidCallback press;
+  final bool isFavorite; // Parámetro para saber si el producto es favorito
+  final Function toggleFavorite; // Función para cambiar el estado de favorito
 
   const CatalogueItemCard({
     super.key,
     required this.product,
     required this.press,
+    required this.isFavorite, // Recibimos el estado de favorito
+    required this.toggleFavorite, // Recibimos la función para cambiar el estado de favorito
   });
 
   @override
@@ -52,10 +56,19 @@ class CatalogueItemCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                  // 2. Ícono de favorito
+                  IconButton(
+                    icon: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: isFavorite ? Colors.red : Colors.grey,
+                    ),
+                    onPressed: () =>
+                        toggleFavorite(), // Llamar a la función para cambiar el estado de favorito
+                  ),
                 ],
               ),
             ),
-            // 2. Foto del producto centrada
+            // 3. Foto del producto centrada
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
@@ -67,7 +80,7 @@ class CatalogueItemCard extends StatelessWidget {
                 ),
               ),
             ),
-            // 3. Nombre del producto (datos de ejemplo)
+            // 4. Nombre del producto (datos de ejemplo)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Text(
@@ -83,7 +96,7 @@ class CatalogueItemCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            // 4. Talla del producto (si no existe, poner M/38)
+            // 5. Talla del producto (si no existe, poner M/38)
             Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
@@ -97,7 +110,7 @@ class CatalogueItemCard extends StatelessWidget {
                 ),
               ),
             ),
-            // 5. Row con la palabra "Intercambio" y botón "+"
+            // 6. Row con la palabra "Intercambio" y botón "+"
             Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
@@ -120,7 +133,7 @@ class CatalogueItemCard extends StatelessWidget {
                 ],
               ),
             ),
-            // 6. Botón swap
+            // 7. Botón swap
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(

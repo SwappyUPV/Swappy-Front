@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pin/features/catalogue/presentation/screens/favorites.dart';
 import 'package:pin/features/catalogue/presentation/widgets/header.dart';
 import '../../../../core/services/catalogue.dart';
 import '../widgets/catalogue_app_bar.dart';
@@ -29,6 +30,7 @@ class _CatalogueState extends State<Catalogue> {
     'Glam'
   };
   bool _isLoading = true;
+  Set<Product> favoriteProducts = {}; // Set para favoritos
 
   final CatalogService _catalogService = CatalogService();
 
@@ -56,7 +58,7 @@ class _CatalogueState extends State<Catalogue> {
       categories.add(item.category);
     }
 
-    if (!mounted) return; // Check to avoid setState after widget is disposed
+    if (!mounted) return;
 
     setState(() {
       catalogoRopa = clothes;
@@ -76,6 +78,16 @@ class _CatalogueState extends State<Catalogue> {
               (tag) => tag.toLowerCase().contains(_searchQuery.toLowerCase()));
       return matchesCategory && matchesSearch;
     }).toList();
+  }
+
+  void _toggleFavorite(Product product) {
+    setState(() {
+      if (favoriteProducts.contains(product)) {
+        favoriteProducts.remove(product);
+      } else {
+        favoriteProducts.add(product);
+      }
+    });
   }
 
   @override
@@ -98,13 +110,11 @@ class _CatalogueState extends State<Catalogue> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: 20),
-                  // Row con logo y botón
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16.0, vertical: 8.0),
                     child: Stack(
                       children: [
-                        // Logo centrado horizontalmente
                         Align(
                           alignment: Alignment.center,
                           child: Padding(
@@ -116,31 +126,28 @@ class _CatalogueState extends State<Catalogue> {
                             ),
                           ),
                         ),
-                        // Iconos alineados a la derecha
                         Align(
                           alignment: Alignment.centerRight,
                           child: Padding(
                             padding:
                                 const EdgeInsets.only(top: 10.0, right: 8.0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.favorite_border,
-                                    color: Colors.white,
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.favorite_border,
+                                color: Colors.white,
+                              ),
+                              iconSize: 30.0,
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => FavoritesScreen(
+                                      favoriteProducts:
+                                          favoriteProducts.toList(),
+                                    ),
                                   ),
-                                  iconSize: 30.0,
-                                  onPressed: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            'Pantalla de favoritos no implementada'),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
+                                );
+                              },
                             ),
                           ),
                         ),
@@ -155,12 +162,10 @@ class _CatalogueState extends State<Catalogue> {
                     },
                     productos: catalogoRopa.map((item) => item.title).toList(),
                   ),
-                  // Contenido principal del slider
                   Padding(
                     padding: const EdgeInsets.only(top: 100, left: 40),
                     child: Column(
                       children: [
-                        // "RENUEVA" alineado a la izquierda
                         Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
@@ -172,7 +177,6 @@ class _CatalogueState extends State<Catalogue> {
                             ),
                           ),
                         ),
-                        // "TEMPORADA" e "INVIERNO 2024" centrados
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -200,17 +204,15 @@ class _CatalogueState extends State<Catalogue> {
                 ],
               ),
             ),
-
             SizedBox(height: 20),
             Column(children: [
               Header(
                 title: 'On Trend',
                 subtitle: 'The styles that are taking over',
-                imageAsset: 'assets/icons/Linea5.svg', // Este es opcional
+                imageAsset: 'assets/icons/Linea5.svg',
               ),
             ]),
             SizedBox(height: 20),
-
             CategoryFilter(
               categories: _categories.toList(),
               selectedCategory: _selectedCategory,
@@ -229,7 +231,11 @@ class _CatalogueState extends State<Catalogue> {
                     padding: const EdgeInsets.all(20.0),
                     child: Center(child: CircularProgressIndicator()),
                   )
-                : CatalogueGrid(filteredCatalogo: filteredCatalogo),
+                : CatalogueGrid(
+                    filteredCatalogo: filteredCatalogo,
+                    toggleFavorite: _toggleFavorite,
+                    favoriteProducts: favoriteProducts,
+                  ),
           ],
         ),
       ),
