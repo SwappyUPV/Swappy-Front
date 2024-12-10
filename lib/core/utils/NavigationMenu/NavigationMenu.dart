@@ -35,7 +35,6 @@ class _NavigationMenuState extends State<NavigationMenu> {
     const ProfileScreen(),
   ];
 
-  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -104,8 +103,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
             body: Stack(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(
-                      bottom: 0), // Add padding to the bottom
+                  padding: const EdgeInsets.only(bottom: 0),
                   child: WillPopScope(
                     onWillPop: _onWillPop,
                     child: IndexedStack(
@@ -150,35 +148,46 @@ class _NavigationMenuState extends State<NavigationMenu> {
                         ),
                       ],
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 42),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          BottomNavBarItemWidget.buildNavBarItem(
-                              'home', 0, _selectedIndex, _onItemTapped),
-                          BottomNavBarItemWidget.buildNavBarItem(
-                              'top', 1, _selectedIndex, _onItemTapped),
-                          SizedBox(
-                              width: 60), // Space for FloatingActionButton
-                          BottomNavBarItemWidget.buildNavBarItem(
-                              'chat', 3, _selectedIndex, _onItemTapped),
-                          BottomNavBarItemWidget.buildNavBarItem(
-                              'user', 4, _selectedIndex, _onItemTapped),
-                        ],
-                      ),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        double iconSize = constraints.maxWidth < 300 ? 24 : 30;
+                        return Padding(
+                          padding: EdgeInsets.symmetric(horizontal: constraints.maxWidth / 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                child: BottomNavBarItemWidget.buildNavBarItem(
+                                    'home', 0, _selectedIndex, _onItemTapped, iconSize),
+                              ),
+                              Flexible(
+                                child: BottomNavBarItemWidget.buildNavBarItem(
+                                    'top', 1, _selectedIndex, _onItemTapped, iconSize),
+                              ),
+                              const SizedBox(width: 60), // Space for FloatingActionButton
+                              Flexible(
+                                child: BottomNavBarItemWidget.buildNavBarItem(
+                                    'chat', 3, _selectedIndex, _onItemTapped, iconSize),
+                              ),
+                              Flexible(
+                                child: BottomNavBarItemWidget.buildNavBarItem(
+                                    'user', 4, _selectedIndex, _onItemTapped, iconSize),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
               ],
             ),
-            floatingActionButtonLocation:
-            FloatingActionButtonLocation.centerDocked,
+            floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
             floatingActionButton: Stack(alignment: Alignment.center, children: [
               Positioned(
                 bottom: 30,
                 child: SizedBox(
-                  height: 53, // Extiende el área interactiva.
+                  height: 53, // Extends the interactive area.
                   width: 53,
                   child: FloatingActionButton(
                     backgroundColor: Colors.black,
