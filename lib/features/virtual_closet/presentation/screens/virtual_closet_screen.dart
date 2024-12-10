@@ -80,7 +80,7 @@ class _VirtualClosetScreenState extends State<VirtualCloset> {
     return Scaffold(
       appBar: CustomAppBar(
         title: 'ARMARIO VIRTUAL',
-        iconPath: '',
+        iconPath: 'assets/icons/back.svg',
         onIconPressed: () {},
         iconPosition: IconPosition.left,
       ),
