@@ -396,92 +396,6 @@ class _AddProductFormState extends State<AddProductForm> {
 
             SizedBox(height: 16),
 
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  isExchangeOnly =
-                      !isExchangeOnly; // Cambia el estado del interruptor
-                });
-              },
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Solo intercambio'),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(isExchangeOnly ? 'ON' : 'OFF'),
-                        Switch(
-                          value: isExchangeOnly,
-                          onChanged: (bool value) {
-                            setState(() {
-                              isExchangeOnly = value;
-                              if (value) {
-                                // Si se activa solo intercambio, limpiamos el precio
-                                price = null;
-                              }
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 16),
-
-            // Precio
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(16.0),
-                child: TextField(
-                  keyboardType: TextInputType.number,
-                  enabled:
-                      !isExchangeOnly, // Deshabilitamos el campo si es solo intercambio
-                  decoration: InputDecoration(
-                    labelText: 'Precio',
-                    border: OutlineInputBorder(),
-                    // Añadimos un sufijo para mostrar la moneda
-                    suffixText: '€',
-                    // Añadimos un texto de ayuda cuando está deshabilitado
-                    helperText: isExchangeOnly
-                        ? 'No disponible en modo intercambio'
-                        : null,
-                    // Cambiamos el color cuando está deshabilitado
-                    fillColor: isExchangeOnly ? Colors.grey[200] : null,
-                    filled: isExchangeOnly,
-                  ),
-                  controller: TextEditingController(
-                    text: price?.toString() ?? '',
-                  )..selection = TextSelection.fromPosition(
-                      TextPosition(offset: price?.toString().length ?? 0),
-                    ),
-                  onChanged: (value) {
-                    if (!isExchangeOnly) {
-                      setState(() {
-                        price = int.tryParse(value);
-                      });
-                    }
-                  },
-                ),
-              ),
-            ),
-
-            SizedBox(height: 16),
             // Calidad
             GestureDetector(
               onTap: () {
@@ -579,6 +493,93 @@ class _AddProductFormState extends State<AddProductForm> {
                       .toList(),
                 ),
               ),
+
+            SizedBox(height: 16),
+
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  isExchangeOnly =
+                      !isExchangeOnly; // Cambia el estado del interruptor
+                });
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Solo intercambio'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(isExchangeOnly ? 'ON' : 'OFF'),
+                        Switch(
+                          value: isExchangeOnly,
+                          onChanged: (bool value) {
+                            setState(() {
+                              isExchangeOnly = value;
+                              if (value) {
+                                // Si se activa solo intercambio, limpiamos el precio
+                                price = null;
+                              }
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+
+            // Precio
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                child: TextField(
+                  keyboardType: TextInputType.number,
+                  enabled:
+                      !isExchangeOnly, // Deshabilitamos el campo si es solo intercambio
+                  decoration: InputDecoration(
+                    labelText: 'Precio',
+                    border: OutlineInputBorder(),
+                    // Añadimos un sufijo para mostrar la moneda
+                    suffixText: '€',
+                    // Añadimos un texto de ayuda cuando está deshabilitado
+                    helperText: isExchangeOnly
+                        ? 'No disponible en modo "solo intercambio"'
+                        : null,
+                    // Cambiamos el color cuando está deshabilitado
+                    fillColor: isExchangeOnly ? Colors.grey[200] : null,
+                    filled: isExchangeOnly,
+                  ),
+                  controller: TextEditingController(
+                    text: price?.toString() ?? '',
+                  )..selection = TextSelection.fromPosition(
+                      TextPosition(offset: price?.toString().length ?? 0),
+                    ),
+                  onChanged: (value) {
+                    if (!isExchangeOnly) {
+                      setState(() {
+                        price = int.tryParse(value);
+                      });
+                    }
+                  },
+                ),
+              ),
+            ),
 
             SizedBox(height: 16),
 

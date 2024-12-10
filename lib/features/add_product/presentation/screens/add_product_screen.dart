@@ -15,12 +15,9 @@ class _AddProductState extends State<AddProduct> {
     return Scaffold(
       appBar: CustomAppBar(
         title: 'SUBE UNA PRENDA',
-        iconPath: 'assets/icons/back.svg',
-        // Llama a Navigator.pop para regresar a la pantalla anterior
-        onIconPressed: () {
-          Navigator.pop(context);
-        },
-        iconPosition: IconPosition.left, // Para icono a la izquierda
+        iconPath: '',
+        onIconPressed: () {},
+        iconPosition: IconPosition.left,
       ),
       body: Container(
         color: Color.fromARGB(255, 12, 2, 2), // Fondo gris claro
