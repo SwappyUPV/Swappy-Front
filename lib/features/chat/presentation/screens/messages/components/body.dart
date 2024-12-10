@@ -78,7 +78,10 @@ class BodyState extends State<Body> {
                   "Mensaje no enviado, campo vacío o usuario no loggeado.");
             }
           },
+
         ),
+        //TEMPORAL HASTA ELIMINAR BARRA DE MENU DE MESSAGES
+        SizedBox(height: 50),
       ],
     );
   }

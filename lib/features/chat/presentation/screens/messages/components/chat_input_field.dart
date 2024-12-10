@@ -11,12 +11,20 @@ class ChatInputField extends StatefulWidget {
 
 class ChatInputFieldState extends State<ChatInputField> {
   final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.requestFocus();
+  }
 
   void _sendMessage() {
     final messageText = _controller.text.trim();
     if (messageText.isNotEmpty) {
       widget.onMessageSent(messageText);
       _controller.clear();
+      _focusNode.requestFocus();
     }
   }
 
@@ -43,10 +51,9 @@ class ChatInputFieldState extends State<ChatInputField> {
                     onPressed: () {
                       // Add camera functionality here
                       ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                'Fotos no implementado'),
-                          ),
+                        const SnackBar(
+                          content: Text('Fotos no implementado'),
+                        ),
                       );
                     },
                   ),
@@ -54,6 +61,8 @@ class ChatInputFieldState extends State<ChatInputField> {
                   Expanded(
                     child: TextField(
                       controller: _controller,
+                      focusNode: _focusNode,
+                      textInputAction: TextInputAction.send,
                       onSubmitted: (_) => _sendMessage(),
                       decoration: const InputDecoration(
                         hintText: "Escribe un mensaje...",
@@ -66,25 +75,23 @@ class ChatInputFieldState extends State<ChatInputField> {
               ),
             ),
           ),
-          SizedBox(width: 20),
+          const SizedBox(width: 20),
           // Microphone Icon with black circle background and size 40x40
           Container(
             width: 40,
             height: 40,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.black,
               shape: BoxShape.circle,
-
             ),
             child: IconButton(
               icon: const Icon(Icons.mic, color: Colors.white),
               onPressed: () {
                 // Add microphone functionality here
                 ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                          'Microfono no implementado'),
-                    ),
+                  const SnackBar(
+                    content: Text('Microfono no implementado'),
+                  ),
                 );
               },
             ),
@@ -92,5 +99,12 @@ class ChatInputFieldState extends State<ChatInputField> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
   }
 }
