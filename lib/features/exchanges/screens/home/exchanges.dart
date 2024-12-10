@@ -37,7 +37,8 @@ class ExchangesState extends State<Exchanges> {
   bool isNewExchange =
       false; // Nueva variable para identificar si es un nuevo intercambio
   bool isOwner = false;
-  List<Product> modifiedItems = List.from(products);
+  List<Product> modifiedItems = [];
+  Product? selectedProduct;
   final ExchangeService _exchangeService = ExchangeService();
   final ChatService _chatService = ChatService();
 
@@ -46,6 +47,7 @@ class ExchangesState extends State<Exchanges> {
     super.initState();
     _loadUserId();
     isNewExchange = widget.exchangeId == null || widget.exchangeId!.isEmpty;
+    selectedProduct = widget.selectedProduct;
   }
 
   Future<void> _loadUserId() async {
