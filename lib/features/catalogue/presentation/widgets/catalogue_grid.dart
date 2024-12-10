@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'catalogue_item_card.dart';
 import 'package:pin/features/exchanges/models/Product.dart';

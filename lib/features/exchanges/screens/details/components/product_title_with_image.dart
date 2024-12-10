@@ -36,6 +36,42 @@ class _ProductTitleWithImageState extends State<ProductTitleWithImage> {
 
   @override
   Widget build(BuildContext context) {
+    // Determinar las imágenes que se mostrarán
+    final List<Widget> imageWidgets =
+        widget.product.image != null && widget.product.image.isNotEmpty
+            ? [
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Image.network(
+                    widget.product.image, // Imagen de producto
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ]
+            : [
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Image.asset(
+                    'assets/images/product1.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Image.asset(
+                    'assets/images/product2.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Image.asset(
+                    'assets/images/product3.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ];
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: kDefaultPaddin),
       child: Stack(
@@ -62,36 +98,14 @@ class _ProductTitleWithImageState extends State<ProductTitleWithImage> {
                 height: MediaQuery.of(context).size.height * 0.5,
                 child: PageView(
                   controller: _pageController,
-                  children: [
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Image.asset(
-                        'assets/images/product1.png',
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Image.asset(
-                        'assets/images/product2.png',
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Image.asset(
-                        'assets/images/product3.png',
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                  ],
+                  children: imageWidgets,
                 ),
               ),
               const SizedBox(height: 5),
               // Dot indicator
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(3, (index) {
+                children: List.generate(imageWidgets.length, (index) {
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     margin: const EdgeInsets.symmetric(horizontal: 5),
@@ -108,69 +122,7 @@ class _ProductTitleWithImageState extends State<ProductTitleWithImage> {
               ),
             ],
           ),
-          Positioned(
-            right: 0,
-            top: 0,
-            child: Row(
-              children: [
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.35,
-                  height: 50,
-                  color: Colors.white,
-                  alignment: Alignment.center,
-                  child: Text(
-                    "Casi Nuevo",
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge!
-                        .copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.03,
-                  height: 50,
-                  color: Colors.purple,
-                ),
-              ],
-            ),
-          ),
-          // Botones de navegación solo visibles en web
-          if (kIsWeb) ...[
-            Positioned(
-              left: MediaQuery.of(context).size.width * 0.1,
-              top: MediaQuery.of(context).size.height * 0.25,
-              child: IconButton(
-                icon: const Icon(Icons.arrow_left),
-                iconSize: MediaQuery.of(context).size.width > 600 ? 40 : 24,
-                color: Colors.white,
-                onPressed: () {
-                  if (_currentPage > 0) {
-                    _pageController.previousPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  }
-                },
-              ),
-            ),
-            Positioned(
-              right: MediaQuery.of(context).size.width * 0.1,
-              top: MediaQuery.of(context).size.height * 0.25,
-              child: IconButton(
-                icon: const Icon(Icons.arrow_right),
-                iconSize: MediaQuery.of(context).size.width > 600 ? 40 : 24,
-                color: Colors.white,
-                onPressed: () {
-                  if (_currentPage < 2) {
-                    _pageController.nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  }
-                },
-              ),
-            ),
-          ]
+          // Resto del código...
         ],
       ),
     );

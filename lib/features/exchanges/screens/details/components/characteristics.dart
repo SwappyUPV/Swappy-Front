@@ -23,7 +23,7 @@ class Characteristics extends StatelessWidget {
                   style: TextStyle(color: kTextColor),
                 ),
                 Text(
-                  "${product.size}",
+                  product.size,
                   style: Theme.of(context)
                       .textTheme
                       .titleLarge!
@@ -36,11 +36,11 @@ class Characteristics extends StatelessWidget {
             child: Column(
               children: [
                 const Text(
-                  "Tela",
+                  "Calidad",
                   style: TextStyle(color: kTextColor),
                 ),
                 Text(
-                  "Lino",
+                  product.quality,
                   style: Theme.of(context)
                       .textTheme
                       .titleLarge!
@@ -53,11 +53,11 @@ class Characteristics extends StatelessWidget {
             child: Column(
               children: [
                 const Text(
-                  "Categoría",
+                  "Estilos",
                   style: TextStyle(color: kTextColor),
                 ),
                 Text(
-                  "Vintage",
+                  product.styles.isEmpty ? "Varios" : product.styles.first,
                   style: Theme.of(context)
                       .textTheme
                       .titleLarge!
