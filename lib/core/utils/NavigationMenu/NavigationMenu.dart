@@ -32,7 +32,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
     ),
     const AddProduct(),
     ChatsScreen(),
-    const Profile(),
+    const ProfileScreen(),
   ];
 
   @override
