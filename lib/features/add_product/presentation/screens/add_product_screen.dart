@@ -16,8 +16,9 @@ class _AddProductState extends State<AddProduct> {
       appBar: CustomAppBar(
         title: 'SUBE UNA PRENDA',
         iconPath: '',
+        // Llama a Navigator.pop para regresar a la pantalla anterior
         onIconPressed: () {},
-        iconPosition: IconPosition.left,
+        iconPosition: IconPosition.left, // Para icono a la izquierda
       ),
       body: Container(
         color: Color.fromARGB(255, 12, 2, 2), // Fondo gris claro

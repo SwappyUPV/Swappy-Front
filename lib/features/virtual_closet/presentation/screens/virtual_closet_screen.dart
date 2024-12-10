@@ -5,6 +5,7 @@ import 'package:pin/features/exchanges/screens/details/details_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/services/catalogue.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
+import 'package:pin/features/CustomAppBar.dart';
 
 class VirtualCloset extends StatefulWidget {
   final bool
@@ -77,7 +78,12 @@ class _VirtualClosetScreenState extends State<VirtualCloset> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Armario Virtual")),
+      appBar: CustomAppBar(
+        title: 'ARMARIO VIRTUAL',
+        iconPath: '',
+        onIconPressed: () {},
+        iconPosition: IconPosition.left,
+      ),
       body: Stack(
         children: [
           _categorizedClothes.isEmpty
@@ -121,8 +127,7 @@ class _VirtualClosetScreenState extends State<VirtualCloset> {
                                         MaterialPageRoute(
                                           builder: (context) => DetailsScreen(
                                             product: product,
-                                            showActionButtons:
-                                                false, // O lo que necesites
+                                            showActionButtons: false,
                                           ),
                                         ),
                                       );
