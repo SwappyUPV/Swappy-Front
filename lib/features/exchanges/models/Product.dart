@@ -12,6 +12,7 @@ class Product {
   final String category;
   final bool isExchangeOnly;
   final Color? color;
+  final String? userId;
 
   Product({
     required this.id,
@@ -24,6 +25,7 @@ class Product {
     required this.image,
     required this.category,
     required this.isExchangeOnly,
+    this.userId,
     this.color,
   });
 }

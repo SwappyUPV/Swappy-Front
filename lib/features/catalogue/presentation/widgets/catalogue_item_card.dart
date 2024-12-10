@@ -1,8 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:pin/features/auth/data/models/user_model.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
 import 'package:pin/features/exchanges/screens/home/exchanges.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class CatalogueItemCard extends StatelessWidget {
+class CatalogueItemCard extends StatefulWidget {
   final Product product;
   final VoidCallback press;
   final bool isFavorite; // Parámetro para saber si el producto es favorito
@@ -17,13 +21,71 @@ class CatalogueItemCard extends StatelessWidget {
   });
 
   @override
+  _CatalogueItemCardState createState() => _CatalogueItemCardState();
+}
+
+class _CatalogueItemCardState extends State<CatalogueItemCard> {
+  String? userName; // Para almacenar el nombre del usuario
+  bool isLoading = true; // Estado de carga
+
+  @override
+  void initState() {
+    super.initState();
+    isLoading = true;
+    loadUserName(widget.product.userId);
+    ; // Cargar el nombre del usuario al iniciar el widget
+  }
+
+  Future<void> loadUserName(String? userId) async {
+    try {
+      final user = await getUserById(userId);
+      if (user != null) {
+        setState(() {
+          userName = user.name; // Asigna el nombre del usuario
+          isLoading = false; // Detén la carga
+        });
+      } else {
+        setState(() {
+          userName = "Usuario desconocido"; // Usuario no encontrado
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print("Error al cargar el usuario: $e");
+      setState(() {
+        userName = "Error al cargar"; // Muestra un error
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<UserModel?> getUserById(String? userId) async {
+    try {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+
+      if (userDoc.exists) {
+        return UserModel.fromFirestore(userDoc);
+      } else {
+        print("No user found for the given ID: $userId");
+        return null;
+      }
+    } catch (e) {
+      print("Error fetching user by ID: $e");
+      return null;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: press,
+      onTap: widget.press,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16), // Bordes más redondeados
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
               color: Colors.black12,
@@ -35,105 +97,68 @@ class CatalogueItemCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Foto de perfil y nombre de usuario (datos de ejemplo)
+            // 1. Foto de perfil y nombre de usuario dinámico
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: [
                   CircleAvatar(
-                    backgroundImage: AssetImage(
-                        'assets/images/user_2.png'), // Imagen de ejemplo del perfil
+                    backgroundImage: AssetImage('assets/images/user_2.png'),
                     radius: 20,
                   ),
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Pepe', // Nombre de usuario de ejemplo
+                      isLoading
+                          ? "Cargando..." // Mostrar estado de carga
+                          : userName ?? "Sin nombre",
                       style: TextStyle(
-                        fontFamily:
-                            'UrbaneMedium', // Usando la fuente registrada
-                        fontSize: 18, // Tamaño del texto
+                        fontFamily: 'UrbaneMedium',
+                        fontSize: 18,
                       ),
                     ),
                   ),
-                  // 2. Ícono de favorito
                   IconButton(
                     icon: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: isFavorite ? Colors.red : Colors.grey,
+                      widget.isFavorite
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: widget.isFavorite ? Colors.red : Colors.grey,
                     ),
-                    onPressed: () =>
-                        toggleFavorite(), // Llamar a la función para cambiar el estado de favorito
+                    onPressed: () => widget.toggleFavorite(),
                   ),
                 ],
               ),
             ),
-            // 3. Foto del producto centrada
+            // Resto del contenido (imagen, descripción, etc.)
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                 child: Image.network(
-                  product.image, // Imagen del producto
+                  widget.product.image,
                   fit: BoxFit.cover,
                   width: double.infinity,
                   height: double.infinity,
                 ),
               ),
             ),
-            // 4. Nombre del producto (datos de ejemplo)
+            // Nombre del producto
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Text(
-                product.title.isNotEmpty
-                    ? product.title
-                    : 'Camiseta de Verano', // Nombre del producto o ejemplo
+                widget.product.title.isNotEmpty
+                    ? widget.product.title
+                    : 'Camiseta de Verano',
                 style: TextStyle(
-                  fontFamily: 'UrbaneMedium', // Usando la fuente registrada
-                  fontSize: 16, // Tamaño del texto
+                  fontFamily: 'UrbaneMedium',
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            // 5. Talla del producto (si no existe, poner M/38)
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-              child: Text(
-                product.size.isEmpty
-                    ? 'M/38'
-                    : product.size, // Talla o M/38 si no hay talla
-                style: TextStyle(
-                  fontFamily: 'UrbaneMedium', // Usando la fuente registrada
-                  fontSize: 14, // Tamaño del texto
-                ),
-              ),
-            ),
-            // 6. Row con la palabra "Intercambio" y botón "+"
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Intercambio',
-                    style: TextStyle(
-                      fontFamily: 'UrbaneMedium', // Usando la fuente registrada
-                      fontSize: 14, // Tamaño del texto
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.add_circle_outline),
-                    onPressed: () {
-                      // Acción para el botón "+"
-                    },
-                  ),
-                ],
-              ),
-            ),
-            // 7. Botón swap
+            // Botón de intercambio
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
@@ -142,7 +167,7 @@ class CatalogueItemCard extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => Exchanges(
-                        selectedProduct: product,
+                        selectedProduct: widget.product,
                       ),
                     ),
                   );
@@ -153,8 +178,8 @@ class CatalogueItemCard extends StatelessWidget {
                 child: Text(
                   'SWAP',
                   style: TextStyle(
-                    fontFamily: 'UrbaneMedium', // Usando la fuente registrada
-                    fontSize: 16, // Tamaño del texto
+                    fontFamily: 'UrbaneMedium',
+                    fontSize: 16,
                   ),
                 ),
               ),

@@ -23,6 +23,7 @@ class CatalogService {
           category: data['category'] ?? '',
           isExchangeOnly: data['isExchangeOnly'] ?? false,
           color: null,
+          userId: doc['userId'],
         );
       }).toList();
 
@@ -47,10 +48,11 @@ class CatalogService {
           description: doc['descripcion'],
           size: doc['talla'],
           color: doc['color'],
-          styles: doc['styles'],
-          quality: doc['quality'],
-          category: doc['category'],
-          isExchangeOnly: doc['isExchangeOnly'],
+          styles: doc['estilos'],
+          quality: doc['calidad'],
+          category: doc['categoria'],
+          isExchangeOnly: doc['soloIntercambio'],
+          userId: doc['userId'],
         );
       } else {
         return null;
