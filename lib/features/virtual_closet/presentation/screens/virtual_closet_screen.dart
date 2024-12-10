@@ -6,12 +6,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert'; // Para manejar JSON
 
 class VirtualCloset extends StatefulWidget {
-  const VirtualCloset({super.key});
+  final bool
+      fromExchange; // Atributo para determinar si se viene de un intercambio
+
+  const VirtualCloset({super.key, required this.fromExchange});
 
   @override
   _VirtualClosetState createState() => _VirtualClosetState();
 }
 
+<<<<<<< Updated upstream
 class _VirtualClosetState extends State<VirtualCloset> {
   List<Widget> _mid = [];
   List<Widget> _top = [];
@@ -26,6 +30,14 @@ class _VirtualClosetState extends State<VirtualCloset> {
   final PageController _pageControllerTop = PageController(initialPage: 0);
   final PageController _pageControllerMiddle = PageController(initialPage: 0);
   final PageController _pageControllerBottom = PageController(initialPage: 0);
+=======
+class _VirtualClosetScreenState extends State<VirtualCloset> {
+  final ChatService2 _chatService2 = ChatService2();
+  final CatalogService _catalogService = CatalogService();
+  String? _cachedUserId;
+  Map<String, List<Product>> _categorizedClothes = {};
+  List<Product> _selectedProducts = []; // Lista de productos seleccionados
+>>>>>>> Stashed changes
 
   @override
   void initState() {
@@ -66,6 +78,7 @@ class _VirtualClosetState extends State<VirtualCloset> {
 
   Future<void> _fetchTopImages() async {
     try {
+<<<<<<< Updated upstream
       final snapshot = await FirebaseFirestore.instance
           .collection('clothes')
           .where('categoria', whereIn: ['Vestidos', 'Camisetas', 'Chaquetas'])
@@ -79,12 +92,26 @@ class _VirtualClosetState extends State<VirtualCloset> {
       setState(() {
         _top = pages;
         _isLoading = false;
+=======
+      List<Product> clothes = await _catalogService.getClothByUserId(userId);
+      Map<String, List<Product>> categorizedClothes = {};
+      for (var product in clothes) {
+        if (categorizedClothes[product.category] == null) {
+          categorizedClothes[product.category] = [];
+        }
+        categorizedClothes[product.category]!.add(product);
+      }
+
+      setState(() {
+        _categorizedClothes = categorizedClothes;
+>>>>>>> Stashed changes
       });
     } catch (e) {
       print("Error al obtener datos de Firebase (Top): $e");
     }
   }
 
+<<<<<<< Updated upstream
   Future<void> _fetchMidImages() async {
     try {
       final snapshot = await FirebaseFirestore.instance
@@ -125,11 +152,27 @@ class _VirtualClosetState extends State<VirtualCloset> {
     } catch (e) {
       print("Error al obtener datos de Firebase (Bot): $e");
     }
+=======
+  void _toggleProductSelection(Product product) {
+    setState(() {
+      if (_selectedProducts.contains(product)) {
+        _selectedProducts.remove(product);
+      } else {
+        _selectedProducts.add(product);
+      }
+    });
+  }
+
+  void _confirmSelection() {
+    Navigator.pop(
+        context, _selectedProducts); // Devuelve los productos seleccionados
+>>>>>>> Stashed changes
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+<<<<<<< Updated upstream
       appBar: AppBar(
         title: const Text('Armario Virtual'),
       ),
@@ -188,10 +231,109 @@ class _VirtualClosetState extends State<VirtualCloset> {
               child: const Icon(Icons.more_vert, size: 20),
             ),
           ),
+=======
+      appBar: AppBar(title: const Text("Armario Virtual")),
+      body: Stack(
+        children: [
+          _categorizedClothes.isEmpty
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: _categorizedClothes.entries.map((entry) {
+                      final category = entry.key;
+                      final products = entry.value;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              category,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 150,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: products.length,
+                              itemBuilder: (context, index) {
+                                final product = products[index];
+                                final isSelected =
+                                    _selectedProducts.contains(product);
+
+                                return GestureDetector(
+                                  onTap: widget.fromExchange
+                                      ? () => _toggleProductSelection(product)
+                                      : null, // Solo seleccionable si fromExchange es true
+                                  child: Container(
+                                    width: 120,
+                                    margin: const EdgeInsets.all(8.0),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? Colors.blue
+                                            : Colors.grey,
+                                        width: 2,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Flexible(
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                            child: Image.network(
+                                              product.image,
+                                              width: 100,
+                                              height: 100,
+                                              fit: BoxFit.contain,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(product.title,
+                                            textAlign: TextAlign.center),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ),
+          if (widget.fromExchange && _selectedProducts.isNotEmpty)
+            Positioned(
+              bottom: 16,
+              left: 16,
+              right: 16,
+              child: Column(
+                children: [
+                  ElevatedButton(
+                    onPressed: _confirmSelection,
+                    child: const Text("Confirmar y añadir prendas"),
+                  ),
+                  const SizedBox(
+                      height: 100), // Espacio adicional debajo del botón
+                ],
+              ),
+            ),
+>>>>>>> Stashed changes
         ],
       ),
     );
   }
+<<<<<<< Updated upstream
 
 
 
@@ -273,3 +415,6 @@ class ImagePlaceHolder extends StatelessWidget {
   }
 }
 
+=======
+}
+>>>>>>> Stashed changes
