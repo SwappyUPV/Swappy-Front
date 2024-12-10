@@ -18,10 +18,10 @@ class CatalogService {
           image: data['imagen'] ?? '',
           description: data['descripcion'] ?? '',
           size: data['talla'] ?? '',
-          styles: List<String>.from(data['styles'] ?? []),
-          quality: data['quality'] ?? '',
-          category: data['category'] ?? '',
-          isExchangeOnly: data['isExchangeOnly'] ?? false,
+          styles: List<String>.from(data['estilos'] ?? []),
+          quality: data['calidad'] ?? '',
+          category: data['categoria'] ?? '',
+          isExchangeOnly: data['soloIntercambio'] ?? false,
           color: null,
           userId: doc['userId'],
         );
@@ -63,10 +63,12 @@ class CatalogService {
     }
   }
 
-    Future<List<Product>> getClothByUserId(String id) async {
+  Future<List<Product>> getClothByUserId(String id) async {
     try {
-      QuerySnapshot querySnapshot =
-          await _firestore.collection('clothes').where("userId", isEqualTo: id).get();
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('clothes')
+          .where("userId", isEqualTo: id)
+          .get();
 
       List<Product> clothes = querySnapshot.docs.map((doc) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
@@ -77,10 +79,10 @@ class CatalogService {
           image: data['imagen'] ?? '',
           description: data['descripcion'] ?? '',
           size: data['talla'] ?? '',
-          styles: List<String>.from(data['styles'] ?? []),
-          quality: data['quality'] ?? '',
+          styles: List<String>.from(data['estilos'] ?? []),
+          quality: data['caidad'] ?? '',
           category: data['categoria'] ?? '',
-          isExchangeOnly: data['isExchangeOnly'] ?? false,
+          isExchangeOnly: data['soloIntercambio'] ?? false,
           color: null,
         );
       }).toList();

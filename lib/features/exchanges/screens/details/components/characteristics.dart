@@ -20,14 +20,14 @@ class Characteristics extends StatelessWidget {
               children: [
                 const Text(
                   "Talla",
-                  style: TextStyle(color: kTextColor),
+                  style: TextStyle(
+                      color: kTextColor, fontSize: 14), // Reducido a 12
                 ),
                 Text(
                   product.size,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge!
-                      .copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14), // Reducido a 12
                 ),
               ],
             ),
@@ -37,14 +37,14 @@ class Characteristics extends StatelessWidget {
               children: [
                 const Text(
                   "Calidad",
-                  style: TextStyle(color: kTextColor),
+                  style: TextStyle(
+                      color: kTextColor, fontSize: 14), // Reducido a 12
                 ),
                 Text(
                   product.quality,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge!
-                      .copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14), // Reducido a 12
                 ),
               ],
             ),
@@ -54,14 +54,14 @@ class Characteristics extends StatelessWidget {
               children: [
                 const Text(
                   "Estilos",
-                  style: TextStyle(color: kTextColor),
+                  style: TextStyle(
+                      color: kTextColor, fontSize: 14), // Reducido a 12
                 ),
                 Text(
                   product.styles.isEmpty ? "Varios" : product.styles.first,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge!
-                      .copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14), // Reducido a 12
                 ),
               ],
             ),
