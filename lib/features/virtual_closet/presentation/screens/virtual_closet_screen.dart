@@ -1,187 +1,275 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:pin/core/services/chat_service_2.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:pin/features/virtual_closet/presentation/screens/change_clothes_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../core/services/catalogue.dart';
-import 'package:pin/features/exchanges/models/Product.dart';
+import 'dart:convert'; // Para manejar JSON
 
 class VirtualCloset extends StatefulWidget {
   const VirtualCloset({super.key});
 
   @override
-  _VirtualClosetScreenState createState() => _VirtualClosetScreenState();
+  _VirtualClosetState createState() => _VirtualClosetState();
 }
 
-class _VirtualClosetScreenState extends State<VirtualCloset> {
-  final ChatService2 _chatService2 = ChatService2();
-  final CatalogService _catalogService = CatalogService();
-  String? _cachedUserId;
-  Map<String, List<Product>> _categorizedClothes = {}; // Para almacenar las prendas por categoría
+class _VirtualClosetState extends State<VirtualCloset> {
+  List<Widget> _mid = [];
+  List<Widget> _top = [];
+  List<Widget> _bot = [];
+  bool _isLoading = true;
+  String? _userId; // Variable para almacenar el ID del usuario
+
+  int _activePageTop = 0;
+  int _activePageMiddle = 0;
+  int _activePageBottom = 0;
+
+  final PageController _pageControllerTop = PageController(initialPage: 0);
+  final PageController _pageControllerMiddle = PageController(initialPage: 0);
+  final PageController _pageControllerBottom = PageController(initialPage: 0);
 
   @override
   void initState() {
     super.initState();
-    _initializeUserId();
+    _loadUserId(); // Cargar el ID del usuario antes de cargar imágenes
   }
 
-  Future<void> _initializeUserId() async {
-    String? userId = await _chatService2.getUserId();
-    setState(() {
-      _cachedUserId = userId;
-    });
+  Future<void> _loadUserId() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      String? userModelJson = prefs.getString('userModel');
 
-    if (_cachedUserId != null) {
-      _fetchClothesForUser(_cachedUserId!);
+      if (userModelJson != null) {
+        Map<String, dynamic> userModelMap = jsonDecode(userModelJson);
+        if (mounted) {
+          setState(() {
+            _userId = userModelMap['uid']; // Asigna el ID del usuario
+          });
+          print("User ID: $_userId");
+        }
+        // Ahora puedes usar _userId para consultas específicas si es necesario
+        _fetchTopImages();
+        _fetchMidImages();
+        _fetchBotImages();
+      } else {
+        print("No user data found");
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (error) {
+      print("Error loading user ID: $error");
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
-  Future<void> _fetchClothesForUser(String userId) async {
+  Future<void> _fetchTopImages() async {
     try {
-      List<Product> clothes = await _catalogService.getClothByUserId(userId);
+      final snapshot = await FirebaseFirestore.instance
+          .collection('clothes')
+          .where('categoria', whereIn: ['Vestidos', 'Camisetas', 'Chaquetas'])
+          .where('userId', whereIn: [_userId])
+          .get();
 
-      // Agrupa las prendas por categoría
-      Map<String, List<Product>> categorizedClothes = {};
-      for (var product in clothes) {
-        if (categorizedClothes[product.category] == null) {
-          categorizedClothes[product.category] = [];
-        }
-        categorizedClothes[product.category]!.add(product);
-      }
+      final List<Widget> pages = snapshot.docs.map((doc) {
+        return ImagePlaceHolder(imagePath: doc['imagen']);
+      }).toList();
 
       setState(() {
-        _categorizedClothes = categorizedClothes; // Actualiza el estado con las prendas categorizadas
+        _top = pages;
+        _isLoading = false;
       });
     } catch (e) {
-      print('Error al obtener la ropa del usuario: $e');
+      print("Error al obtener datos de Firebase (Top): $e");
     }
   }
 
-    @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Armario Virtual")),
-      body: _categorizedClothes.isEmpty
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: _categorizedClothes.entries.map((entry) {
-                    final category = entry.key;
-                    final products = entry.value;
+  Future<void> _fetchMidImages() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('clothes')
+          .where('categoria', whereIn: ['Pantalones', 'Faldas'])
+          .where('userId', whereIn: [_userId])
+          .get();
 
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            category,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 150,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: products.length,
-                            itemBuilder: (context, index) {
-                              final product = products[index];
-                              return GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ProductDetailScreen(product: product),
-                                    ),
-                                  );
-                                },
-                                child: Container(
-                                  width: 120,
-                                  margin: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    children: [
-                                      Flexible(
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(8.0),
-                                          child: Image.network(
-                                            product.image,
-                                            width: 100,
-                                            height: 100,
-                                            fit: BoxFit.contain,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(product.title, textAlign: TextAlign.center),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-              ),
-            ),
-    );
+      final List<Widget> pages = snapshot.docs.map((doc) {
+        return ImagePlaceHolder(imagePath: doc['imagen']);
+      }).toList();
+
+      setState(() {
+        _mid = pages;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print("Error al obtener datos de Firebase (Mid): $e");
+    }
   }
-}
 
-class ProductDetailScreen extends StatelessWidget {
-  final Product product;
+  Future<void> _fetchBotImages() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('clothes')
+          .where('categoria', isEqualTo: 'Zapatos')
+          .where('userId', whereIn: [_userId])
+          .get();
 
-  const ProductDetailScreen({Key? key, required this.product}) : super(key: key);
+      final List<Widget> pages = snapshot.docs.map((doc) {
+        return ImagePlaceHolder(imagePath: doc['imagen']);
+      }).toList();
+
+      setState(() {
+        _bot = pages;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print("Error al obtener datos de Firebase (Bot): $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(product.title),
+        title: const Text('Armario Virtual'),
       ),
-      body: Center( // Centra el contenido completo en la pantalla
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center, // Centra verticalmente
-            crossAxisAlignment: CrossAxisAlignment.center, // Centra horizontalmente
+      body: Stack(
+        children: [
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12.0),
-                child: Image.network(
-                  product.image,
-                  width: 500,
-                  height: 600,
-                  fit: BoxFit.contain,
-                ),
+              carouselWidget(
+                _pageControllerTop,
+                _activePageTop,
+                _top,
+                    (value) {
+                  setState(() {
+                    _activePageTop = value;
+                  });
+                },
               ),
-              const SizedBox(height: 16),
-              Text(
-                product.title,
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center,  // Centra el texto
+              carouselWidget(
+                _pageControllerMiddle,
+                _activePageMiddle,
+                _mid,
+                    (value) {
+                  setState(() {
+                    _activePageMiddle = value;
+                  });
+                },
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Precio: \$${product.price}',
-                style: Theme.of(context).textTheme.headlineSmall,
-                textAlign: TextAlign.center,  // Centra el precio
+              carouselWidget(
+                _pageControllerBottom,
+                _activePageBottom,
+                _bot,
+                    (value) {
+                  setState(() {
+                    _activePageBottom = value;
+                  });
+                },
               ),
-              const SizedBox(height: 16),
-              Text(
-                product.description,
-                style: Theme.of(context).textTheme.labelMedium,
-                textAlign: TextAlign.center,  // Centra la descripción
-              ),
-              // Agrega otros detalles del producto aquí
             ],
           ),
-        ),
+          // Botón flotante en la esquina superior derecha
+          Positioned(
+            top: 20,
+            right: 20,
+            child: FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ChangeClothes()),
+                );
+              },
+              backgroundColor: Colors.blue,
+              mini: true, // Botón pequeño
+              child: const Icon(Icons.more_vert, size: 20),
+            ),
+          ),
+        ],
       ),
     );
   }
+
+
+
+  Widget carouselWidget(
+      PageController controller,
+      int activePage,
+      List<Widget> images,
+      Function(int) onPageChanged,
+      ) {
+    return Stack(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          height: MediaQuery.of(context).size.height / 4,
+          child: PageView.builder(
+            controller: controller,
+            itemCount: images.length,
+            onPageChanged: onPageChanged,
+            itemBuilder: (context, index) {
+              return images[index];
+            },
+          ),
+        ),
+        Positioned(
+          bottom: 10,
+          left: 0,
+          right: 0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List<Widget>.generate(
+              images.length,
+                  (index) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                child: InkWell(
+                  onTap: () {
+                    controller.animateToPage(
+                      index,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeIn,
+                    );
+                  },
+                  child: CircleAvatar(
+                    radius: 5,
+                    backgroundColor:
+                    activePage == index ? Colors.yellow : Colors.grey,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
 }
+
+class ImagePlaceHolder extends StatelessWidget {
+  final String? imagePath;
+  const ImagePlaceHolder({super.key, this.imagePath});
+
+  @override
+  Widget build(BuildContext context) {
+    if (imagePath != null) {
+      return Image.network(
+        imagePath!,
+        fit: BoxFit.contain,
+      );
+    } else {
+      return Container(
+        color: Colors.grey.shade300,
+        child: const Center(
+          child: Text(
+            'Image not available',
+            style: TextStyle(color: Colors.black54),
+          ),
+        ),
+      );
+    }
+  }
+}
+
