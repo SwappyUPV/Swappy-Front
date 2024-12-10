@@ -7,6 +7,7 @@ import 'package:pin/core/services/chat_service.dart';
 import 'package:pin/features/exchanges/models/Exchange.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
 import 'package:pin/features/exchanges/screens/details/components/confirmation.dart';
+import 'package:pin/features/virtual_closet/presentation/screens/virtual_closet_screen.dart';
 import '../home/components/user_header.dart';
 import 'package:pin/core/services/exchange_service.dart';
 import 'components/item_grid.dart';
@@ -108,22 +109,14 @@ class ExchangesState extends State<Exchanges> {
   }
 
   void _addItem() {
-    setState(() {
-      modifiedItems.add(Product(
-        id: "1",
-        title: "Office Code",
-        price: 234,
-        size: "12",
-        description: dummyText,
-        image: "assets/images/bag_1.png",
-        color: const Color(0xFF3D82AE),
-        category: "Bags",
-        isExchangeOnly: false,
-        styles: ["Office", "Code"],
-        quality: "New",
-      ));
-      hasChanges = true;
-    });
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => VirtualCloset(
+          fromExchange: true,
+        ), // Aquí debes asegurarte de implementar VirtualCloset.
+      ),
+    );
   }
 
   void _removeItem(int id) {
@@ -262,8 +255,12 @@ class ExchangesState extends State<Exchanges> {
             ),
             ItemGrid(
               items: modifiedItems,
-              onRemoveItem: hasResponded || isNewExchange ? _removeItem : null,
-              onAddItem: hasResponded || isNewExchange ? _addItem : null,
+              onAddItem: (List<Product> selectedProducts) {
+                setState(() {
+                  modifiedItems.addAll(selectedProducts);
+                  hasChanges = true;
+                });
+              },
               onDeleteItem: (Product product) {
                 setState(() {
                   modifiedItems.remove(product);

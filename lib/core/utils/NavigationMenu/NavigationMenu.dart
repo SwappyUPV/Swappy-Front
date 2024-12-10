@@ -27,7 +27,9 @@ class _NavigationMenuState extends State<NavigationMenu> {
       List.generate(5, (_) => GlobalKey<NavigatorState>());
   final List<Widget> _pages = [
     const Catalogue(),
-    const VirtualCloset(),
+    const VirtualCloset(
+      fromExchange: false,
+    ),
     const AddProduct(),
     ChatsScreen(),
     const Profile(),
