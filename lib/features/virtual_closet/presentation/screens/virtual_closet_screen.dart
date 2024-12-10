@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pin/core/services/chat_service_2.dart';
+import 'package:pin/features/exchanges/screens/details/details_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/services/catalogue.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
@@ -112,9 +113,23 @@ class _VirtualClosetScreenState extends State<VirtualCloset> {
                                     _selectedProducts.contains(product);
 
                                 return GestureDetector(
-                                  onTap: widget.fromExchange
-                                      ? () => _toggleProductSelection(product)
-                                      : null, // Solo seleccionable si fromExchange es true
+                                  onTap: () {
+                                    if (!widget.fromExchange) {
+                                      // Navegar a la pantalla de detalles
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => DetailsScreen(
+                                            product: product,
+                                            showActionButtons:
+                                                false, // O lo que necesites
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      _toggleProductSelection(product);
+                                    }
+                                  },
                                   child: Container(
                                     width: 120,
                                     margin: const EdgeInsets.all(8.0),
