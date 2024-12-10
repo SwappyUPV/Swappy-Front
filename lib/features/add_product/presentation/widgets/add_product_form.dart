@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pin/features/add_product/presentation/widgets/filters.dart';
 import '/core/services/product.dart';
-import '/features/add_product/presentation/widgets/category_dropdown_widget.dart';
 import '/features/add_product/presentation/widgets/custom_text_field_widget.dart';
 import '/features/add_product/presentation/widgets/image_picker.dart';
-import '/features/add_product/presentation/widgets/price_input_widget.dart';
-import '/features/add_product/presentation/widgets/quality_selector_widget.dart';
-import '/features/add_product/presentation/widgets/sizes_selector_widget.dart';
-import '/features/add_product/presentation/widgets/styles_selector_widget.dart';
 import 'package:get/get.dart';
 import '../../../../core/utils/NavigationMenu/NavigationMenu.dart';
 import 'package:pin/core/utils/NavigationMenu/controllers/navigationController.dart';
@@ -370,7 +364,9 @@ class _AddProductFormState extends State<AddProductForm> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Categoría:'),
-                    Text(selectedCategory ?? 'Seleccionar'),
+                    Text(selectedCategory.isEmpty
+                        ? 'Seleccionar'
+                        : selectedCategory),
                   ],
                 ),
               ),
@@ -399,11 +395,12 @@ class _AddProductFormState extends State<AddProductForm> {
               ),
 
             SizedBox(height: 16),
-            // Precio
+
             GestureDetector(
               onTap: () {
                 setState(() {
-                  showPriceOptions = !showPriceOptions;
+                  isExchangeOnly =
+                      !isExchangeOnly; // Cambia el estado del interruptor
                 });
               },
               child: Container(
@@ -416,30 +413,74 @@ class _AddProductFormState extends State<AddProductForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Precio:'),
-                    Text(price != null ? '\$${price}' : 'Seleccionar'),
-                    // Aquí puedes agregar la flecha de check si es necesario, dependiendo del diseño.
+                    Text('Solo intercambio'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(isExchangeOnly ? 'ON' : 'OFF'),
+                        Switch(
+                          value: isExchangeOnly,
+                          onChanged: (bool value) {
+                            setState(() {
+                              isExchangeOnly = value;
+                              if (value) {
+                                // Si se activa solo intercambio, limpiamos el precio
+                                price = null;
+                              }
+                            });
+                          },
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
             ),
+            SizedBox(height: 16),
 
-            if (showPriceOptions)
-              Container(
+            // Precio
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Container(
                 padding: const EdgeInsets.all(16.0),
                 child: TextField(
                   keyboardType: TextInputType.number,
+                  enabled:
+                      !isExchangeOnly, // Deshabilitamos el campo si es solo intercambio
                   decoration: InputDecoration(
                     labelText: 'Precio',
                     border: OutlineInputBorder(),
+                    // Añadimos un sufijo para mostrar la moneda
+                    suffixText: '€',
+                    // Añadimos un texto de ayuda cuando está deshabilitado
+                    helperText: isExchangeOnly
+                        ? 'No disponible en modo intercambio'
+                        : null,
+                    // Cambiamos el color cuando está deshabilitado
+                    fillColor: isExchangeOnly ? Colors.grey[200] : null,
+                    filled: isExchangeOnly,
                   ),
+                  controller: TextEditingController(
+                    text: price?.toString() ?? '',
+                  )..selection = TextSelection.fromPosition(
+                      TextPosition(offset: price?.toString().length ?? 0),
+                    ),
                   onChanged: (value) {
-                    setState(() {
-                      price = int.tryParse(value);
-                    });
+                    if (!isExchangeOnly) {
+                      setState(() {
+                        price = int.tryParse(value);
+                      });
+                    }
                   },
                 ),
               ),
+            ),
+
             SizedBox(height: 16),
             // Calidad
             GestureDetector(
@@ -541,65 +582,6 @@ class _AddProductFormState extends State<AddProductForm> {
 
             SizedBox(height: 16),
 
-            SizedBox(height: 16),
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  isExchangeOnly =
-                      !isExchangeOnly; // Cambia el estado del interruptor
-                });
-              },
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Solo intercambio'),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(isExchangeOnly ? 'ON' : 'OFF'),
-                        Switch(
-                          value: isExchangeOnly,
-                          onChanged: (bool value) {
-                            setState(() {
-                              isExchangeOnly = value;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 16),
-            Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Primero, añade una foto de la prenda que vas a vender o intercambiar, ¡Asegúrate de que aparezca nítida, de frente y bien iluminada!",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ])),
-            const SizedBox(height: 26),
-
             GestureDetector(
               onTap: () {
                 setState(() {
@@ -642,6 +624,7 @@ class _AddProductFormState extends State<AddProductForm> {
               ),
             ),
 
+            const SizedBox(height: 26),
             ElevatedButton(
               onPressed: _uploadProduct,
               style: ElevatedButton.styleFrom(
