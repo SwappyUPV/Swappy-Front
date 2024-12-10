@@ -62,4 +62,33 @@ class CatalogService {
       return null;
     }
   }
+
+    Future<List<Product>> getClothByUserId(String id) async {
+    try {
+      QuerySnapshot querySnapshot =
+          await _firestore.collection('clothes').where("userId", isEqualTo: id).get();
+
+      List<Product> clothes = querySnapshot.docs.map((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        return Product(
+          id: doc.id,
+          title: data['nombre'] ?? '',
+          price: data['precio'] ?? 0,
+          image: data['imagen'] ?? '',
+          description: data['descripcion'] ?? '',
+          size: data['talla'] ?? '',
+          styles: List<String>.from(data['styles'] ?? []),
+          quality: data['quality'] ?? '',
+          category: data['categoria'] ?? '',
+          isExchangeOnly: data['isExchangeOnly'] ?? false,
+          color: null,
+        );
+      }).toList();
+
+      return clothes;
+    } catch (e) {
+      print('Error al obtener la ropa: $e');
+      rethrow;
+    }
+  }
 }
