@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:pin/features/virtual_closet/presentation/screens/change_clothes_screen.dart';
+import 'package:pin/features/virtual_closet/presentation/widgets/virtual_closet_app_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert'; // Para manejar JSON
 
@@ -130,9 +131,7 @@ class _VirtualClosetState extends State<VirtualCloset> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Armario Virtual'),
-      ),
+      appBar: VirtualClosetAppBar(),
       body: Stack(
         children: [
           _isLoading

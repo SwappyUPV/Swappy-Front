@@ -3,14 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pin/core/services/chat_service_2.dart';
 import 'package:pin/features/exchanges/screens/details/details_screen.dart';
 import 'package:pin/features/virtual_closet/presentation/screens/virtual_closet_screen.dart';
+import 'package:pin/features/virtual_closet/presentation/widgets/change_clothes_app_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/services/catalogue.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
 import 'package:pin/features/CustomAppBar.dart';
 
 class ChangeClothes extends StatefulWidget {
-  final bool
-  fromExchange; // Atributo para determinar si se viene de un intercambio
+  final bool fromExchange; // Atributo para determinar si se viene de un intercambio
 
   const ChangeClothes({super.key, required this.fromExchange});
 
@@ -72,24 +72,19 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
   }
 
   void _confirmSelection() {
-    Navigator.pop(
-        context, _selectedProducts); // Devuelve los productos seleccionados
+    Navigator.pop(context, _selectedProducts); // Devuelve los productos seleccionados
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(
-        title: 'ARMARIO VIRTUAL',
-        iconPath: 'assets/icons/back.svg',
+      appBar: ChangeClothesAppBar(
         onIconPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const VirtualCloset()),
           );
-
         },
-        iconPosition: IconPosition.left,
       ),
       body: Stack(
         children: [
@@ -122,8 +117,7 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
                         itemCount: products.length,
                         itemBuilder: (context, index) {
                           final product = products[index];
-                          final isSelected =
-                          _selectedProducts.contains(product);
+                          final isSelected = _selectedProducts.contains(product);
 
                           return GestureDetector(
                             onTap: () {
@@ -147,9 +141,7 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
                               margin: const EdgeInsets.all(8.0),
                               decoration: BoxDecoration(
                                 border: Border.all(
-                                  color: isSelected
-                                      ? Colors.blue
-                                      : Colors.grey,
+                                  color: isSelected ? Colors.blue : Colors.grey,
                                   width: 2,
                                 ),
                                 borderRadius: BorderRadius.circular(8),
@@ -158,8 +150,7 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
                                 children: [
                                   Flexible(
                                     child: ClipRRect(
-                                      borderRadius:
-                                      BorderRadius.circular(8.0),
+                                      borderRadius: BorderRadius.circular(8.0),
                                       child: Image.network(
                                         product.image,
                                         width: 100,
@@ -169,8 +160,7 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
                                     ),
                                   ),
                                   const SizedBox(height: 4),
-                                  Text(product.title,
-                                      textAlign: TextAlign.center),
+                                  Text(product.title, textAlign: TextAlign.center),
                                 ],
                               ),
                             ),
@@ -194,8 +184,7 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
                     onPressed: _confirmSelection,
                     child: const Text("Confirmar y añadir prendas"),
                   ),
-                  const SizedBox(
-                      height: 100), // Espacio adicional debajo del botón
+                  const SizedBox(height: 100), // Espacio adicional debajo del botón
                 ],
               ),
             ),
