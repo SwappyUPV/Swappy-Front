@@ -4,18 +4,22 @@ class CategorySelector extends StatefulWidget {
   final List<String> categories;
   final List<String> styles;
   final List<String> sizes;
+  final List<String> qualities; // Add this line
   final ValueChanged<String> onCategorySelected;
   final ValueChanged<String> onStyleSelected;
   final ValueChanged<String> onSizeSelected;
+  final ValueChanged<String> onQualitySelected; // Add this line
 
   const CategorySelector({
     Key? key,
     required this.categories,
     required this.styles,
     required this.sizes,
+    required this.qualities, // Add this line
     required this.onCategorySelected,
     required this.onStyleSelected,
     required this.onSizeSelected,
+    required this.onQualitySelected, // Add this line
   }) : super(key: key);
 
   @override
@@ -26,6 +30,7 @@ class _CategorySelectorState extends State<CategorySelector> {
   String? selectedCategory;
   String? selectedStyle;
   String? selectedSize;
+  String? selectedQuality; // Add this line
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +61,15 @@ class _CategorySelectorState extends State<CategorySelector> {
               (value) {
             setState(() => selectedSize = value);
             widget.onSizeSelected(value!);
+          },
+        ),
+        _buildCustomExpansionTile(
+          'Calidad', // Add this block
+          widget.qualities,
+          selectedQuality,
+              (value) {
+            setState(() => selectedQuality = value);
+            widget.onQualitySelected(value!);
           },
         ),
       ],

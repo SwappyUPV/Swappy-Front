@@ -37,6 +37,7 @@ class _UploadProductState extends State<UploadProductScreen> {
   List<String> predefinedStyles = [];
   List<String> predefinedSizes = [];
   List<String> clothingCategories = [];
+  List<String> predefinedQualities = [];
 
   @override
   void initState() {
@@ -48,7 +49,8 @@ class _UploadProductState extends State<UploadProductScreen> {
     try {
       predefinedStyles = await _productService.getStyles();
       clothingCategories = await _productService.getClothingCategories();
-      predefinedSizes = ['S', 'M', 'L', 'XL']; // Default sizes
+      predefinedSizes = ['S', 'M', 'L', 'XL'];
+      predefinedQualities = ['Nuevo','Casi nuevo','Pequeños desperfectos', 'Usado', 'Viejo'];
     } finally {
       setState(() => _isLoading = false);
     }
@@ -60,7 +62,7 @@ class _UploadProductState extends State<UploadProductScreen> {
       _pickedImage = null;
       selectedStyles.clear();
       selectedSize = '';
-      selectedQuality = null;
+      selectedQuality = null; // Reset selectedQuality
       selectedCategory = '';
     });
   }
@@ -184,11 +186,13 @@ class _UploadProductState extends State<UploadProductScreen> {
                   categories: clothingCategories,
                   styles: predefinedStyles,
                   sizes: predefinedSizes,
+                  qualities: predefinedQualities, // Pass predefined qualities
                   onCategorySelected: (category) =>
                       setState(() => selectedCategory = category),
                   onStyleSelected: (style) =>
                       setState(() => selectedStyles = [style]),
                   onSizeSelected: (size) => setState(() => selectedSize = size),
+                  onQualitySelected: (quality) => setState(() => selectedQuality = quality), // Handle quality selection
                 ),
                 const Divider(color: Color(0xFFD9D9D9), thickness: 20),
                 PricingSection(
