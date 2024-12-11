@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:pin/features/add_product/presentation/screens/add_product_screen.dart';
+import 'package:pin/features/add_product/presentation/screens/upload_product_screen.dart';
 import 'package:pin/features/catalogue/presentation/screens/catalogue_screen.dart';
 import 'package:pin/features/chat/presentation/screens/chats/chats_screen.dart';
 import 'package:pin/features/profile/presentation/screens/profile_screen.dart';
@@ -30,7 +30,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
     const VirtualCloset(
       fromExchange: false,
     ),
-    const AddProduct(),
+    const UploadProductScreen(),
     ChatsScreen(),
     const ProfileScreen(),
   ];
