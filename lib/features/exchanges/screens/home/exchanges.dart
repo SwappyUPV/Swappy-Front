@@ -7,6 +7,7 @@ import 'package:pin/core/services/chat_service.dart';
 import 'package:pin/features/exchanges/models/Exchange.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
 import 'package:pin/features/exchanges/screens/details/components/confirmation.dart';
+import 'package:pin/features/virtual_closet/presentation/screens/change_clothes_screen.dart';
 import 'package:pin/features/virtual_closet/presentation/screens/virtual_closet_screen.dart';
 import '../home/components/user_header.dart';
 import 'package:pin/core/services/exchange_service.dart';
@@ -114,7 +115,7 @@ class ExchangesState extends State<Exchanges> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => VirtualCloset(
+        builder: (context) => ChangeClothes(
           fromExchange: true,
         ), // Aquí debes asegurarte de implementar VirtualCloset.
       ),

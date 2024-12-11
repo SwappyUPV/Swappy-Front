@@ -28,7 +28,6 @@ class _NavigationMenuState extends State<NavigationMenu> {
   final List<Widget> _pages = [
     const Catalogue(),
     const VirtualCloset(
-      fromExchange: false,
     ),
     const AddProduct(),
     ChatsScreen(),

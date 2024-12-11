@@ -1,23 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pin/core/services/chat_service_2.dart';
+import 'package:pin/features/exchanges/screens/details/details_screen.dart';
+import 'package:pin/features/virtual_closet/presentation/screens/virtual_closet_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/services/catalogue.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
+import 'package:pin/features/CustomAppBar.dart';
 
 class ChangeClothes extends StatefulWidget {
-  const ChangeClothes({super.key});
+  final bool
+  fromExchange; // Atributo para determinar si se viene de un intercambio
+
+  const ChangeClothes({super.key, required this.fromExchange});
 
   @override
-  _VirtualClosetScreenState createState() => _VirtualClosetScreenState();
+  _ChangeClothesScreenState createState() => _ChangeClothesScreenState();
 }
 
-class _VirtualClosetScreenState extends State<ChangeClothes> {
+class _ChangeClothesScreenState extends State<ChangeClothes> {
   final ChatService2 _chatService2 = ChatService2();
   final CatalogService _catalogService = CatalogService();
   String? _cachedUserId;
-  Map<String, List<Product>> _categorizedClothes =
-      {}; // Para almacenar las prendas por categoría
+  Map<String, List<Product>> _categorizedClothes = {};
+  List<Product> _selectedProducts = []; // Lista de productos seleccionados
 
   @override
   void initState() {
@@ -39,8 +45,6 @@ class _VirtualClosetScreenState extends State<ChangeClothes> {
   Future<void> _fetchClothesForUser(String userId) async {
     try {
       List<Product> clothes = await _catalogService.getClothByUserId(userId);
-
-      // Agrupa las prendas por categoría
       Map<String, List<Product>> categorizedClothes = {};
       for (var product in clothes) {
         if (categorizedClothes[product.category] == null) {
@@ -50,145 +54,152 @@ class _VirtualClosetScreenState extends State<ChangeClothes> {
       }
 
       setState(() {
-        _categorizedClothes =
-            categorizedClothes; // Actualiza el estado con las prendas categorizadas
+        _categorizedClothes = categorizedClothes;
       });
     } catch (e) {
       print('Error al obtener la ropa del usuario: $e');
     }
   }
 
+  void _toggleProductSelection(Product product) {
+    setState(() {
+      if (_selectedProducts.contains(product)) {
+        _selectedProducts.remove(product);
+      } else {
+        _selectedProducts.add(product);
+      }
+    });
+  }
+
+  void _confirmSelection() {
+    Navigator.pop(
+        context, _selectedProducts); // Devuelve los productos seleccionados
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Armario Virtual")),
-      body: _categorizedClothes.isEmpty
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: _categorizedClothes.entries.map((entry) {
-                  final category = entry.key;
-                  final products = entry.value;
+      appBar: CustomAppBar(
+        title: 'ARMARIO VIRTUAL',
+        iconPath: 'assets/icons/back.svg',
+        onIconPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const VirtualCloset()),
+          );
 
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          category,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+        },
+        iconPosition: IconPosition.left,
+      ),
+      body: Stack(
+        children: [
+          _categorizedClothes.isEmpty
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: _categorizedClothes.entries.map((entry) {
+                final category = entry.key;
+                final products = entry.value;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        category,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(
-                        height: 150,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: products.length,
-                          itemBuilder: (context, index) {
-                            final product = products[index];
-                            return GestureDetector(
-                              onTap: () {
+                    ),
+                    SizedBox(
+                      height: 150,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: products.length,
+                        itemBuilder: (context, index) {
+                          final product = products[index];
+                          final isSelected =
+                          _selectedProducts.contains(product);
+
+                          return GestureDetector(
+                            onTap: () {
+                              if (!widget.fromExchange) {
+                                // Navegar a la pantalla de detalles
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) =>
-                                        ProductDetailScreen(product: product),
+                                    builder: (context) => DetailsScreen(
+                                      product: product,
+                                      showActionButtons: false,
+                                    ),
                                   ),
                                 );
-                              },
-                              child: Container(
-                                width: 120,
-                                margin: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  children: [
-                                    Flexible(
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        child: Image.network(
-                                          product.image,
-                                          width: 100,
-                                          height: 100,
-                                          fit: BoxFit.contain,
-                                        ),
+                              } else {
+                                _toggleProductSelection(product);
+                              }
+                            },
+                            child: Container(
+                              width: 120,
+                              margin: const EdgeInsets.all(8.0),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: isSelected
+                                      ? Colors.blue
+                                      : Colors.grey,
+                                  width: 2,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Column(
+                                children: [
+                                  Flexible(
+                                    child: ClipRRect(
+                                      borderRadius:
+                                      BorderRadius.circular(8.0),
+                                      child: Image.network(
+                                        product.image,
+                                        width: 100,
+                                        height: 100,
+                                        fit: BoxFit.contain,
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(product.title,
-                                        textAlign: TextAlign.center),
-                                  ],
-                                ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(product.title,
+                                      textAlign: TextAlign.center),
+                                ],
                               ),
-                            );
-                          },
-                        ),
+                            ),
+                          );
+                        },
                       ),
-                    ],
-                  );
-                }).toList(),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
+          ),
+          if (widget.fromExchange && _selectedProducts.isNotEmpty)
+            Positioned(
+              bottom: 16,
+              left: 16,
+              right: 16,
+              child: Column(
+                children: [
+                  ElevatedButton(
+                    onPressed: _confirmSelection,
+                    child: const Text("Confirmar y añadir prendas"),
+                  ),
+                  const SizedBox(
+                      height: 100), // Espacio adicional debajo del botón
+                ],
               ),
             ),
-    );
-  }
-}
-
-class ProductDetailScreen extends StatelessWidget {
-  final Product product;
-
-  const ProductDetailScreen({Key? key, required this.product})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(product.title),
-      ),
-      body: Center(
-        // Centra el contenido completo en la pantalla
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center, // Centra verticalmente
-            crossAxisAlignment:
-                CrossAxisAlignment.center, // Centra horizontalmente
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12.0),
-                child: Image.network(
-                  product.image,
-                  width: 500,
-                  height: 600,
-                  fit: BoxFit.contain,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                product.title,
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center, // Centra el texto
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Precio: \$${product.price}',
-                style: Theme.of(context).textTheme.headlineSmall,
-                textAlign: TextAlign.center, // Centra el precio
-              ),
-              const SizedBox(height: 16),
-              Text(
-                product.description,
-                style: Theme.of(context).textTheme.labelMedium,
-                textAlign: TextAlign.center, // Centra la descripción
-              ),
-              // Agrega otros detalles del producto aquí
-            ],
-          ),
-        ),
+        ],
       ),
     );
   }
