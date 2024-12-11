@@ -6,13 +6,13 @@ class NavigationRailDestinationWidget {
     final bool isSelected = selectedIndex == pages.indexWhere((element) => element.toString() == label);
     return NavigationRailDestination(
       icon: SvgPicture.asset(
-        'icons/navBar/$icon.svg',
+        'assets/icons/navBar/$icon.svg',
         width: 30,
         height: 30,
         color: isSelected ? Colors.black : Colors.black.withOpacity(0.9),
       ),
       selectedIcon: SvgPicture.asset(
-        'icons/navBar/$selectedIcon.svg',
+        'assets/icons/navBar/$selectedIcon.svg',
         width: 30,
         height: 30,
         color: Colors.black,
