@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:pin/core/utils/NavigationMenu/components/hover_button.dart';
 import 'package:pin/features/add_product/presentation/screens/upload_product_screen.dart';
 import 'package:pin/features/catalogue/presentation/screens/catalogue_screen.dart';
 import 'package:pin/features/chat/presentation/screens/chats/chats_screen.dart';
@@ -27,13 +28,13 @@ class _NavigationMenuState extends State<NavigationMenu> {
   List.generate(5, (_) => GlobalKey<NavigatorState>());
   final List<Widget> _pages = [
     const Catalogue(),
-    const VirtualCloset(
-    ),
+    const VirtualCloset(),
     const UploadProductScreen(),
     ChatsScreen(),
     const ProfileScreen(),
   ];
 
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -60,20 +61,18 @@ class _NavigationMenuState extends State<NavigationMenu> {
                   },
                   labelType: NavigationRailLabelType.all,
                   destinations: [
-                    NavigationRailDestinationWidget.buildRailDestination('home',
-                        'home_selected', 'Catálogo', _selectedIndex, _pages),
-                    NavigationRailDestinationWidget.buildRailDestination('top',
-                        'top_selected', 'Armario', _selectedIndex, _pages),
+                    NavigationRailDestinationWidget.buildRailDestination(
+                        'home', 'home_selected', 'Catálogo', _selectedIndex, _pages),
+                    NavigationRailDestinationWidget.buildRailDestination(
+                        'top', 'top_selected', 'Armario', _selectedIndex, _pages),
                     NavigationRailDestinationWidget.buildRailDestination(
                         'add', 'add_selected', 'Subir', _selectedIndex, _pages),
-                    NavigationRailDestinationWidget.buildRailDestination('chat',
-                        'chat_selected', 'Chat', _selectedIndex, _pages),
+                    NavigationRailDestinationWidget.buildRailDestination(
+                        'chat', 'chat_selected', 'Chat', _selectedIndex, _pages),
                     NavigationRailDestinationWidget.buildRailDestination(
                         'user',
                         'user_selected',
-                        authController.isLoggedIn.value
-                            ? 'Perfil'
-                            : 'Iniciar Sesión',
+                        authController.isLoggedIn.value ? 'Perfil' : 'Iniciar Sesión',
                         _selectedIndex,
                         _pages),
                   ],
@@ -102,7 +101,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
             body: Stack(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 0),
+                  padding: const EdgeInsets.only(bottom: 56),
                   child: WillPopScope(
                     onWillPop: _onWillPop,
                     child: IndexedStack(
@@ -126,8 +125,8 @@ class _NavigationMenuState extends State<NavigationMenu> {
                 ),
                 Positioned(
                   bottom: 0,
-                  left: -3,
-                  right: -3,
+                  left: 0,
+                  right: 0,
                   child: Container(
                     height: 56,
                     width: MediaQuery.of(context).size.width,
@@ -136,8 +135,6 @@ class _NavigationMenuState extends State<NavigationMenu> {
                       borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(35.0),
                         topRight: Radius.circular(35.0),
-                        bottomLeft: Radius.circular(0),
-                        bottomRight: Radius.circular(0),
                       ),
                       boxShadow: [
                         BoxShadow(
@@ -163,7 +160,29 @@ class _NavigationMenuState extends State<NavigationMenu> {
                                 child: BottomNavBarItemWidget.buildNavBarItem(
                                     'top', 1, _selectedIndex, _onItemTapped, iconSize),
                               ),
-                              const SizedBox(width: 60), // Space for FloatingActionButton
+                              Flexible(
+                                child: HoverButton(
+                                  onTap: () {
+                                    if (authController.isLoggedIn.value) {
+                                      _onItemTapped(2);
+                                    } else {
+                                      _showLoginDialog();
+                                    }
+                                  },
+                                  child: Container(
+                                    width: 60,
+                                    height: 60,
+                                    child: Center(
+                                      child: SvgPicture.asset(
+                                        'assets/icons/navBar/add.svg',
+                                        width: 20,
+                                        height: 20,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                               Flexible(
                                 child: BottomNavBarItemWidget.buildNavBarItem(
                                     'chat', 3, _selectedIndex, _onItemTapped, iconSize),
@@ -181,45 +200,12 @@ class _NavigationMenuState extends State<NavigationMenu> {
                 ),
               ],
             ),
-            floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-            floatingActionButton: Stack(alignment: Alignment.center, children: [
-              Positioned(
-                bottom: 30,
-                child: SizedBox(
-                  height: 53, // Extends the interactive area.
-                  width: 53,
-                  child: FloatingActionButton(
-                    backgroundColor: Colors.black,
-                    elevation: 5,
-                    onPressed: () {
-                      if (authController.isLoggedIn.value) {
-                        _onItemTapped(2);
-                      } else {
-                        _showLoginDialog();
-                      }
-                    },
-                    shape: CircleBorder(
-                      side: BorderSide(color: Colors.black, width: 2),
-                    ),
-                    child: SvgPicture.asset(
-                      'assets/icons/navBar/add.svg',
-                      width: 20,
-                      height: 20,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ]),
           );
         }
       },
     );
   }
 
-  //  -------------------------------------- Methods --------------------------------------------
-
-  /// Handles the back button press to navigate within the nested navigators.
   Future<bool> _onWillPop() async {
     if (_navKeys[_selectedIndex].currentState?.canPop() ?? false) {
       _navKeys[_selectedIndex].currentState?.pop();
@@ -228,8 +214,6 @@ class _NavigationMenuState extends State<NavigationMenu> {
     return true;
   }
 
-  /// Handles the navigation item tap.
-  /// If the user is not logged in and tries to access restricted pages, it shows a login dialog.
   void _onItemTapped(int index) {
     if (_selectedIndex == index) {
       _navKeys[index].currentState?.popUntil((route) => route.isFirst);
@@ -248,15 +232,13 @@ class _NavigationMenuState extends State<NavigationMenu> {
     }
   }
 
-  /// Shows a dialog prompting the user to log in.
   void _showLoginDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Inicio de Sesión'),
-          content: const Text(
-              'Necesitas iniciar sesión para acceder a esta sección.'),
+          content: const Text('Necesitas iniciar sesión para acceder a esta sección.'),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancelar'),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class UploadProductAppBar extends StatelessWidget {
+class UploadProductAppBar extends StatelessWidget implements PreferredSizeWidget {
   const UploadProductAppBar({Key? key}) : super(key: key);
 
   @override
@@ -21,4 +21,7 @@ class UploadProductAppBar extends StatelessWidget {
       ),
     );
   }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(56);
 }

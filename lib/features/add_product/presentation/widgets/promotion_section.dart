@@ -2,19 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 class PromotionSection extends StatefulWidget {
-  const PromotionSection({Key? key}) : super(key: key);
+  final bool isPromoted;
+  final ValueChanged<bool> onPromotionChanged;
+
+  const PromotionSection({
+    Key? key,
+    required this.isPromoted,
+    required this.onPromotionChanged,
+  }) : super(key: key);
 
   @override
   State<PromotionSection> createState() => _PromotionSectionState();
 }
 
 class _PromotionSectionState extends State<PromotionSection> {
-  bool isPromoted = false;
-
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(29),
+      padding: const EdgeInsets.only(left:30, right:18, top: 10, bottom: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -29,25 +34,27 @@ class _PromotionSectionState extends State<PromotionSection> {
             ),
           ),
           const SizedBox(height: 13),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Destaca tu prenda en búsquedas y secciones principales para aumentar su visibilidad y llegar a más usuarios.',
-                    style: TextStyle(
-                      color: Color(0x80000000),
-                      fontFamily: 'OpenSans',
-                      fontSize: 11,
-                    ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Expanded(
+                child: Text(
+                  'Destaca tu prenda en búsquedas y secciones principales para aumentar su visibilidad y llegar a más usuarios.',
+                  style: TextStyle(
+                    color: Color(0x80000000),
+                    fontFamily: 'OpenSans',
+                    fontSize: 11,
                   ),
                 ),
-                CupertinoSwitch(
-                  value: isPromoted,
-                  onChanged: (value) => setState(() => isPromoted = value),
-                ),
-              ],
-            ),
+              ),
+              CupertinoSwitch(
+                value: widget.isPromoted,
+                onChanged: (value) {
+                  setState(() => widget.onPromotionChanged(value));
+                },
+              ),
+            ],
+          ),
         ],
       ),
     );

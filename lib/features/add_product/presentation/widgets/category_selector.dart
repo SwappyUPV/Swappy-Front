@@ -1,17 +1,28 @@
 import 'package:flutter/material.dart';
 
 class CategorySelector extends StatefulWidget {
-  const CategorySelector({Key? key}) : super(key: key);
+  final List<String> categories;
+  final List<String> styles;
+  final List<String> sizes;
+  final ValueChanged<String> onCategorySelected;
+  final ValueChanged<String> onStyleSelected;
+  final ValueChanged<String> onSizeSelected;
+
+  const CategorySelector({
+    Key? key,
+    required this.categories,
+    required this.styles,
+    required this.sizes,
+    required this.onCategorySelected,
+    required this.onStyleSelected,
+    required this.onSizeSelected,
+  }) : super(key: key);
 
   @override
   State<CategorySelector> createState() => _CategorySelectorState();
 }
 
 class _CategorySelectorState extends State<CategorySelector> {
-  final List<String> categories = ['Ropa', 'Calzado', 'Accesorios'];
-  final List<String> styles = ['Casual', 'Formal', 'Deportivo'];
-  final List<String> sizes = ['XS', 'S', 'M', 'L', 'XL'];
-
   String? selectedCategory;
   String? selectedStyle;
   String? selectedSize;
@@ -22,21 +33,30 @@ class _CategorySelectorState extends State<CategorySelector> {
       children: [
         _buildCustomExpansionTile(
           'Categoría',
-          categories,
+          widget.categories,
           selectedCategory,
-              (value) => setState(() => selectedCategory = value),
+              (value) {
+            setState(() => selectedCategory = value);
+            widget.onCategorySelected(value!);
+          },
         ),
         _buildCustomExpansionTile(
           'Estilo',
-          styles,
+          widget.styles,
           selectedStyle,
-              (value) => setState(() => selectedStyle = value),
+              (value) {
+            setState(() => selectedStyle = value);
+            widget.onStyleSelected(value!);
+          },
         ),
         _buildCustomExpansionTile(
-          'Tallas',
-          sizes,
+          'Talla',
+          widget.sizes,
           selectedSize,
-              (value) => setState(() => selectedSize = value),
+              (value) {
+            setState(() => selectedSize = value);
+            widget.onSizeSelected(value!);
+          },
         ),
       ],
     );

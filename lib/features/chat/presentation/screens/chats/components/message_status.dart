@@ -71,7 +71,7 @@ class MessageStatus extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontFamily: 'Open Sans',
+                    fontFamily: 'OpenSans',
                     fontSize: 14,
                     fontStyle: FontStyle.normal,
                     fontWeight: FontWeight.w700,

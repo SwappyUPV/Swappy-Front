@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import '/features/add_product/presentation/widgets/image_picker.dart';
 
 class PhotoUploadSection extends StatelessWidget {
-  const PhotoUploadSection({Key? key}) : super(key: key);
+  final dynamic pickedImage;
+  final ValueChanged<dynamic> onImagePicked;
+
+  const PhotoUploadSection({
+    Key? key,
+    required this.pickedImage,
+    required this.onImagePicked,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,24 +28,9 @@ class PhotoUploadSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 19),
-        OutlinedButton.icon(
-          onPressed: () {},
-          icon: const Icon(Icons.add, color: Colors.black),
-          label: const Text(
-            'Sube una foto',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 13,
-              fontFamily: 'OpenSans',
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: Colors.black),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
-            ),
-          ),
+        ImagePickerWidget(
+          pickedImage: pickedImage,
+          onImagePicked: onImagePicked,
         ),
         const SizedBox(height: 30),
       ],

@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 class PricingSection extends StatefulWidget {
-  const PricingSection({Key? key}) : super(key: key);
+  final ValueChanged<int?> onPriceChanged;
+  final ValueChanged<bool> onExchangeOnlyChanged;
+
+  const PricingSection({
+    Key? key,
+    required this.onPriceChanged,
+    required this.onExchangeOnlyChanged,
+  }) : super(key: key);
 
   @override
   State<PricingSection> createState() => _PricingSectionState();
@@ -67,7 +74,10 @@ class _PricingSectionState extends State<PricingSection> {
                 ),
                 CupertinoSwitch(
                   value: isExchangeOnly,
-                  onChanged: (value) => setState(() => isExchangeOnly = value),
+                  onChanged: (value) {
+                    setState(() => isExchangeOnly = value);
+                    widget.onExchangeOnlyChanged(value);
+                  },
                 ),
               ],
             ),
@@ -147,6 +157,7 @@ class _PricingSectionState extends State<PricingSection> {
                 onSubmitted: (value) {
                   setState(() {
                     enteredPrice = value;
+                    widget.onPriceChanged(int.tryParse(value));
                   });
                 },
               ),

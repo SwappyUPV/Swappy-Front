@@ -1,15 +1,33 @@
 import 'package:flutter/material.dart';
 
 class ProductDetailsForm extends StatefulWidget {
-  const ProductDetailsForm({Key? key}) : super(key: key);
+  final String initialName;
+  final String initialDescription;
+  final ValueChanged<String> onNameChanged;
+  final ValueChanged<String> onDescriptionChanged;
+
+  const ProductDetailsForm({
+    Key? key,
+    required this.initialName,
+    required this.initialDescription,
+    required this.onNameChanged,
+    required this.onDescriptionChanged,
+  }) : super(key: key);
 
   @override
   State<ProductDetailsForm> createState() => _ProductDetailsFormState();
 }
 
 class _ProductDetailsFormState extends State<ProductDetailsForm> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
+  late TextEditingController _nameController;
+  late TextEditingController _descriptionController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.initialName);
+    _descriptionController = TextEditingController(text: widget.initialDescription);
+  }
 
   @override
   void dispose() {
@@ -47,6 +65,7 @@ class _ProductDetailsFormState extends State<ProductDetailsForm> {
               ),
               border: UnderlineInputBorder(),
             ),
+            onChanged: widget.onNameChanged,
           ),
           const SizedBox(height: 27),
           const Text(
@@ -72,6 +91,7 @@ class _ProductDetailsFormState extends State<ProductDetailsForm> {
               ),
               border: UnderlineInputBorder(),
             ),
+            onChanged: widget.onDescriptionChanged,
           ),
           const SizedBox(height: 30),
         ],
