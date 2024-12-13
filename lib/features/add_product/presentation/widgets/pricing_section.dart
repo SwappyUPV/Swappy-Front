@@ -137,7 +137,6 @@ class _PricingSectionState extends State<PricingSection> {
               height: 30, // Set a fixed width for the TextField
               child: TextField(
                 controller: priceController,
-                keyboardType: TextInputType.number,
                 style: const TextStyle(
                   fontFamily: 'OpenSans',
                   fontSize: 13,

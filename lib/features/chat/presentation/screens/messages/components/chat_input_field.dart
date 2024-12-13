@@ -31,7 +31,7 @@ class ChatInputFieldState extends State<ChatInputField> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 35.0),
+      margin: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 25.0),
       color: Colors.transparent, // No background color
       child: Row(
         children: [

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart';
 import 'package:pin/features/chat/presentation/screens/messages/model/ChatMessageModel.dart';
 import 'package:pin/features/chat/presentation/components/exchange_notification.dart';
@@ -80,8 +79,6 @@ class BodyState extends State<Body> {
           },
 
         ),
-        //TEMPORAL HASTA ELIMINAR BARRA DE MENU DE MESSAGES
-        SizedBox(height: 50),
       ],
     );
   }

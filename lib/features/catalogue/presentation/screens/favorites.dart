@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pin/features/catalogue/presentation/widgets/catalogue_item_card.dart';
+import 'package:pin/features/catalogue/presentation/widgets/favorites_app_bar.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
 
 class FavoritesScreen extends StatefulWidget {
@@ -37,9 +38,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Favoritos'),
-      ),
+      appBar: FavoritesAppBar(),
       body: _favoriteProducts.isEmpty
           ? const Center(child: Text('No tienes productos favoritos aún.'))
           : Padding(

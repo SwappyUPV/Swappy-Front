@@ -48,8 +48,8 @@ class ImagePickerWidget extends StatelessWidget {
               double buttonWidth = constraints.maxWidth;
               double fontSize = buttonWidth / 17;
               double iconSize = buttonWidth / 15;
-              double minFontSize = 6;
-              double minIconSize = 8;
+              double minFontSize = 10;
+              double minIconSize = 10;
 
               fontSize = fontSize < minFontSize ? minFontSize : fontSize;
               iconSize = iconSize < minIconSize ? minIconSize : iconSize;
@@ -76,7 +76,7 @@ class ImagePickerWidget extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                 ),
               );
             },
