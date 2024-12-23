@@ -27,8 +27,8 @@ class _NavigationMenuState extends State<NavigationMenu> {
   final List<GlobalKey<NavigatorState>> _navKeys =
   List.generate(5, (_) => GlobalKey<NavigatorState>());
   final List<Widget> _pages = [
-    const Catalogue(),
-    const VirtualCloset(),
+    const CatalogueScreen(),
+    const VirtualClosetScreen(),
     const UploadProductScreen(),
     ChatsScreen(),
     const ProfileScreen(),

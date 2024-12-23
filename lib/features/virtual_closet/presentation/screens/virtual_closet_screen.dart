@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:pin/features/virtual_closet/presentation/screens/change_clothes_screen.dart';
 import 'package:pin/features/virtual_closet/presentation/widgets/virtual_closet_app_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert'; // Para manejar JSON
 
-class VirtualCloset extends StatefulWidget {
-  const VirtualCloset({super.key});
+class VirtualClosetScreen extends StatefulWidget {
+  const VirtualClosetScreen({super.key});
 
   @override
-  _VirtualClosetState createState() => _VirtualClosetState();
+  _VirtualClosetScreenState createState() => _VirtualClosetScreenState();
 }
 
-class _VirtualClosetState extends State<VirtualCloset> {
+class _VirtualClosetScreenState extends State<VirtualClosetScreen> {
   List<Widget> _mid = [];
   List<Widget> _top = [];
   List<Widget> _bot = [];

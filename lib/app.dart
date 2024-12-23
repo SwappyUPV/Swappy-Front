@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart'; // Import GetX package
 import 'package:pin/core/utils/NavigationMenu/NavigationMenu.dart';
 import 'package:pin/core/constants/constants.dart';
+import 'package:pin/features/add_product/presentation/screens/upload_product_screen.dart';
+import 'package:pin/features/auth/presentation/screens/login_screen.dart';
+import 'package:pin/features/auth/presentation/screens/sign_up_screen.dart';
+import 'package:pin/features/catalogue/presentation/screens/catalogue_screen.dart';
+import 'package:pin/features/chat/presentation/screens/chats/chats_screen.dart';
+import 'package:pin/features/profile/presentation/screens/profile_screen.dart';
+import 'package:pin/features/virtual_closet/presentation/screens/virtual_closet_screen.dart';
 
 class Swappy extends StatelessWidget {
   const Swappy({super.key});
@@ -14,6 +21,7 @@ class Swappy extends StatelessWidget {
       theme: ThemeData(
         primaryColor: PrimaryColor, // This is the primary color of the app,
         scaffoldBackgroundColor: Colors.white,
+        dialogBackgroundColor: Colors.white, // Set dialog background color to white
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             elevation: 0,
@@ -53,7 +61,17 @@ class Swappy extends StatelessWidget {
           displaySmall: TextStyle(fontFamily: 'UrbaneBold'),
         ),
       ),
-      home: NavigationMenu(), // This can remain as it is
+      initialRoute: '/', // Set initial route
+      routes: {
+        '/': (context) => NavigationMenu(),
+        '/SignUpScreen': (context) => SignUpScreen(),
+        '/LoginScreen': (context) => Login(),
+        '/ProfileScreen': (context) => ProfileScreen(), // Define ProfileScreen route
+        '/VirtualClosetScreen': (context) => VirtualClosetScreen(), // Define VirtualClosetScreen route
+        '/CatalogueScreen': (context) => CatalogueScreen(), // Define CatalogueScreen route
+        '/UploadProductScreen': (context) => UploadProductScreen(), // Define UploadProductScreen route
+        '/ChatsScreen': (context) => ChatsScreen(), // Define ChatsScreen route
+      },// This can remain as it is
     );
   }
 }

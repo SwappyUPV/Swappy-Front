@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:pin/features/catalogue/presentation/screens/favorites.dart';
 import 'package:pin/features/catalogue/presentation/widgets/header.dart';
 import '../../../../core/services/catalogue.dart';
-import '../widgets/catalogue_app_bar.dart';
 import '../widgets/search_bar.dart' as CustomWidgets;
 import '../widgets/category_filter.dart';
 import '../widgets/catalogue_grid.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
 
-class Catalogue extends StatefulWidget {
-  const Catalogue({super.key});
+class CatalogueScreen extends StatefulWidget {
+  const CatalogueScreen({super.key});
 
   @override
-  _CatalogueState createState() => _CatalogueState();
+  _CatalogueScreenState createState() => _CatalogueScreenState();
 }
 
-class _CatalogueState extends State<Catalogue> {
+class _CatalogueScreenState extends State<CatalogueScreen> {
   String _selectedCategory = 'Streetwear';
   String _searchQuery = '';
   List<Product> catalogoRopa = [];
