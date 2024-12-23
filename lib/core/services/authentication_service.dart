@@ -240,5 +240,48 @@ class AuthMethod {
     return res;
   }
 
+  Future<void> updatePassword(String newPassword) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      await user.updatePassword(newPassword);
+    }
+  }
+
+  Future<void> updateEmail(String newEmail, String password) async {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      throw Exception("No user is currently logged in.");
+    }
+
+    try {
+      // Re-authenticate user
+      AuthCredential credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: password,
+      );
+
+      await user.reauthenticateWithCredential(credential);
+
+      // Update email in Firebase Authentication
+      await user.updateEmail(newEmail);
+
+      // Update email in Firestore (optional, depending on your structure)
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+        'email': newEmail,
+      });
+
+      print("Email updated successfully.");
+    } catch (e) {
+      print("Failed to update email: $e");
+      throw Exception("Re-authentication failed or email update error.");
+    }
+  }
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    await _auth.sendPasswordResetEmail(email: email);
+  }
+
+
 
 }

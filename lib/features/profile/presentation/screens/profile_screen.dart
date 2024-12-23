@@ -62,10 +62,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.menu, color: Colors.white),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const SettingsScreen()),
-            ),
+            onPressed: () async {
+              bool? result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SettingsScreen(userModel: _userModel!),
+                ),
+              );
+              if (result == true) {
+                _loadUserModel(); // Refresh user data
+              }
+            },
           ),
         ],
       ),

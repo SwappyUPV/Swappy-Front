@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pin/core/services/authentication_service.dart';
 import 'package:pin/core/utils/NavigationMenu/NavigationMenu.dart';
+import 'package:pin/features/auth/presentation/widgets/components/showRecoverPasswordDialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../../core/constants/constants.dart';
@@ -193,7 +194,7 @@ class _LoginFormState extends State<LoginForm> {
               },
               child: GestureDetector(
                 onTap: () {
-                  // Add your onTap logic here
+                  showRecoverPasswordDialog(context);
                 },
                 child: RichText(
                   textAlign: TextAlign.left,

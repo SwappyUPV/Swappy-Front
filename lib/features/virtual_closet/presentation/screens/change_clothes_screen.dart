@@ -82,7 +82,7 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
         onIconPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const VirtualCloset()),
+            MaterialPageRoute(builder: (context) => const VirtualClosetScreen()),
           );
         },
       ),

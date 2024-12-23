@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:multi_dropdown/multi_dropdown.dart';
 import 'package:pin/core/services/create_user_service.dart';
+import 'package:pin/features/profile/presentation/services/user_update_service.dart';
+import 'package:pin/features/profile/presentation/widgets/edit_birthday_dialog.dart';
 import '../../screens/login_screen.dart';
-import 'package:pin/features/auth/presentation/widgets/components/image_picker_widget.dart'; // Import ImagePickerWidget
-import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'package:pin/features/auth/presentation/widgets/components/image_picker_widget.dart';
 
 class SignUpForm extends StatefulWidget {
   const SignUpForm({super.key});
@@ -14,14 +16,14 @@ class SignUpForm extends StatefulWidget {
 class _SignUpFormState extends State<SignUpForm> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final CreateUserService _createUserService = CreateUserService();
   final _formKey = GlobalKey<FormState>();
 
   final List<String> allSizes = ['XS', 'S', 'M', 'L', 'XL'];
+  final MultiSelectController<String> _multiSelectController = MultiSelectController();
 
   DateTime? _selectedBirthday;
   String? _selectedGender = 'Hombre';
@@ -105,8 +107,7 @@ class _SignUpFormState extends State<SignUpForm> {
                 hintText: "Introducir contraseña",
                 prefixIcon: const Icon(Icons.lock),
                 suffixIcon: IconButton(
-                  icon: Icon(
-                      _showPassword ? Icons.visibility : Icons.visibility_off),
+                  icon: Icon(_showPassword ? Icons.visibility : Icons.visibility_off),
                   onPressed: () {
                     setState(() {
                       _showPassword = !_showPassword;
@@ -127,9 +128,7 @@ class _SignUpFormState extends State<SignUpForm> {
                 hintText: "Confirmar contraseña",
                 prefixIcon: const Icon(Icons.lock),
                 suffixIcon: IconButton(
-                  icon: Icon(_showConfirmPassword
-                      ? Icons.visibility
-                      : Icons.visibility_off),
+                  icon: Icon(_showConfirmPassword ? Icons.visibility : Icons.visibility_off),
                   onPressed: () {
                     setState(() {
                       _showConfirmPassword = !_showConfirmPassword;
@@ -171,11 +170,12 @@ class _SignUpFormState extends State<SignUpForm> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
+              style: TextStyle(fontSize: 14, fontFamily: 'UrbaneMedium', color: Colors.black87),
               items: ['Hombre', 'Mujer', 'Otro']
                   .map((gender) => DropdownMenuItem(
-                        value: gender,
-                        child: Text(gender),
-                      ))
+                value: gender,
+                child: Text(gender),
+              ))
                   .toList(),
               onChanged: (String? newValue) {
                 setState(() {
@@ -183,7 +183,7 @@ class _SignUpFormState extends State<SignUpForm> {
                 });
               },
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -214,7 +214,7 @@ class _SignUpFormState extends State<SignUpForm> {
                           const SizedBox(width: 8),
                           Text(
                             _selectedBirthday == null
-                                ? "Selecciona fecha"
+                                ? "Seleccionar"
                                 : "${_selectedBirthday!.toLocal()}".split(' ')[0],
                             style: TextStyle(color: Colors.black),
                           ),
@@ -226,60 +226,64 @@ class _SignUpFormState extends State<SignUpForm> {
               ],
             ),
             const SizedBox(height: 10),
-            MultiSelectDialogField(
-              items: allSizes
-                  .map((size) => MultiSelectItem<String>(size, size))
-                  .toList(),
-              title: Text("Selecciona las tallas"),
-              selectedColor: Colors.blue,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.black),
+            MultiDropdown<String>(
+              items: allSizes.map((size) => DropdownItem<String>(label: size, value: size)).toList(),
+              controller: _multiSelectController,
+              enabled: true,
+              searchEnabled: false, // Disable the search bar
+              chipDecoration: const ChipDecoration(
+                backgroundColor: Colors.black,
+                labelStyle: TextStyle(color: Colors.white),
+                wrap: false,
+                runSpacing: 0,
+                spacing: 5, // Reduce spacing
               ),
-              buttonIcon: Icon(Icons.arrow_drop_down),
-              buttonText: Text(
-                preferredSizes.isEmpty
-                    ? 'Selecciona tallas'
-                    : 'Tallas seleccionadas',
+              fieldDecoration: const FieldDecoration(
+                hintText: 'Selecciona tallas',
+                hintStyle: TextStyle(color: Colors.black87),
+                showClearIcon: false,
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
               ),
-              onConfirm: (selectedSizes) {
+              dropdownDecoration: const DropdownDecoration(
+                marginTop: 10, // Display content underneath
+                maxHeight: 500,
+                borderRadius: BorderRadius.all(Radius.circular(10)), // Rounded borders
+              ),
+              dropdownItemDecoration: DropdownItemDecoration(
+                selectedIcon: const Icon(Icons.check_box, color: Colors.black),
+                disabledIcon: Icon(Icons.lock, color: Colors.grey.shade300),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Selecciona tallas';
+                }
+                return null;
+              },
+              onSelectionChange: (selectedItems) {
                 setState(() {
-                  preferredSizes = selectedSizes.cast<String>();
+                  preferredSizes = selectedItems.map((item) => item).toList();
                 });
               },
-              initialValue: preferredSizes,
-              dialogHeight: 300,
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => signUpUser(context),
-              child: Text("Registrarse".toUpperCase()),
+              child: const Text(
+                "Registrarse",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
             const SizedBox(height: 40),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildSizeCheckbox(String size) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Checkbox(
-          value: preferredSizes.contains(size),
-          onChanged: (bool? value) {
-            setState(() {
-              if (value == true) {
-                preferredSizes.add(size);
-              } else {
-                preferredSizes.remove(size);
-              }
-            });
-          },
-        ),
-        Text(size),
-      ],
     );
   }
 
@@ -294,15 +298,29 @@ class _SignUpFormState extends State<SignUpForm> {
   }
 
   void _pickBirthday() async {
-    DateTime? pickedDate = await showDatePicker(
+
+    DateTime? selectedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate:  DateTime.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Colors.black,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+            dialogBackgroundColor: Colors.white,
+          ),
+          child: child!,
+        );
+      },
     );
-    if (pickedDate != null) {
+    if (selectedDate != null) {
       setState(() {
-        _selectedBirthday = pickedDate;
+        _selectedBirthday = selectedDate;
       });
     }
   }
@@ -333,7 +351,7 @@ class _SignUpFormState extends State<SignUpForm> {
       // Use default image URL if no image is picked
       if (_pickedImage == null) {
         _pickedImage =
-            "https://firebasestorage.googleapis.com/v0/b/swappy-pin.appspot.com/o/profile_images%2Fdefault_user.png?alt=media&token=92bbfc56-8927-41a0-b81c-2394b90bf38c";
+        "https://firebasestorage.googleapis.com/v0/b/swappy-pin.appspot.com/o/profile_images%2Fdefault_user.png?alt=media&token=92bbfc56-8927-41a0-b81c-2394b90bf38c";
       }
 
       String res = await _createUserService.createUser(

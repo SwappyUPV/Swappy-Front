@@ -69,4 +69,31 @@ class UserModel {
       birthday: data['birthday'] as Timestamp?,
     );
   }
+
+  UserModel copyWith({
+    String? uid,
+    String? name,
+    String? email,
+    String? profilePicture,
+    String? address,
+    List<String>? preferredSizes,
+    String? gender,
+    Timestamp? birthday,
+  }) {
+    return UserModel(
+      uid: uid ?? this.uid,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      profilePicture: profilePicture ?? this.profilePicture,
+      address: address ?? this.address,
+      preferredSizes: preferredSizes ?? this.preferredSizes,
+      gender: gender ?? this.gender,
+      birthday: birthday ?? this.birthday,
+    );
+  }
+
+  String? get size => preferredSizes?.join(', ');
+  String? get birthDate => birthday?.toDate().toString();
+  String? get location => address;
+
 }

@@ -3,6 +3,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io';
 
+import 'package:pin/features/rewards/constants.dart';
+
 class ImagePickerWidget extends StatelessWidget {
   final dynamic pickedImage;
   final Function(dynamic) onImagePicked;
@@ -37,32 +39,33 @@ class ImagePickerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Stack(
-        clipBehavior: Clip.none,
         children: [
-          // IconButton en la esquina inferior derecha
-          Positioned(
-            bottom: -10, // Ajusta el valor para solapar más o menos
-            right: -29, // Ajusta el valor para solapar más o menos
-            child: Ink(
-              decoration: const ShapeDecoration(
-                color: Color.fromARGB(255, 255, 255, 255),
-                shape: CircleBorder(),
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.photo_library,
-                    color: Color.fromARGB(255, 0, 0, 0)),
-                onPressed: _pickImage,
-                iconSize: 28, // Tamaño del ícono
-              ),
+          GestureDetector(
+            onTap: _pickImage,
+            child: CircleAvatar(
+              radius: 50,
+              backgroundImage: pickedImage != null
+                  ? (kIsWeb
+                  ? NetworkImage(pickedImage.path)
+                  : FileImage(pickedImage) as ImageProvider)
+                  : const AssetImage('assets/images/default_user.png'),
             ),
           ),
-          CircleAvatar(
-            radius: 50,
-            backgroundImage: pickedImage != null
-                ? (kIsWeb
-                    ? NetworkImage(pickedImage.path)
-                    : FileImage(pickedImage) as ImageProvider)
-                : const AssetImage('assets/images/default_user.png'),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: GestureDetector(
+              onTap: _pickImage,
+              child: CircleAvatar(
+                radius: 15,
+                backgroundColor: lightGreyColor,
+                child: Icon(
+                  Icons.edit,
+                  size: 20,
+                  color: Colors.black,
+                ),
+              ),
+            ),
           ),
         ],
       ),
