@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:pin/features/add_product/presentation/widgets/upload_product_app_bar.dart';
 import '/core/services/product.dart';
-import 'package:get/get.dart';
-import '../../../../core/utils/NavigationMenu/NavigationMenu.dart';
-import 'package:pin/core/utils/NavigationMenu/controllers/navigationController.dart';
 import 'package:pin/features/add_product/presentation/widgets/category_selector.dart';
 import 'package:pin/features/add_product/presentation/widgets/photo_upload_section.dart';
 import 'package:pin/features/add_product/presentation/widgets/pricing_section.dart';
 import 'package:pin/features/add_product/presentation/widgets/product_details_form.dart';
 import 'package:pin/features/add_product/presentation/widgets/promotion_section.dart';
 
+//todo: when uploading a product, the resetForm should also update the CategorySelector, Pricing and PromotionSection clearing them
 class UploadProductScreen extends StatefulWidget {
   const UploadProductScreen({super.key});
 
@@ -21,9 +19,9 @@ class _UploadProductState extends State<UploadProductScreen> {
   final _formKey = GlobalKey<FormState>();
   final ProductService _productService = ProductService();
 
-  // Variables de estado
-  String title = '';
-  String description = '';
+  // State variables
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
   List<String> selectedStyles = [];
   String selectedSize = '';
   int? price = 0;
@@ -51,7 +49,7 @@ class _UploadProductState extends State<UploadProductScreen> {
       predefinedStyles = await _productService.getStyles();
       clothingCategories = await _productService.getClothingCategories();
       predefinedSizes = ['S', 'M', 'L', 'XL'];
-      predefinedQualities = ['Nuevo','Casi nuevo','Pequeños desperfectos', 'Usado', 'Viejo'];
+      predefinedQualities = ['Nuevo', 'Casi nuevo', 'Pequeños desperfectos', 'Usado', 'Viejo'];
     } finally {
       setState(() => _isLoading = false);
     }
@@ -60,11 +58,17 @@ class _UploadProductState extends State<UploadProductScreen> {
   void _resetForm() {
     _formKey.currentState!.reset();
     setState(() {
-      _pickedImage = null;
+      _titleController.clear();
+      _descriptionController.clear();
       selectedStyles.clear();
       selectedSize = '';
-      selectedQuality = null; // Reset selectedQuality
+      selectedQuality = null;
+      _pickedImage = null;
       selectedCategory = '';
+      price = 0;
+      isExchangeOnly = false;
+      isPublic = false;
+      isPromoted = false;
     });
   }
 
@@ -87,56 +91,45 @@ class _UploadProductState extends State<UploadProductScreen> {
       }
 
       try {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return Center(child: CircularProgressIndicator());
-          },
-        );
-
         String result = await _productService.uploadProduct(
-            title: title,
-            description: description,
-            styles: selectedStyles,
-            size: selectedSize,
-            price: isExchangeOnly ? null : price,
-            quality: selectedQuality!,
-            image: _pickedImage,
-            category: selectedCategory,
-            isExchangeOnly: isExchangeOnly,
-            isPublic: isPublic
+          title: _titleController.text,
+          description: _descriptionController.text,
+          styles: selectedStyles,
+          size: selectedSize,
+          price: isExchangeOnly ? null : price,
+          quality: selectedQuality!,
+          image: _pickedImage,
+          category: selectedCategory,
+          isExchangeOnly: isExchangeOnly,
+          isPublic: isPublic,
         );
-
-        Navigator.of(context).pop(); // Cierra el diálogo de progreso
 
         if (result.startsWith("Producto añadido con éxito")) {
-          // Mostrar diálogo de confirmación
           showDialog(
             context: context,
             builder: (BuildContext context) {
+              Future.delayed(const Duration(seconds: 2), () {
+                Navigator.of(context).pop();
+                _resetForm();
+              });
+
               return AlertDialog(
-                title: Text('Producto añadido'),
-                content: Text('¿Qué deseas hacer ahora?'),
-                actions: <Widget>[
-                  TextButton(
-                    child: Text('Añadir otro producto'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      _resetForm();
-                    },
-                  ),
-                  TextButton(
-                    child: Text('Volver al catálogo'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      final NavigationController navigationController =
-                      Get.find<NavigationController>();
-                      navigationController.updateIndex(0);
-                      Get.off(() => NavigationMenu());
-                    },
-                  ),
-                ],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.check_circle, color: Colors.green, size: 60),
+                    const SizedBox(height: 16),
+                    const Center(
+                      child: Text(
+                        'Guardado correctamente',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ),
+                  ],
+                ),
               );
             },
           );
@@ -146,7 +139,7 @@ class _UploadProductState extends State<UploadProductScreen> {
           );
         }
       } catch (e) {
-        Navigator.of(context).pop(); // Cierra el diálogo de progreso
+        Navigator.of(context).pop(); // Close the loading dialog in case of error
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al guardar el producto: $e')),
         );
@@ -164,7 +157,7 @@ class _UploadProductState extends State<UploadProductScreen> {
       appBar: UploadProductAppBar(),
       body: SingleChildScrollView(
         child: Container(
-          color: Colors.white, // Fondo blanco para toda la ventana
+          color: Colors.white, // Background color for the entire screen
           child: Form(
             key: _formKey,
             child: Column(
@@ -172,29 +165,23 @@ class _UploadProductState extends State<UploadProductScreen> {
               children: [
                 PhotoUploadSection(
                   pickedImage: _pickedImage,
-                  onImagePicked: (image) =>
-                      setState(() => _pickedImage = image),
+                  onImagePicked: (image) => setState(() => _pickedImage = image),
                 ),
                 const Divider(color: Color(0xFFD9D9D9), thickness: 20),
                 ProductDetailsForm(
-                  initialName: title,
-                  initialDescription: description,
-                  onNameChanged: (value) => setState(() => title = value),
-                  onDescriptionChanged: (value) =>
-                      setState(() => description = value),
+                  nameController: _titleController,
+                  descriptionController: _descriptionController,
                 ),
                 const Divider(color: Color(0xFFD9D9D9), thickness: 20),
                 CategorySelector(
                   categories: clothingCategories,
                   styles: predefinedStyles,
                   sizes: predefinedSizes,
-                  qualities: predefinedQualities, // Pass predefined qualities
-                  onCategorySelected: (category) =>
-                      setState(() => selectedCategory = category),
-                  onStyleSelected: (style) =>
-                      setState(() => selectedStyles = [style]),
+                  qualities: predefinedQualities,
+                  onCategorySelected: (category) => setState(() => selectedCategory = category),
+                  onStyleSelected: (style) => setState(() => selectedStyles = [style]),
                   onSizeSelected: (size) => setState(() => selectedSize = size),
-                  onQualitySelected: (quality) => setState(() => selectedQuality = quality), // Handle quality selection
+                  onQualitySelected: (quality) => setState(() => selectedQuality = quality),
                 ),
                 const Divider(color: Color(0xFFD9D9D9), thickness: 20),
                 PricingSection(
@@ -208,8 +195,7 @@ class _UploadProductState extends State<UploadProductScreen> {
                 const Divider(color: Color(0xFFD9D9D9), thickness: 20),
                 PromotionSection(
                   isPromoted: isPromoted,
-                  onPromotionChanged: (isPromoted) =>
-                      setState(() => this.isPromoted = isPromoted),
+                  onPromotionChanged: (isPromoted) => setState(() => this.isPromoted = isPromoted),
                 ),
                 const SizedBox(height: 26),
                 _buildPublishButton(),

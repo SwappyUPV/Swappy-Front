@@ -1,40 +1,14 @@
 import 'package:flutter/material.dart';
 
-class ProductDetailsForm extends StatefulWidget {
-  final String initialName;
-  final String initialDescription;
-  final ValueChanged<String> onNameChanged;
-  final ValueChanged<String> onDescriptionChanged;
+class ProductDetailsForm extends StatelessWidget {
+  final TextEditingController nameController;
+  final TextEditingController descriptionController;
 
   const ProductDetailsForm({
     Key? key,
-    required this.initialName,
-    required this.initialDescription,
-    required this.onNameChanged,
-    required this.onDescriptionChanged,
+    required this.nameController,
+    required this.descriptionController,
   }) : super(key: key);
-
-  @override
-  State<ProductDetailsForm> createState() => _ProductDetailsFormState();
-}
-
-class _ProductDetailsFormState extends State<ProductDetailsForm> {
-  late TextEditingController _nameController;
-  late TextEditingController _descriptionController;
-
-  @override
-  void initState() {
-    super.initState();
-    _nameController = TextEditingController(text: widget.initialName);
-    _descriptionController = TextEditingController(text: widget.initialDescription);
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +29,7 @@ class _ProductDetailsFormState extends State<ProductDetailsForm> {
           ),
           const SizedBox(height: 22),
           TextField(
-            controller: _nameController,
+            controller: nameController,
             decoration: const InputDecoration(
               hintText: 'ej., Camiseta Blanca Nike',
               hintStyle: TextStyle(
@@ -65,7 +39,6 @@ class _ProductDetailsFormState extends State<ProductDetailsForm> {
               ),
               border: UnderlineInputBorder(),
             ),
-            onChanged: widget.onNameChanged,
           ),
           const SizedBox(height: 27),
           const Text(
@@ -79,7 +52,7 @@ class _ProductDetailsFormState extends State<ProductDetailsForm> {
           ),
           const SizedBox(height: 18),
           TextField(
-            controller: _descriptionController,
+            controller: descriptionController,
             maxLength: 1000,
             maxLines: 3,
             decoration: const InputDecoration(
@@ -91,7 +64,6 @@ class _ProductDetailsFormState extends State<ProductDetailsForm> {
               ),
               border: UnderlineInputBorder(),
             ),
-            onChanged: widget.onDescriptionChanged,
           ),
           const SizedBox(height: 30),
         ],
