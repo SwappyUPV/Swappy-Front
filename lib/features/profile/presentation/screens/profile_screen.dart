@@ -8,6 +8,13 @@ import 'package:pin/features/profile/presentation/widgets/profile_stats.dart';
 import 'package:pin/features/profile/presentation/widgets/wardrobe_section.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+//todo: 1. Allow profileImage update or Edit like in SignUpScreen
+//todo: 2. Allow user to update their bio with Edit profile, optionally everything else like in SettingsScreen
+//todo: 3. Allow user to share their profile publicly with a generated web link from firebase (allow other users profile viewing)
+//todo: 4. Allow filtering of clothes by category, type... etc
+
+
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 

@@ -6,12 +6,14 @@ import 'components/body.dart';
 import 'components/new_chat_PopUp.dart';
 
 // todo: use of constants and components: code refactoring and clean up
-// todo: Add message sent time: Day grouping for message collection. Cache messages by day and scroll to fetch previous days from firebase into cached.
 
-// todo: removal of BottomNavBar in nested message class (complex to implement since the current routing isn't detecting the screens in)
-// todo: Make camera functional
 
-//todo: allow google sign in to work with chats
+// todo: PRIORITY: update the read and unread messages when opening a chat instead of when going back from a chat
+// todo: make emojis live with firebase
+
+// todo: FIX NAVIGATION ROUTING (Consider creating GoRouting so links can be shared and accessed by loggedIn users to view users profiles, items...): removal of BottomNavBar in nested message class (complex to implement since the current routing isn't detecting the screens in)
+// todo: Make camera and audio functional
+
 
 class ChatsScreen extends StatefulWidget {
   @override

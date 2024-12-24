@@ -64,6 +64,7 @@ class Swappy extends StatelessWidget {
       initialRoute: '/', // Set initial route
       routes: {
         '/': (context) => NavigationMenu(),
+        '/NavigationMenu': (context) => NavigationMenu(),
         '/SignUpScreen': (context) => SignUpScreen(),
         '/LoginScreen': (context) => Login(),
         '/ProfileScreen': (context) => ProfileScreen(), // Define ProfileScreen route

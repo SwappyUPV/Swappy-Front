@@ -1,23 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pin/features/auth/data/models/user_model.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
 import 'package:pin/features/exchanges/screens/home/exchanges.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import 'dart:async';
 
 class CatalogueItemCard extends StatefulWidget {
   final Product product;
   final VoidCallback press;
-  final bool isFavorite; // Parámetro para saber si el producto es favorito
-  final Function toggleFavorite; // Función para cambiar el estado de favorito
+  final bool isFavorite;
+  final Function toggleFavorite;
 
   const CatalogueItemCard({
     super.key,
     required this.product,
     required this.press,
-    required this.isFavorite, // Recibimos el estado de favorito
-    required this.toggleFavorite, // Recibimos la función para cambiar el estado de favorito
+    required this.isFavorite,
+    required this.toggleFavorite,
   });
 
   @override
@@ -25,37 +25,33 @@ class CatalogueItemCard extends StatefulWidget {
 }
 
 class _CatalogueItemCardState extends State<CatalogueItemCard> {
-  String? userName; // Para almacenar el nombre del usuario
-  bool isLoading = true; // Estado de carga
+  String? userName;
+  bool isLoading = true;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     isLoading = true;
     loadUserName(widget.product.userId);
-    ; // Cargar el nombre del usuario al iniciar el widget
   }
 
   Future<void> loadUserName(String? userId) async {
     try {
       final user = await getUserById(userId);
-      if (user != null) {
+      if (mounted) {
         setState(() {
-          userName = user.name; // Asigna el nombre del usuario
-          isLoading = false; // Detén la carga
-        });
-      } else {
-        setState(() {
-          userName = "Usuario desconocido"; // Usuario no encontrado
+          userName = user?.name ?? "Usuario desconocido";
           isLoading = false;
         });
       }
     } catch (e) {
-      print("Error al cargar el usuario: $e");
-      setState(() {
-        userName = "Error al cargar"; // Muestra un error
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          userName = "Error al cargar";
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -69,13 +65,18 @@ class _CatalogueItemCardState extends State<CatalogueItemCard> {
       if (userDoc.exists) {
         return UserModel.fromFirestore(userDoc);
       } else {
-        //print("No user found for the given ID: $userId");
         return null;
       }
     } catch (e) {
       print("Error fetching user by ID: $e");
       return null;
     }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -97,7 +98,6 @@ class _CatalogueItemCardState extends State<CatalogueItemCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Foto de perfil y nombre de usuario dinámico
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
@@ -109,9 +109,7 @@ class _CatalogueItemCardState extends State<CatalogueItemCard> {
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      isLoading
-                          ? "Cargando..." // Mostrar estado de carga
-                          : userName ?? "Sin nombre",
+                      isLoading ? "Cargando..." : userName ?? "Sin nombre",
                       style: TextStyle(
                         fontFamily: 'UrbaneMedium',
                         fontSize: 18,
@@ -130,7 +128,6 @@ class _CatalogueItemCardState extends State<CatalogueItemCard> {
                 ],
               ),
             ),
-            // Resto del contenido (imagen, descripción, etc.)
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
@@ -142,7 +139,6 @@ class _CatalogueItemCardState extends State<CatalogueItemCard> {
                 ),
               ),
             ),
-            // Nombre del producto
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Text(
@@ -158,7 +154,6 @@ class _CatalogueItemCardState extends State<CatalogueItemCard> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            // Botón de intercambio
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
