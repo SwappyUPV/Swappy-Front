@@ -26,13 +26,14 @@ class _UploadProductState extends State<UploadProductScreen> {
   String description = '';
   List<String> selectedStyles = [];
   String selectedSize = '';
-  int? price;
+  int? price = 0;
   String? selectedQuality;
   dynamic _pickedImage;
   String selectedCategory = '';
   bool isExchangeOnly = false;
   bool _isLoading = true;
-  bool isPromoted = false; // Variable para controlar si está promocionada o no
+  bool isPromoted = false;
+  bool isPublic = false;
 
   List<String> predefinedStyles = [];
   List<String> predefinedSizes = [];
@@ -95,15 +96,16 @@ class _UploadProductState extends State<UploadProductScreen> {
         );
 
         String result = await _productService.uploadProduct(
-          title: title,
-          description: description,
-          styles: selectedStyles,
-          size: selectedSize,
-          price: isExchangeOnly ? null : price,
-          quality: selectedQuality!,
-          image: _pickedImage,
-          category: selectedCategory,
-          isExchangeOnly: isExchangeOnly,
+            title: title,
+            description: description,
+            styles: selectedStyles,
+            size: selectedSize,
+            price: isExchangeOnly ? null : price,
+            quality: selectedQuality!,
+            image: _pickedImage,
+            category: selectedCategory,
+            isExchangeOnly: isExchangeOnly,
+            isPublic: isPublic
         );
 
         Navigator.of(context).pop(); // Cierra el diálogo de progreso
@@ -197,8 +199,11 @@ class _UploadProductState extends State<UploadProductScreen> {
                 const Divider(color: Color(0xFFD9D9D9), thickness: 20),
                 PricingSection(
                   onPriceChanged: (price) => setState(() => this.price = price),
-                  onExchangeOnlyChanged: (isExchangeOnly) =>
-                      setState(() => this.isExchangeOnly = isExchangeOnly),
+                  onExchangeOnlyChanged: (isExchangeOnly) => setState(() => this.isExchangeOnly = isExchangeOnly),
+                  onPublicChanged: (isPublic) => setState(() => this.isPublic = isPublic),
+                  isPublic: isPublic,
+                  initialPrice: price,
+                  initialExchangeOnly: isExchangeOnly,
                 ),
                 const Divider(color: Color(0xFFD9D9D9), thickness: 20),
                 PromotionSection(

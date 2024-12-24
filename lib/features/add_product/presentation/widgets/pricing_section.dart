@@ -4,11 +4,19 @@ import 'package:flutter/cupertino.dart';
 class PricingSection extends StatefulWidget {
   final ValueChanged<int?> onPriceChanged;
   final ValueChanged<bool> onExchangeOnlyChanged;
+  final ValueChanged<bool> onPublicChanged;
+  final bool isPublic;
+  final int? initialPrice;
+  final bool initialExchangeOnly;
 
   const PricingSection({
     Key? key,
     required this.onPriceChanged,
     required this.onExchangeOnlyChanged,
+    required this.onPublicChanged,
+    required this.isPublic,
+    this.initialPrice,
+    this.initialExchangeOnly = true,
   }) : super(key: key);
 
   @override
@@ -16,10 +24,19 @@ class PricingSection extends StatefulWidget {
 }
 
 class _PricingSectionState extends State<PricingSection> {
-  bool isPublic = false;
-  bool isExchangeOnly = true; // Default to true
-  TextEditingController priceController = TextEditingController();
+  late bool isExchangeOnly;
+  late bool isPublic;
+  late TextEditingController priceController;
   String? enteredPrice;
+
+  @override
+  void initState() {
+    super.initState();
+    isPublic = widget.isPublic;
+    isExchangeOnly = widget.initialExchangeOnly;
+    priceController = TextEditingController(text: widget.initialPrice?.toString());
+    enteredPrice = widget.initialPrice?.toString();
+  }
 
   @override
   void dispose() {
@@ -49,7 +66,10 @@ class _PricingSectionState extends State<PricingSection> {
               ),
               CupertinoSwitch(
                 value: isPublic,
-                onChanged: (value) => setState(() => isPublic = value),
+                onChanged: (value) {
+                  setState(() => isPublic = value);
+                  widget.onPublicChanged(value);
+                },
               ),
             ],
           ),
