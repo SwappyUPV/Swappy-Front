@@ -49,6 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
+        centerTitle: true,
         title: const Text(
           'MI PERFIL',
           style: TextStyle(

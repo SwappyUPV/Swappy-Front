@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class Product {
@@ -13,6 +14,8 @@ class Product {
   final bool isExchangeOnly;
   final Color? color;
   final String? userId;
+  final Timestamp? createdAt;
+  final bool? isPublic;
 
   Product({
     required this.id,
@@ -27,6 +30,8 @@ class Product {
     required this.isExchangeOnly,
     this.userId,
     this.color,
+    this.createdAt,
+    this.isPublic,
   });
 }
 

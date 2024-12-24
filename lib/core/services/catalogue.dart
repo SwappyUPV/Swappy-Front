@@ -24,6 +24,9 @@ class CatalogService {
           isExchangeOnly: data['soloIntercambio'] ?? false,
           color: null,
           userId: doc['userId'],
+          createdAt: doc['createdAt'] ?? Timestamp.now(),
+          isPublic: data['isPublic'] ?? false,
+
         );
       }).toList();
 
@@ -53,6 +56,8 @@ class CatalogService {
           category: doc['categoria'],
           isExchangeOnly: doc['soloIntercambio'],
           userId: doc['userId'],
+          createdAt: doc['createdAt'] ?? Timestamp.now(),
+          isPublic: doc['isPublic'] ?? false,
         );
       } else {
         return null;
@@ -84,6 +89,8 @@ class CatalogService {
           category: data['categoria'] ?? '',
           isExchangeOnly: data['soloIntercambio'] ?? false,
           color: null,
+          createdAt: doc['createdAt'] ?? Timestamp.now(),
+          isPublic: data['isPublic'] ?? false,
         );
       }).toList();
 

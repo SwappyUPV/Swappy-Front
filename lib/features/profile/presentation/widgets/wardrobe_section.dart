@@ -1,11 +1,73 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pin/features/auth/data/models/user_model.dart';
+import 'package:pin/features/exchanges/models/Product.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:pin/features/profile/presentation/widgets/product_detail_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class WardrobeSection extends StatelessWidget {
+class WardrobeSection extends StatefulWidget {
   final UserModel userModel;
 
   const WardrobeSection({Key? key, required this.userModel}) : super(key: key);
+
+  @override
+  _WardrobeSectionState createState() => _WardrobeSectionState();
+}
+
+class _WardrobeSectionState extends State<WardrobeSection> {
+  List<Product> _products = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchWardrobeItems();
+  }
+
+  Future<void> _fetchWardrobeItems() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      String? userId = prefs.getString('userId');
+
+      if (userId != null) {
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+            .collection('clothes')
+            .where('userId', isEqualTo: userId)
+            .where('isPublic', isEqualTo: true)
+            .get();
+
+        List<Product> products = querySnapshot.docs.map((doc) {
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          return Product(
+            id: doc.id,
+            title: data['nombre'] ?? '',
+            price: data['precio'] ?? 0,
+            image: data['imagen'] ?? '',
+            description: data['descripcion'] ?? '',
+            size: data['talla'] ?? '',
+            styles: List<String>.from(data['estilos'] ?? []),
+            quality: data['calidad'] ?? '',
+            category: data['categoria'] ?? '',
+            isExchangeOnly: data['soloIntercambio'] ?? false,
+            userId: data['userId'],
+            createdAt: data['createdAt'] ?? Timestamp.now(),
+            isPublic: data['isPublic'] ?? false,
+          );
+        }).toList();
+
+        setState(() {
+          _products = products;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Error fetching wardrobe items: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +107,9 @@ class WardrobeSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 23),
-          _buildWardrobeGrid(),
+          _isLoading
+              ? const CircularProgressIndicator()
+              : _buildWardrobeGrid(),
         ],
       ),
     );
@@ -58,25 +122,34 @@ class WardrobeSection extends StatelessWidget {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 250, // Maximum width of each container
-          mainAxisSpacing: 10, // Vertical spacing between containers
-          crossAxisSpacing: 10, // Horizontal spacing between containers
-          childAspectRatio: 1, // Adjust if needed to match container's aspect ratio
+          maxCrossAxisExtent: 250,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          childAspectRatio: 1,
         ),
-        itemCount: 10,
+        itemCount: _products.length,
         itemBuilder: (context, index) {
-          return Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: FittedBox(
-              fit: BoxFit.contain, // Adjust this to your desired behavior
-              child: Image.asset(
-                'assets/images/wardrobe/wardrobe_item_${index + 1}.png',
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProductDetailScreen(product: _products[index]),
+                ),
+              );
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: Image.network(
+                  _products[index].image,
+                ),
               ),
             ),
-
           );
         },
       ),
