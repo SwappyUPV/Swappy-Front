@@ -23,7 +23,7 @@ class ProfileInfo extends StatelessWidget {
         ),
         const SizedBox(height: 9),
         Text(
-          'Without fear of success 🫡 🎯\nStreetwear lover',
+          userModel.bio ?? 'Sin biografía',
           style: TextStyle(
             fontSize: 13,
             fontFamily: 'OpenSans',
@@ -31,7 +31,7 @@ class ProfileInfo extends StatelessWidget {
         ),
         const SizedBox(height: 7),
         Text(
-          'Mérida, España',
+          (userModel.location ?? '') + ', España',
           style: TextStyle(
             fontSize: 13,
             fontFamily: 'OpenSans',
@@ -45,18 +45,18 @@ class ProfileInfo extends StatelessWidget {
               // Render vertically for small width screens
               return Column(
                 children: [
-                  _buildInfoBox('103', 'intercambios', false),
+                  _buildInfoBox(userModel.exchanges.toString(), 'intercambios', false),
                   const SizedBox(height: 9),
-                  _buildInfoBox('1009', 'puntos acumulados', false),
+                  _buildInfoBox(userModel.points.toString(), 'puntos acumulados', false),
                 ],
               );
             } else {
               // Render horizontally for larger screens
               return Row(
                 children: [
-                  _buildInfoBox('103', 'intercambios', true),
+                  _buildInfoBox(userModel.exchanges.toString(), 'intercambios', true),
                   const SizedBox(width: 9),
-                  _buildInfoBox('1009', 'puntos acumulados', true),
+                  _buildInfoBox(userModel.points.toString(), 'puntos acumulados', true),
                 ],
               );
             }

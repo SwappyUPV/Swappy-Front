@@ -57,9 +57,9 @@ class ProfileStats extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildStatColumn('78', 'prendas'),
-        _buildStatColumn('926', 'seguidores'),
-        _buildStatColumn('21', 'seguidos'),
+        _buildStatColumn(userModel.clothes.toString(), 'prendas'),
+        _buildStatColumn(userModel.followers.toString(), 'seguidores'),
+        _buildStatColumn(userModel.following.toString(), 'seguidos'),
       ],
     );
   }
@@ -67,11 +67,11 @@ class ProfileStats extends StatelessWidget {
   Widget _buildVerticalStats() {
     return Column(
       children: [
-        _buildStatColumn('78', 'prendas'),
+        _buildStatColumn(userModel.clothes.toString(), 'prendas'),
         const SizedBox(height: 10),
-        _buildStatColumn('926', 'seguidores'),
+        _buildStatColumn(userModel.followers.toString(), 'seguidores'),
         const SizedBox(height: 10),
-        _buildStatColumn('21', 'seguidos'),
+        _buildStatColumn(userModel.following.toString(), 'seguidos'),
       ],
     );
   }

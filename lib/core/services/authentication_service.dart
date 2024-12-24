@@ -56,6 +56,12 @@ class AuthMethod {
           'points': '0', // Store points as string
           'preferredSizes': ['S'],
           'profilePicture': 'https://firebasestorage.googleapis.com/v0/b/swappy-pin.appspot.com/o/profile_images%2Fdefault_user.png?alt=media&token=92bbfc56-8927-41a0-b81c-2394b90bf38c',
+          'createdAt': FieldValue.serverTimestamp(),
+          'bio': 'Sin biografía',
+          'clothes': 0,
+          'followers': 0,
+          'following': 0,
+          'exchanges': 0,
         });
         //googleUser.photoUrl ?? fails due to too many requests
       }
@@ -183,6 +189,7 @@ class AuthMethod {
             userData[key] = value.toDate().toString(); // or use value.toDate() for DateTime
           }
         });
+        userData['clothes'] = userData['clothes'] ?? 0;
 
         String userModelJson = jsonEncode(userData);
         await prefs.setString('userModel', userModelJson);

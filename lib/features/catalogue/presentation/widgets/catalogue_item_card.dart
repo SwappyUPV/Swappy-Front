@@ -69,7 +69,7 @@ class _CatalogueItemCardState extends State<CatalogueItemCard> {
       if (userDoc.exists) {
         return UserModel.fromFirestore(userDoc);
       } else {
-        print("No user found for the given ID: $userId");
+        //print("No user found for the given ID: $userId");
         return null;
       }
     } catch (e) {

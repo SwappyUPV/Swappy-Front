@@ -10,6 +10,12 @@ class UserModel {
   final List<String>? preferredSizes;
   final String? gender;
   final Timestamp? birthday;
+  final int clothes;
+  final int followers;
+  final int following;
+  final int points;
+  final int exchanges;
+  final String? bio;
 
   UserModel({
     required this.uid,
@@ -20,6 +26,12 @@ class UserModel {
     this.preferredSizes,
     this.gender,
     this.birthday,
+    this.clothes = 0, // Default value for clothes
+    this.followers = 0, // Default value for followers
+    this.following = 0, // Default value for following
+    this.points = 0, // Default value for points
+    this.exchanges = 0, // Default value for exchanges
+    this.bio,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -40,6 +52,12 @@ class UserModel {
           : json['birthday'] is String
           ? Timestamp.fromDate(DateTime.parse(json['birthday'] as String))
           : null,
+      clothes: json['clothes'] as int? ?? 0, // Default value if null
+      followers: json['followers'] as int? ?? 0, // Default value if null
+      following: json['following'] as int? ?? 0, // Default value if null
+      points: json['points'] is String ? int.tryParse(json['points']) ?? 0 : json['points'] as int? ?? 0, // Handle String to int conversion
+      exchanges: json['exchanges'] as int? ?? 0, // Default value if null
+      bio: json['bio'] as String?,
     );
   }
 
@@ -53,6 +71,12 @@ class UserModel {
       'preferredSizes': preferredSizes,
       'gender': gender,
       'birthday': birthday?.millisecondsSinceEpoch,
+      'clothes': clothes,
+      'followers': followers,
+      'following': following,
+      'points': points,
+      'exchanges': exchanges,
+      'bio': bio,
     };
   }
 
@@ -67,6 +91,12 @@ class UserModel {
       preferredSizes: (data['preferredSizes'] as List<dynamic>?)?.map((e) => e as String).toList(),
       gender: data['gender'] as String?,
       birthday: data['birthday'] as Timestamp?,
+      clothes: data['clothes'] as int? ?? 0, // Default value if null
+      followers: data['followers'] as int? ?? 0, // Default value if null
+      following: data['following'] as int? ?? 0, // Default value if null
+      points: data['points'] is String ? int.tryParse(data['points']) ?? 0 : data['points'] as int? ?? 0, // Handle String to int conversion
+      exchanges: data['exchanges'] as int? ?? 0, // Default value if null
+      bio: data['bio'] as String?,
     );
   }
 
@@ -79,6 +109,12 @@ class UserModel {
     List<String>? preferredSizes,
     String? gender,
     Timestamp? birthday,
+    int? clothes,
+    int? followers,
+    int? following,
+    int? points,
+    int? exchanges,
+    String? bio,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -89,11 +125,16 @@ class UserModel {
       preferredSizes: preferredSizes ?? this.preferredSizes,
       gender: gender ?? this.gender,
       birthday: birthday ?? this.birthday,
+      clothes: clothes ?? this.clothes,
+      followers: followers ?? this.followers,
+      following: following ?? this.following,
+      points: points ?? this.points,
+      exchanges: exchanges ?? this.exchanges,
+      bio: bio ?? this.bio,
     );
   }
 
   String? get size => preferredSizes?.join(', ');
   String? get birthDate => birthday?.toDate().toString();
   String? get location => address;
-
 }

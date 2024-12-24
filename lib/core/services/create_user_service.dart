@@ -64,6 +64,12 @@ class CreateUserService {
           'points': additionalData['points'].toString(), // Store points as string
           'preferredSizes': additionalData['preferredSizes'],
           'profilePicture': profileImageUrl,
+          'created_at': FieldValue.serverTimestamp(), // Store timestamp
+          'clothes': additionalData['clothes'],
+          'followers': additionalData['followers'],
+          'exchanges': additionalData['exchanges'],
+          'following': additionalData['following'],
+          'bio': additionalData['bio'],
         });
 
         res = "success";

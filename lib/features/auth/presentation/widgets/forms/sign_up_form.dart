@@ -364,6 +364,10 @@ class _SignUpFormState extends State<SignUpForm> {
           'gender': _selectedGender,
           'points': 0,
           'preferredSizes': preferredSizes,
+          'followers': 0,
+          'following': 0,
+          'exchanges': 0,
+          'bio': 'Sin biografía',
         },
         profileImage: _pickedImage,
       );
