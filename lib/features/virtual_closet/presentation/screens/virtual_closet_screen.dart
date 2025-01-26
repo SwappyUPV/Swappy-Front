@@ -4,6 +4,9 @@ import 'package:pin/features/virtual_closet/presentation/screens/change_clothes_
 import 'package:pin/features/virtual_closet/presentation/widgets/virtual_closet_app_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert'; // Para manejar JSON
+import 'package:pin/features/virtual_closet/presentation/widgets/help_button.dart';
+import 'package:pin/features/virtual_closet/presentation/widgets/MyGarmentsButton.dart';
+import 'package:pin/features/virtual_closet/presentation/widgets/CameraButton.dart';
 
 class VirtualClosetScreen extends StatefulWidget {
   const VirtualClosetScreen({super.key});
@@ -171,23 +174,25 @@ class _VirtualClosetScreenState extends State<VirtualClosetScreen> {
             ],
           ),
           // Botón flotante en la esquina superior derecha
-          Positioned(
-            top: 20,
+        const Positioned(
+          top: 10,
+          right: 20,
+          child: MyGarmentsButton(),
+          ), // Botón flotante en la esquina inferior derecha
+          const Positioned(
+            bottom: 10,
             right: 20,
-            child: FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ChangeClothes(fromExchange: false)),
-                );
-              },
-              backgroundColor: Colors.blue,
-              mini: true, // Botón pequeño
-              child: const Icon(Icons.more_vert, size: 20),
-            ),
+            child: HelpButton(),
+          ),
+          const Positioned(
+            top: 10,
+            left: 20,
+            child: CameraButton(),
           ),
         ],
+
       ),
+
     );
   }
 
@@ -231,11 +236,6 @@ class _VirtualClosetScreenState extends State<VirtualClosetScreen> {
                       curve: Curves.easeIn,
                     );
                   },
-                  child: CircleAvatar(
-                    radius: 5,
-                    backgroundColor:
-                    activePage == index ? Colors.yellow : Colors.grey,
-                  ),
                 ),
               ),
             ),
