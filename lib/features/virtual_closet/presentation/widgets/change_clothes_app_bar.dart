@@ -17,7 +17,7 @@ class ChangeClothesAppBar extends StatelessWidget implements PreferredSizeWidget
         onPressed: onIconPressed,
       ),
       title: const Text(
-        'MI ARMARIO',
+        'ARMARIO',
         style: TextStyle(
           color: Colors.white,
           fontSize: 16,
@@ -27,6 +27,30 @@ class ChangeClothesAppBar extends StatelessWidget implements PreferredSizeWidget
         ),
       ),
       centerTitle: true,
+      actions: [
+        // Botón de filtros en la esquina superior derecha
+        IconButton(
+          icon: Icon(Icons.filter_alt, color: Colors.white),
+          onPressed: () {
+            // Muestra un mensaje de "No implementado" cuando se presione el botón
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Text("Filtros"),
+                content: Text("Esta función no ha sido implementada todavía."),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);  // Cierra el diálogo
+                    },
+                    child: Text("Cerrar"),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 
