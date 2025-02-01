@@ -65,6 +65,7 @@ class ProductService {
     required String category,
     required bool isExchangeOnly,
     required bool isPublic,
+    required bool enCloset,
   }) async {
     try {
       final userId = await getUserId();
@@ -101,6 +102,7 @@ class ProductService {
         'userId': userId,
         'soloIntercambio': isExchangeOnly,
         'isPublic': isPublic,
+        'enCloset' : enCloset,
       });
 
       await updateUserPointsAndClothes(userId, isPublic, isExchangeOnly);
@@ -143,5 +145,22 @@ class ProductService {
     QuerySnapshot snapshot =
     await _firestore.collection('clothing_categories').get();
     return snapshot.docs.map((doc) => doc['name'] as String).toList();
+  }
+
+   // Método para actualizar el valor de 'enCloset' de un producto
+  Future<String> updateInClosetStatus(String productId, bool inCloset) async {
+    try {
+      // Obtener la referencia del documento del producto
+      DocumentReference productRef = _firestore.collection('clothes').doc(productId);
+
+      // Actualizar el campo 'enCloset'
+      await productRef.update({
+        'enCloset': inCloset,
+      });
+
+      return "Estado 'enCloset' actualizado correctamente.";
+    } catch (e) {
+      return "Error al actualizar el estado 'enCloset': $e";
+    }
   }
 }

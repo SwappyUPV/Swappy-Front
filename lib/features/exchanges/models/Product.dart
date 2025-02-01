@@ -16,6 +16,7 @@ class Product {
   final String? userId;
   final Timestamp? createdAt;
   final bool? isPublic;
+  final bool inCloset;
 
   Product({
     required this.id,
@@ -28,6 +29,7 @@ class Product {
     required this.image,
     required this.category,
     required this.isExchangeOnly,
+    required this.inCloset,
     this.userId,
     this.color,
     this.createdAt,
@@ -47,7 +49,8 @@ List<Product> products = [
       isExchangeOnly: false,
       styles: ["Office", "Code"],
       quality: "New",
-      color: const Color.fromARGB(255, 81, 99, 241)),
+      color: const Color.fromARGB(255, 81, 99, 241),
+      inCloset: true),
   Product(
       id: '2',
       title: "Belt Bag",
@@ -59,7 +62,8 @@ List<Product> products = [
       isExchangeOnly: false,
       styles: ["Office", "Code"],
       quality: "New",
-      color: const Color(0xFFD3A984)),
+      color: const Color(0xFFD3A984),
+      inCloset: true),
   Product(
       id: '3',
       title: "Hang Top",
@@ -71,7 +75,8 @@ List<Product> products = [
       isExchangeOnly: false,
       styles: ["Office", "Code"],
       quality: "New",
-      color: const Color(0xFF989493)),
+      color: const Color(0xFF989493),
+      inCloset: true),
   Product(
       id: '4',
       title: "Old Fashion",
@@ -83,7 +88,8 @@ List<Product> products = [
       isExchangeOnly: false,
       styles: ["Office", "Code"],
       quality: "New",
-      color: const Color(0xFFE6B398)),
+      color: const Color(0xFFE6B398),
+      inCloset: true),
   Product(
       id: '5',
       title: "Office Code",
@@ -95,7 +101,8 @@ List<Product> products = [
       isExchangeOnly: false,
       styles: ["Office", "Code"],
       quality: "New",
-      color: const Color(0xFFFB7883)),
+      color: const Color(0xFFFB7883),
+      inCloset: true),
 ];
 String dummyText =
     "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since. When an unknown printer took a galley.";
