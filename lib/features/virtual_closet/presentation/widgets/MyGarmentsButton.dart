@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:pin/features/virtual_closet/presentation/screens/change_clothes_screen.dart';
 
 class MyGarmentsButton extends StatelessWidget {
-  const MyGarmentsButton({Key? key}) : super(key: key);
+  final VoidCallback onPressed; // Agregamos la propiedad onPressed
+
+  const MyGarmentsButton({Key? key, required this.onPressed}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -10,14 +12,7 @@ class MyGarmentsButton extends StatelessWidget {
       top: 20,
       right: 20,
       child: GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const ChangeClothes(fromExchange: false),
-            ),
-          );
-        },
+        onTap: onPressed, // Usamos el callback que nos pasó VirtualClosetScreen
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
           decoration: BoxDecoration(

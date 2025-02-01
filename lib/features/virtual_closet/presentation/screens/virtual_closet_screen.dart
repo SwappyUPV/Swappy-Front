@@ -19,13 +19,16 @@ class _VirtualClosetScreenState extends State<VirtualClosetScreen> {
   List<Widget> _mid = [];
   List<Widget> _top = [];
   List<Widget> _bot = [];
+  List<Widget> _accessories = [];
   bool _isLoading = true;
   String? _userId; // Variable para almacenar el ID del usuario
 
+  int _activePageAccessories = 0;
   int _activePageTop = 0;
   int _activePageMiddle = 0;
   int _activePageBottom = 0;
 
+  final PageController _pageControllerAccessories = PageController(initialPage: 0);
   final PageController _pageControllerTop = PageController(initialPage: 0);
   final PageController _pageControllerMiddle = PageController(initialPage: 0);
   final PageController _pageControllerBottom = PageController(initialPage: 0);
@@ -50,6 +53,7 @@ class _VirtualClosetScreenState extends State<VirtualClosetScreen> {
           print("User ID: $_userId");
         }
         // Ahora puedes usar _userId para consultas específicas si es necesario
+        _fetchAccessoriesImages();
         _fetchTopImages();
         _fetchMidImages();
         _fetchBotImages();
@@ -67,12 +71,35 @@ class _VirtualClosetScreenState extends State<VirtualClosetScreen> {
     }
   }
 
+  Future<void> _fetchAccessoriesImages() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('clothes')
+          .where('categoria', whereIn: ['Accesorios'])
+          .where('userId', whereIn: [_userId])
+          .where('enCloset', isEqualTo: true)
+          .get();
+
+      final List<Widget> pages = snapshot.docs.map((doc) {
+        return ImagePlaceHolder(imagePath: doc['imagen']);
+      }).toList();
+
+      setState(() {
+        _accessories = pages;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print("Error al obtener datos de Firebase (Top): $e");
+    }
+  }
+
   Future<void> _fetchTopImages() async {
     try {
       final snapshot = await FirebaseFirestore.instance
           .collection('clothes')
           .where('categoria', whereIn: ['Vestidos', 'Camisetas', 'Chaquetas'])
           .where('userId', whereIn: [_userId])
+          .where('enCloset', isEqualTo: true)
           .get();
 
       final List<Widget> pages = snapshot.docs.map((doc) {
@@ -94,6 +121,7 @@ class _VirtualClosetScreenState extends State<VirtualClosetScreen> {
           .collection('clothes')
           .where('categoria', whereIn: ['Pantalones', 'Faldas'])
           .where('userId', whereIn: [_userId])
+          .where('enCloset', isEqualTo: true)
           .get();
 
       final List<Widget> pages = snapshot.docs.map((doc) {
@@ -115,6 +143,7 @@ class _VirtualClosetScreenState extends State<VirtualClosetScreen> {
           .collection('clothes')
           .where('categoria', isEqualTo: 'Zapatos')
           .where('userId', whereIn: [_userId])
+          .where('enCloset', isEqualTo: true)
           .get();
 
       final List<Widget> pages = snapshot.docs.map((doc) {
@@ -130,6 +159,25 @@ class _VirtualClosetScreenState extends State<VirtualClosetScreen> {
     }
   }
 
+  // Método para navegar a la pantalla de productos y recargar cuando se regresa
+  void _navigateToChangeClothes() async {
+    final bool shouldReload = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ChangeClothes(fromExchange: false),
+      ),
+    );
+
+    // Si el valor pasado es 'true', recargamos los datos
+    if (shouldReload) {
+      _fetchAccessoriesImages();
+      _fetchTopImages();
+      _fetchMidImages();
+      _fetchBotImages();
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -141,6 +189,16 @@ class _VirtualClosetScreenState extends State<VirtualClosetScreen> {
               : Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              carouselWidget(
+                _pageControllerAccessories,
+                _activePageAccessories,
+                _accessories,
+                    (value) {
+                  setState(() {
+                    _activePageAccessories = value;
+                  });
+                },
+              ),
               carouselWidget(
                 _pageControllerTop,
                 _activePageTop,
@@ -174,11 +232,13 @@ class _VirtualClosetScreenState extends State<VirtualClosetScreen> {
             ],
           ),
           // Botón flotante en la esquina superior derecha
-        const Positioned(
-          top: 10,
-          right: 20,
-          child: MyGarmentsButton(),
-          ), // Botón flotante en la esquina inferior derecha
+          Positioned(
+            top: 10,
+            right: 20,
+            child: MyGarmentsButton(
+              onPressed: _navigateToChangeClothes, // Usamos la nueva función para navegar
+            ),
+          ),
           const Positioned(
             bottom: 10,
             right: 20,
@@ -208,7 +268,7 @@ class _VirtualClosetScreenState extends State<VirtualClosetScreen> {
       children: [
         SizedBox(
           width: double.infinity,
-          height: MediaQuery.of(context).size.height / 4,
+          height: MediaQuery.of(context).size.height / 5,
           child: PageView.builder(
             controller: controller,
             itemCount: images.length,
