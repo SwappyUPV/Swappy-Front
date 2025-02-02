@@ -141,9 +141,15 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
                               ),
                             ),
                             SizedBox(
-                              height: 150,
-                              child: ListView.builder(
+                              height: products.length > 1 ? 300 : 150, // Ajusta la altura según el número de prendas
+                              child: GridView.builder(
                                 scrollDirection: Axis.horizontal,
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: products.length > 1 ? 2 : 1, // 2 filas si hay más de 1 prenda
+                                  mainAxisSpacing: 8.0,
+                                  crossAxisSpacing: 8.0,
+                                  childAspectRatio: 1,
+                                ),
                                 itemCount: products.length,
                                 itemBuilder: (context, index) {
                                   final product = products[index];
@@ -171,8 +177,6 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
                                       }
                                     },
                                     child: Container(
-                                      width: 120,
-                                      margin: const EdgeInsets.all(8.0),
                                       decoration: BoxDecoration(
                                         border: Border.all(
                                           color: isSelected
@@ -180,29 +184,18 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
                                               : product.inCloset
                                                   ? Colors.black
                                                   : Colors.grey[400]!,
-                                          width: isSelected
-                                              ? 4
-                                              : product.inCloset
-                                                  ? 2
-                                                  : 1,
+                                          width: isSelected ? 4 : product.inCloset ? 2 : 1,
                                         ),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Center(
-                                            child: ClipRRect(
-                                              borderRadius: BorderRadius.circular(8.0),
-                                              child: Image.network(
-                                                product.image,
-                                                width: 100,
-                                                height: 100,
-                                                fit: BoxFit.contain,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8.0),
+                                        child: Image.network(
+                                          product.image,
+                                          width: 100,
+                                          height: 100,
+                                          fit: BoxFit.contain,
+                                        ),
                                       ),
                                     ),
                                   );
