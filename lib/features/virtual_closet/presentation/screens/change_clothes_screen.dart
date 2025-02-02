@@ -8,9 +8,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/services/catalogue.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
 import 'package:pin/features/CustomAppBar.dart';
+import '/core/services/product.dart';
 
 class ChangeClothes extends StatefulWidget {
-  final bool fromExchange; // Atributo para determinar si se viene de un intercambio
+  final bool fromExchange;
 
   const ChangeClothes({super.key, required this.fromExchange});
 
@@ -21,9 +22,10 @@ class ChangeClothes extends StatefulWidget {
 class _ChangeClothesScreenState extends State<ChangeClothes> {
   final ChatService2 _chatService2 = ChatService2();
   final CatalogService _catalogService = CatalogService();
+  final ProductService _productService = ProductService();
   String? _cachedUserId;
   Map<String, List<Product>> _categorizedClothes = {};
-  List<Product> _selectedProducts = []; // Lista de productos seleccionados
+  List<Product> _selectedProducts = [];
 
   @override
   void initState() {
@@ -72,7 +74,20 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
   }
 
   void _confirmSelection() {
-    Navigator.pop(context, _selectedProducts); // Devuelve los productos seleccionados
+    Navigator.pop(context, _selectedProducts);
+  }
+
+  Future<void> _invertInClosetStatus() async {
+    for (var product in _selectedProducts) {
+      bool newStatus = !product.inCloset;
+      String productId = product.id;
+      String result = await _productService.updateInClosetStatus(productId, newStatus);
+      print(result);
+    }
+
+    setState(() {
+      Navigator.pop(context, true);
+    });
   }
 
   @override
@@ -86,106 +101,121 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
           );
         },
       ),
-      body: Stack(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _categorizedClothes.isEmpty
-              ? const Center(child: CircularProgressIndicator())
-              : SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: _categorizedClothes.entries.map((entry) {
-                final category = entry.key;
-                final products = entry.value;
+          Expanded(
+            child: _categorizedClothes.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: _categorizedClothes.entries.map((entry) {
+                        final category = entry.key;
+                        final products = entry.value;
+                        final inClosetCount = products.where((p) => p.inCloset).length;
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        category,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 150,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: products.length,
-                        itemBuilder: (context, index) {
-                          final product = products[index];
-                          final isSelected = _selectedProducts.contains(product);
-
-                          return GestureDetector(
-                            onTap: () {
-                              if (!widget.fromExchange) {
-                                // Navegar a la pantalla de detalles
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => DetailsScreen(
-                                      product: product,
-                                      showActionButtons: false,
-                                    ),
-                                  ),
-                                );
-                              } else {
-                                _toggleProductSelection(product);
-                              }
-                            },
-                            child: Container(
-                              width: 120,
-                              margin: const EdgeInsets.all(8.0),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: isSelected ? Colors.blue : Colors.grey,
-                                  width: 2,
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
                               child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Flexible(
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      child: Image.network(
-                                        product.image,
-                                        width: 100,
-                                        height: 100,
-                                        fit: BoxFit.contain,
-                                      ),
+                                  Text(
+                                    category,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(product.title, textAlign: TextAlign.center),
+                                  Text(
+                                    'En clóset: $inClosetCount',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
-                          );
-                        },
-                      ),
+                            SizedBox(
+                              height: products.length > 1 ? 300 : 150, // Ajusta la altura según el número de prendas
+                              child: GridView.builder(
+                                scrollDirection: Axis.horizontal,
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: products.length > 1 ? 2 : 1, // 2 filas si hay más de 1 prenda
+                                  mainAxisSpacing: 8.0,
+                                  crossAxisSpacing: 8.0,
+                                  childAspectRatio: 1,
+                                ),
+                                itemCount: products.length,
+                                itemBuilder: (context, index) {
+                                  final product = products[index];
+                                  final isSelected = _selectedProducts.contains(product);
+
+                                  return GestureDetector(
+                                    onLongPress: () {
+                                      if (!widget.fromExchange) {
+                                        _toggleProductSelection(product);
+                                      }
+                                    },
+                                    onTap: () {
+                                      if (!widget.fromExchange) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => DetailsScreen(
+                                              product: product,
+                                              showActionButtons: false,
+                                            ),
+                                          ),
+                                        );
+                                      } else {
+                                        _toggleProductSelection(product);
+                                      }
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: isSelected
+                                              ? Colors.black
+                                              : product.inCloset
+                                                  ? Colors.black
+                                                  : Colors.grey[400]!,
+                                          width: isSelected ? 4 : product.inCloset ? 2 : 1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8.0),
+                                        child: Image.network(
+                                          product.image,
+                                          width: 100,
+                                          height: 100,
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
                     ),
-                  ],
-                );
-              }).toList(),
-            ),
-          ),
-          if (widget.fromExchange && _selectedProducts.isNotEmpty)
-            Positioned(
-              bottom: 16,
-              left: 16,
-              right: 16,
-              child: Column(
-                children: [
-                  ElevatedButton(
-                    onPressed: _confirmSelection,
-                    child: const Text("Confirmar y añadir prendas"),
                   ),
-                  const SizedBox(height: 100), // Espacio adicional debajo del botón
-                ],
+          ),
+          if (_selectedProducts.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ElevatedButton(
+                onPressed: widget.fromExchange ? _confirmSelection : _invertInClosetStatus,
+                child: Text(widget.fromExchange
+                    ? "Confirmar y añadir prendas"
+                    : "Confirmar selección de prendas"),
               ),
             ),
         ],

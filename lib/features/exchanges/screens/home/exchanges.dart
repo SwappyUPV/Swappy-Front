@@ -252,7 +252,7 @@ class ExchangesState extends State<Exchanges> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             const UserHeader(
-              nombreUsuario: "Nicolas Maduro",
+              nombreUsuario: "Manuel Díaz",
               fotoUrl: "assets/images/user_2.png",
               esMio: true,
             ),
@@ -283,7 +283,7 @@ class ExchangesState extends State<Exchanges> {
               ),
             ),
             const UserHeader(
-              nombreUsuario: "Putin",
+              nombreUsuario: "Juan García",
               fotoUrl: "assets/images/user_3.png",
               esMio: false,
             ),

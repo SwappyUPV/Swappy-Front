@@ -26,6 +26,7 @@ class CatalogService {
           userId: doc['userId'],
           createdAt: doc['createdAt'] ?? Timestamp.now(),
           isPublic: data['isPublic'] ?? false,
+          inCloset: data['enCloset'] ?? false,
 
         );
       }).toList();
@@ -58,6 +59,7 @@ class CatalogService {
           userId: doc['userId'],
           createdAt: doc['createdAt'] ?? Timestamp.now(),
           isPublic: doc['isPublic'] ?? false,
+          inCloset: doc['enCloset'] ?? false,
         );
       } else {
         return null;
@@ -85,12 +87,13 @@ class CatalogService {
           description: data['descripcion'] ?? '',
           size: data['talla'] ?? '',
           styles: List<String>.from(data['estilos'] ?? []),
-          quality: data['caidad'] ?? '',
+          quality: data['calidad'] ?? '',
           category: data['categoria'] ?? '',
           isExchangeOnly: data['soloIntercambio'] ?? false,
           color: null,
           createdAt: doc['createdAt'] ?? Timestamp.now(),
           isPublic: data['isPublic'] ?? false,
+          inCloset: data['enCloset'] ?? false,
         );
       }).toList();
 

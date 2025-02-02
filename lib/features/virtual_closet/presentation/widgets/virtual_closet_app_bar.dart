@@ -10,7 +10,7 @@ class VirtualClosetAppBar extends StatelessWidget implements PreferredSizeWidget
       color: Colors.black,
       alignment: Alignment.center,
       child: const Text(
-        'MIS PRENDAS',
+        'CLÓSET',
         style: TextStyle(
           color: Colors.white,
           fontSize: 16,

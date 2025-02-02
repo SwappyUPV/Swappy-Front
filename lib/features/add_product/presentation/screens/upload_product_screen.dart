@@ -102,6 +102,7 @@ class _UploadProductState extends State<UploadProductScreen> {
           category: selectedCategory,
           isExchangeOnly: isExchangeOnly,
           isPublic: isPublic,
+          enCloset: false,
         );
 
         if (result.startsWith("Producto añadido con éxito")) {

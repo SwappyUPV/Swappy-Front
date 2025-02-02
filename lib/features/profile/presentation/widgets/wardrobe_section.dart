@@ -53,6 +53,7 @@ class _WardrobeSectionState extends State<WardrobeSection> {
             userId: data['userId'],
             createdAt: data['createdAt'] ?? Timestamp.now(),
             isPublic: data['isPublic'] ?? false,
+            inCloset: true,
           );
         }).toList();
 
