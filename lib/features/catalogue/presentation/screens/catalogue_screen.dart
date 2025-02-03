@@ -205,7 +205,7 @@ class _CatalogueScreenState extends State<CatalogueScreen> {
             Column(children: [
               Header(
                 title: 'On Trend',
-                subtitle: 'The styles that are taking over',
+                subtitle: 'Los estilos que están arrasando',
                 imageAsset: 'assets/icons/Linea5.svg',
               ),
             ]),

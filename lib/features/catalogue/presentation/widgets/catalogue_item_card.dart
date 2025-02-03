@@ -112,19 +112,10 @@ class _CatalogueItemCardState extends State<CatalogueItemCard> {
                       isLoading ? "Cargando..." : userName ?? "Sin nombre",
                       style: TextStyle(
                         fontFamily: 'UrbaneMedium',
-                        fontSize: 18,
+                        fontSize: 13,
                       ),
                     ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      widget.isFavorite
-                          ? Icons.favorite
-                          : Icons.favorite_border,
-                      color: widget.isFavorite ? Colors.red : Colors.grey,
-                    ),
-                    onPressed: () => widget.toggleFavorite(),
-                  ),
+                  )
                 ],
               ),
             ),
@@ -144,7 +135,7 @@ class _CatalogueItemCardState extends State<CatalogueItemCard> {
               child: Text(
                 widget.product.title.isNotEmpty
                     ? widget.product.title
-                    : 'Camiseta de Verano',
+                    : 'Nuevo producto!',
                 style: TextStyle(
                   fontFamily: 'UrbaneMedium',
                   fontSize: 16,
@@ -155,30 +146,52 @@ class _CatalogueItemCardState extends State<CatalogueItemCard> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Exchanges(
-                        selectedProduct: widget.product,
-                      ),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: Size(double.infinity, 36),
-                ),
-                child: Text(
-                  'SWAP',
-                  style: TextStyle(
-                    fontFamily: 'UrbaneMedium',
-                    fontSize: 16,
-                  ),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              child: Text(
+                widget.product.size.isNotEmpty
+                    ? 'Talla: ${widget.product.size}'
+                    : 'Talla no disponible',
+                style: TextStyle(
+                  fontFamily: 'UrbaneMedium',
+                  fontSize: 15,
                 ),
               ),
             ),
+            // Mostrar Precio o Intercambio
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    widget.product.isExchangeOnly || widget.product.price == 0
+                        ? 'Intercambio'
+                        : '\$${widget.product.price}',
+                    style: TextStyle(
+                      fontFamily: 'UrbaneMedium',
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: widget.product.price == 0
+                          ? Colors.green
+                          : Colors.black,
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      widget.isFavorite
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: widget.isFavorite ? Colors.red : Colors.grey,
+                    ),
+                    iconSize: 25.0,
+                    onPressed: () => widget.toggleFavorite(),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 8.0),
           ],
         ),
       ),
