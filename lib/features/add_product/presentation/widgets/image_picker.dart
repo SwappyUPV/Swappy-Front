@@ -7,6 +7,15 @@ class ImagePickerWidget extends StatelessWidget {
   final dynamic pickedImage;
   final Function(dynamic) onImagePicked;
 
+  // Dimensiones estándar para todas las imágenes
+  static const double STANDARD_WIDTH = 800.0;
+  static const double STANDARD_HEIGHT = 1200.0;
+  static const int IMAGE_QUALITY = 85;
+
+  // Dimensiones de visualización
+  static const double DISPLAY_WIDTH = 400.0;
+  static const double DISPLAY_HEIGHT = 650.0;
+
   const ImagePickerWidget({
     super.key,
     required this.pickedImage,
@@ -17,9 +26,9 @@ class ImagePickerWidget extends StatelessWidget {
     try {
       final pickedFile = await ImagePicker().pickImage(
         source: ImageSource.gallery,
-        maxWidth: 1000,
-        maxHeight: 1000,
-        imageQuality: 70,
+        maxWidth: STANDARD_WIDTH,
+        maxHeight: STANDARD_HEIGHT,
+        imageQuality: IMAGE_QUALITY,
       );
       if (pickedFile != null) {
         if (kIsWeb) {
@@ -36,7 +45,7 @@ class ImagePickerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double sidePadding = screenWidth / 3;
+    double sidePadding = screenWidth * 0.1; // 10% del ancho de la pantalla
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -45,28 +54,19 @@ class ImagePickerWidget extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: sidePadding),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              double buttonWidth = constraints.maxWidth;
-              double fontSize = buttonWidth / 17;
-              double iconSize = buttonWidth / 15;
-              double minFontSize = 10;
-              double minIconSize = 10;
-
-              fontSize = fontSize < minFontSize ? minFontSize : fontSize;
-              iconSize = iconSize < minIconSize ? minIconSize : iconSize;
-
               return ElevatedButton.icon(
                 onPressed: _pickImage,
-                icon: Icon(Icons.add, size: iconSize),
-                label: Text(
+                icon: const Icon(Icons.add, size: 24),
+                label: const Text(
                   'Sube una foto',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Color(0xFF000000),
                     fontFamily: 'OpenSans',
-                    fontSize: fontSize,
+                    fontSize: 16,
                     fontStyle: FontStyle.normal,
                     fontWeight: FontWeight.w600,
-                    height: 1.0, // This is equivalent to line-height: normal
+                    height: 1.0,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
@@ -76,7 +76,8 @@ class ImagePickerWidget extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
               );
             },
@@ -87,20 +88,30 @@ class ImagePickerWidget extends StatelessWidget {
             margin: EdgeInsets.only(top: 20),
             alignment: Alignment.center,
             padding: EdgeInsets.symmetric(horizontal: sidePadding),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: kIsWeb
-                  ? Image.network(
-                pickedImage.path,
-                width: screenWidth - 2 * sidePadding,
-                height: 200,
-                fit: BoxFit.cover,
-              )
-                  : Image.file(
-                pickedImage,
-                width: screenWidth - 2 * sidePadding,
-                height: 200,
-                fit: BoxFit.cover,
+            child: Container(
+              width: DISPLAY_WIDTH,
+              height: DISPLAY_HEIGHT,
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: kIsWeb
+                      ? Image.network(
+                          pickedImage.path,
+                          width: DISPLAY_WIDTH,
+                          height: null, // Altura automática
+                          fit: BoxFit.fitWidth, // Ajustar al ancho
+                        )
+                      : Image.file(
+                          pickedImage,
+                          width: DISPLAY_WIDTH,
+                          height: null, // Altura automática
+                          fit: BoxFit.fitWidth, // Ajustar al ancho
+                        ),
+                ),
               ),
             ),
           ),
