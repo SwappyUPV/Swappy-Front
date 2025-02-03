@@ -4,15 +4,18 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io';
 import 'package:image/image.dart' as img;
 import 'dart:typed_data';
+import 'dart:isolate';
 
 class ImagePickerWidget extends StatefulWidget {
   final dynamic pickedImage;
   final Function(dynamic) onImagePicked;
+  final Function(dynamic)? onProcessingComplete;
 
   const ImagePickerWidget({
     super.key,
     required this.pickedImage,
     required this.onImagePicked,
+    this.onProcessingComplete,
   });
 
   @override
@@ -21,85 +24,122 @@ class ImagePickerWidget extends StatefulWidget {
 
 class _ImagePickerWidgetState extends State<ImagePickerWidget> {
   bool _isProcessing = false;
+  XFile? _tempImage;
 
   // Dimensiones de visualización
-  static const double DISPLAY_WIDTH = 400.0;
-  static const double DISPLAY_HEIGHT = 650.0;
+  static const double DISPLAY_WIDTH = 250.0;
+  static const double DISPLAY_HEIGHT = 400.0;
+  static const double MARGIN_PERCENTAGE =
+      0.2; // Aumentado de 0.1 a 0.15 (15% de margen)
   static const int IMAGE_QUALITY = 85;
 
-  Future<void> _processAndSaveImage(XFile originalImage) async {
-    if (_isProcessing) return;
+  Future<void> _processImageInBackground(XFile originalImage) async {
+    // Crear un nuevo isolate para procesar la imagen
+    final receivePort = ReceivePort();
+    await Isolate.spawn(
+      _processImage,
+      [
+        receivePort.sendPort,
+        await originalImage.readAsBytes(),
+        DISPLAY_WIDTH,
+        DISPLAY_HEIGHT,
+        MARGIN_PERCENTAGE,
+        IMAGE_QUALITY
+      ],
+    );
 
-    setState(() => _isProcessing = true);
+    // Esperar el resultado del procesamiento
+    final processedBytes = await receivePort.first as Uint8List;
 
-    try {
-      final Uint8List bytes = await originalImage.readAsBytes();
-      final img.Image? image = img.decodeImage(bytes);
+    final processedImage = kIsWeb
+        ? XFile.fromData(processedBytes)
+        : await _saveToTempFile(processedBytes);
 
-      if (image == null) return;
-
-      // Calcular las nuevas dimensiones manteniendo el aspect ratio
-      double ratio = image.width / image.height;
-      int targetWidth = DISPLAY_WIDTH.toInt();
-      int targetHeight = DISPLAY_HEIGHT.toInt();
-
-      if (ratio > DISPLAY_WIDTH / DISPLAY_HEIGHT) {
-        // Imagen más ancha que alta
-        targetHeight = (DISPLAY_WIDTH / ratio).toInt();
-      } else {
-        // Imagen más alta que ancha
-        targetWidth = (DISPLAY_HEIGHT * ratio).toInt();
-      }
-
-      // Redimensionar la imagen
-      final img.Image resizedImage = img.copyResize(
-        image,
-        width: targetWidth,
-        height: targetHeight,
-        interpolation: img.Interpolation.linear,
-      );
-
-      // Crear una nueva imagen con fondo negro del tamaño del display
-      final img.Image finalImage = img.Image(
-        width: DISPLAY_WIDTH.toInt(),
-        height: DISPLAY_HEIGHT.toInt(),
-      );
-
-      // Calcular la posición para centrar la imagen redimensionada
-      int x = ((DISPLAY_WIDTH - targetWidth) / 2).toInt();
-      int y = ((DISPLAY_HEIGHT - targetHeight) / 2).toInt();
-
-      // Copiar la imagen redimensionada en el centro
-      img.compositeImage(finalImage, resizedImage, dstX: x, dstY: y);
-
-      // Convertir la imagen final a bytes
-      final Uint8List processedBytes =
-          Uint8List.fromList(img.encodeJpg(finalImage, quality: IMAGE_QUALITY));
-
-      if (kIsWeb) {
-        widget.onImagePicked(XFile.fromData(processedBytes));
-      } else {
-        final tempDir = await Directory.systemTemp.createTemp();
-        final tempFile = File('${tempDir.path}/processed_image.jpg');
-        await tempFile.writeAsBytes(processedBytes);
-        widget.onImagePicked(tempFile);
-      }
-    } catch (e) {
-      print('Error processing image: $e');
-    } finally {
-      if (mounted) {
-        setState(() => _isProcessing = false);
-      }
+    if (widget.onProcessingComplete != null) {
+      widget.onProcessingComplete!(processedImage);
     }
+  }
+
+  // Función estática para procesar la imagen en un isolate
+  static void _processImage(List<dynamic> args) {
+    SendPort sendPort = args[0];
+    Uint8List bytes = args[1];
+    double displayWidth = args[2];
+    double displayHeight = args[3];
+    double marginPercentage = args[4];
+    int quality = args[5];
+
+    // Decodificar y procesar la imagen
+    final img.Image? image = img.decodeImage(bytes);
+    if (image == null) {
+      sendPort.send(bytes); // Enviar la imagen original si hay error
+      return;
+    }
+
+    // Calcular dimensiones con márgenes
+    double availableWidth = displayWidth * (1 - 2 * marginPercentage);
+    double availableHeight = displayHeight * (1 - 2 * marginPercentage);
+
+    // Calcular las nuevas dimensiones manteniendo el aspect ratio
+    double ratio = image.width / image.height;
+    int targetWidth = availableWidth.toInt();
+    int targetHeight = availableHeight.toInt();
+
+    if (ratio > availableWidth / availableHeight) {
+      targetHeight = (availableWidth / ratio).toInt();
+    } else {
+      targetWidth = (availableHeight * ratio).toInt();
+    }
+
+    // Redimensionar la imagen
+    final img.Image resizedImage = img.copyResize(
+      image,
+      width: targetWidth,
+      height: targetHeight,
+      interpolation: img.Interpolation.linear,
+    );
+
+    // Crear una nueva imagen con fondo negro
+    final img.Image finalImage = img.Image(
+      width: displayWidth.toInt(),
+      height: displayHeight.toInt(),
+    );
+
+    // Calcular la posición para centrar la imagen
+    int x = ((displayWidth - targetWidth) / 2).toInt();
+    int y = ((displayHeight - targetHeight) / 2).toInt();
+
+    // Copiar la imagen redimensionada en el centro
+    img.compositeImage(finalImage, resizedImage, dstX: x, dstY: y);
+
+    // Convertir y enviar el resultado
+    sendPort
+        .send(Uint8List.fromList(img.encodeJpg(finalImage, quality: quality)));
+  }
+
+  Future<File> _saveToTempFile(Uint8List bytes) async {
+    final tempDir = await Directory.systemTemp.createTemp();
+    final tempFile = File('${tempDir.path}/processed_image.jpg');
+    await tempFile.writeAsBytes(bytes);
+    return tempFile;
   }
 
   Future<void> _pickImage() async {
     try {
       final pickedFile = await ImagePicker().pickImage(
         source: ImageSource.gallery,
+        maxWidth: DISPLAY_WIDTH * 2, // Vista previa con calidad reducida
+        maxHeight: DISPLAY_HEIGHT * 2,
+        imageQuality: 60,
       );
+
       if (pickedFile != null) {
-        await _processAndSaveImage(pickedFile);
+        // Mostrar inmediatamente la vista previa
+        setState(() => _tempImage = pickedFile);
+        widget.onImagePicked(pickedFile);
+
+        // Procesar la imagen original en segundo plano
+        _processImageInBackground(pickedFile);
       }
     } catch (e) {
       print('Error selecting image: $e');
@@ -109,7 +149,8 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double sidePadding = screenWidth * 0.1;
+    double sidePadding = screenWidth *
+        0.15; // Aumentado de 0.1 a 0.15 para más espacio en los lados
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -118,49 +159,31 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
           padding: EdgeInsets.symmetric(horizontal: sidePadding),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: _isProcessing ? null : _pickImage,
-                    icon: const Icon(Icons.add, size: 24),
-                    label: Text(
-                      _isProcessing ? 'Procesando...' : 'Sube una foto',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Color(0xFF000000),
-                        fontFamily: 'OpenSans',
-                        fontSize: 16,
-                        fontStyle: FontStyle.normal,
-                        fontWeight: FontWeight.w600,
-                        height: 1.0,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      side: BorderSide(color: Colors.black),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                    ),
+              return ElevatedButton.icon(
+                onPressed: _isProcessing ? null : _pickImage,
+                icon: const Icon(Icons.add, size: 24),
+                label: const Text(
+                  'Sube una foto',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0xFF000000),
+                    fontFamily: 'OpenSans',
+                    fontSize: 16,
+                    fontStyle: FontStyle.normal,
+                    fontWeight: FontWeight.w600,
+                    height: 1.0,
                   ),
-                  if (_isProcessing)
-                    const Positioned(
-                      right: 16,
-                      child: SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.black),
-                        ),
-                      ),
-                    ),
-                ],
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  side: BorderSide(color: Colors.black),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
               );
             },
           ),
@@ -178,21 +201,26 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Center(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: kIsWeb
-                      ? Image.network(
-                          widget.pickedImage.path,
-                          fit: BoxFit.contain,
-                          width: DISPLAY_WIDTH,
-                          height: DISPLAY_HEIGHT,
-                        )
-                      : Image.file(
-                          widget.pickedImage,
-                          fit: BoxFit.contain,
-                          width: DISPLAY_WIDTH,
-                          height: DISPLAY_HEIGHT,
-                        ),
+                child: Padding(
+                  padding: EdgeInsets.all(DISPLAY_WIDTH * MARGIN_PERCENTAGE),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: kIsWeb
+                        ? Image.network(
+                            widget.pickedImage.path,
+                            fit: BoxFit.contain,
+                            width: DISPLAY_WIDTH * (1 - 2 * MARGIN_PERCENTAGE),
+                            height:
+                                DISPLAY_HEIGHT * (1 - 2 * MARGIN_PERCENTAGE),
+                          )
+                        : Image.file(
+                            widget.pickedImage,
+                            fit: BoxFit.contain,
+                            width: DISPLAY_WIDTH * (1 - 2 * MARGIN_PERCENTAGE),
+                            height:
+                                DISPLAY_HEIGHT * (1 - 2 * MARGIN_PERCENTAGE),
+                          ),
+                  ),
                 ),
               ),
             ),
