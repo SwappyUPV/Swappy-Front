@@ -30,7 +30,13 @@ class _CategorySelectorState extends State<CategorySelector> {
   String? selectedCategory;
   String? selectedStyle;
   String? selectedSize;
-  String? selectedQuality; // Add this line
+  String? selectedQuality;
+  final Map<String, ExpansionTileController> _controllers = {
+    'Categoría': ExpansionTileController(),
+    'Estilo': ExpansionTileController(),
+    'Talla': ExpansionTileController(),
+    'Calidad': ExpansionTileController(),
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +46,7 @@ class _CategorySelectorState extends State<CategorySelector> {
           'Categoría',
           widget.categories,
           selectedCategory,
-              (value) {
+          (value) {
             setState(() => selectedCategory = value);
             widget.onCategorySelected(value!);
           },
@@ -49,7 +55,7 @@ class _CategorySelectorState extends State<CategorySelector> {
           'Estilo',
           widget.styles,
           selectedStyle,
-              (value) {
+          (value) {
             setState(() => selectedStyle = value);
             widget.onStyleSelected(value!);
           },
@@ -58,7 +64,7 @@ class _CategorySelectorState extends State<CategorySelector> {
           'Talla',
           widget.sizes,
           selectedSize,
-              (value) {
+          (value) {
             setState(() => selectedSize = value);
             widget.onSizeSelected(value!);
           },
@@ -67,7 +73,7 @@ class _CategorySelectorState extends State<CategorySelector> {
           'Calidad', // Add this block
           widget.qualities,
           selectedQuality,
-              (value) {
+          (value) {
             setState(() => selectedQuality = value);
             widget.onQualitySelected(value!);
           },
@@ -77,11 +83,11 @@ class _CategorySelectorState extends State<CategorySelector> {
   }
 
   Widget _buildCustomExpansionTile(
-      String title,
-      List<String> items,
-      String? selectedValue,
-      ValueChanged<String?> onChanged,
-      ) {
+    String title,
+    List<String> items,
+    String? selectedValue,
+    ValueChanged<String?> onChanged,
+  ) {
     bool isExpanded = false;
 
     return StatefulBuilder(
@@ -94,6 +100,7 @@ class _CategorySelectorState extends State<CategorySelector> {
               highlightColor: Colors.transparent,
             ),
             child: ExpansionTile(
+              controller: _controllers[title],
               tilePadding: const EdgeInsets.only(left: 30, right: 30),
               title: Row(
                 children: [
@@ -110,7 +117,8 @@ class _CategorySelectorState extends State<CategorySelector> {
                   if (selectedValue != null) ...[
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(12),
@@ -144,7 +152,8 @@ class _CategorySelectorState extends State<CategorySelector> {
                       return Column(
                         children: [
                           ListTile(
-                            contentPadding: const EdgeInsets.only(left: 40, right: 35),
+                            contentPadding:
+                                const EdgeInsets.only(left: 40, right: 35),
                             title: Text(
                               item,
                               style: const TextStyle(fontSize: 12),
@@ -154,6 +163,7 @@ class _CategorySelectorState extends State<CategorySelector> {
                                 : null,
                             onTap: () {
                               onChanged(isSelected ? null : item);
+                              _controllers[title]?.collapse();
                             },
                           ),
                           if (item != items.last)
