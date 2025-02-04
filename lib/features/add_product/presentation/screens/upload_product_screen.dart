@@ -49,7 +49,13 @@ class _UploadProductState extends State<UploadProductScreen> {
       predefinedStyles = await _productService.getStyles();
       clothingCategories = await _productService.getClothingCategories();
       predefinedSizes = ['S', 'M', 'L', 'XL'];
-      predefinedQualities = ['Nuevo', 'Casi nuevo', 'Pequeños desperfectos', 'Usado', 'Viejo'];
+      predefinedQualities = [
+        'Nuevo',
+        'Casi nuevo',
+        'Pequeños desperfectos',
+        'Usado',
+        'Viejo'
+      ];
     } finally {
       setState(() => _isLoading = false);
     }
@@ -108,28 +114,91 @@ class _UploadProductState extends State<UploadProductScreen> {
         if (result.startsWith("Producto añadido con éxito")) {
           showDialog(
             context: context,
+            barrierDismissible: false,
             builder: (BuildContext context) {
-              Future.delayed(const Duration(seconds: 2), () {
-                Navigator.of(context).pop();
-                _resetForm();
-              });
-
-              return AlertDialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.check_circle, color: Colors.green, size: 60),
-                    const SizedBox(height: 16),
-                    const Center(
-                      child: Text(
-                        'Guardado correctamente',
-                        style: TextStyle(fontSize: 18),
-                      ),
+              return WillPopScope(
+                onWillPop: () async => false,
+                child: Dialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Container(
+                    width: 300,
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.check_circle,
+                            color: Colors.green, size: 60),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Guardado correctamente',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.black,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).pushNamedAndRemoveUntil(
+                                    '/catalogue',
+                                    (route) => false,
+                                  );
+                                },
+                                child: const Text(
+                                  'Ir al catálogo',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  side: const BorderSide(color: Colors.black),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  _resetForm();
+                                },
+                                child: const Text(
+                                  'Seguir',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               );
             },
@@ -140,7 +209,8 @@ class _UploadProductState extends State<UploadProductScreen> {
           );
         }
       } catch (e) {
-        Navigator.of(context).pop(); // Close the loading dialog in case of error
+        Navigator.of(context)
+            .pop(); // Close the loading dialog in case of error
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al guardar el producto: $e')),
         );
@@ -166,7 +236,8 @@ class _UploadProductState extends State<UploadProductScreen> {
               children: [
                 PhotoUploadSection(
                   pickedImage: _pickedImage,
-                  onImagePicked: (image) => setState(() => _pickedImage = image),
+                  onImagePicked: (image) =>
+                      setState(() => _pickedImage = image),
                 ),
                 const Divider(color: Color(0xFFD9D9D9), thickness: 20),
                 ProductDetailsForm(
@@ -179,16 +250,21 @@ class _UploadProductState extends State<UploadProductScreen> {
                   styles: predefinedStyles,
                   sizes: predefinedSizes,
                   qualities: predefinedQualities,
-                  onCategorySelected: (category) => setState(() => selectedCategory = category),
-                  onStyleSelected: (style) => setState(() => selectedStyles = [style]),
+                  onCategorySelected: (category) =>
+                      setState(() => selectedCategory = category),
+                  onStyleSelected: (style) =>
+                      setState(() => selectedStyles = [style]),
                   onSizeSelected: (size) => setState(() => selectedSize = size),
-                  onQualitySelected: (quality) => setState(() => selectedQuality = quality),
+                  onQualitySelected: (quality) =>
+                      setState(() => selectedQuality = quality),
                 ),
                 const Divider(color: Color(0xFFD9D9D9), thickness: 20),
                 PricingSection(
                   onPriceChanged: (price) => setState(() => this.price = price),
-                  onExchangeOnlyChanged: (isExchangeOnly) => setState(() => this.isExchangeOnly = isExchangeOnly),
-                  onPublicChanged: (isPublic) => setState(() => this.isPublic = isPublic),
+                  onExchangeOnlyChanged: (isExchangeOnly) =>
+                      setState(() => this.isExchangeOnly = isExchangeOnly),
+                  onPublicChanged: (isPublic) =>
+                      setState(() => this.isPublic = isPublic),
                   isPublic: isPublic,
                   initialPrice: price,
                   initialExchangeOnly: isExchangeOnly,
@@ -196,7 +272,8 @@ class _UploadProductState extends State<UploadProductScreen> {
                 const Divider(color: Color(0xFFD9D9D9), thickness: 20),
                 PromotionSection(
                   isPromoted: isPromoted,
-                  onPromotionChanged: (isPromoted) => setState(() => this.isPromoted = isPromoted),
+                  onPromotionChanged: (isPromoted) =>
+                      setState(() => this.isPromoted = isPromoted),
                 ),
                 const SizedBox(height: 26),
                 _buildPublishButton(),
