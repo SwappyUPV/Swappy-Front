@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '/core/services/product.dart';
 
 class CategorySelector extends StatefulWidget {
   final List<String> categories;
@@ -31,12 +32,23 @@ class _CategorySelectorState extends State<CategorySelector> {
   String? selectedStyle;
   String? selectedSize;
   String? selectedQuality;
+  List<String> availableSizes = [];
   final Map<String, ExpansionTileController> _controllers = {
     'Categoría': ExpansionTileController(),
     'Estilo': ExpansionTileController(),
     'Talla': ExpansionTileController(),
     'Calidad': ExpansionTileController(),
   };
+
+  final ProductService _productService = ProductService();
+
+  void _updateSizesForCategory(String category) async {
+    final sizes = await _productService.getSizes(category);
+    setState(() {
+      availableSizes = sizes;
+      selectedSize = null; // Reset selected size when category changes
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +60,9 @@ class _CategorySelectorState extends State<CategorySelector> {
           selectedCategory,
           (value) {
             setState(() => selectedCategory = value);
+            if (value != null) {
+              _updateSizesForCategory(value);
+            }
             widget.onCategorySelected(value!);
           },
         ),
@@ -62,7 +77,7 @@ class _CategorySelectorState extends State<CategorySelector> {
         ),
         _buildCustomExpansionTile(
           'Talla',
-          widget.sizes,
+          availableSizes,
           selectedSize,
           (value) {
             setState(() => selectedSize = value);
@@ -70,7 +85,7 @@ class _CategorySelectorState extends State<CategorySelector> {
           },
         ),
         _buildCustomExpansionTile(
-          'Calidad', // Add this block
+          'Calidad',
           widget.qualities,
           selectedQuality,
           (value) {
