@@ -190,7 +190,7 @@ class _VirtualClosetScreenState extends State<VirtualClosetScreen> {
               ? const Center(child: CircularProgressIndicator())
               : Column(
                   children: [
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.01),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.06),
                     Expanded(
                       child: SingleChildScrollView(
                         child: ConstrainedBox(
@@ -198,10 +198,10 @@ class _VirtualClosetScreenState extends State<VirtualClosetScreen> {
                             minHeight: MediaQuery.of(context).size.height -
                                 (MediaQuery.of(context).padding.top +
                                     kToolbarHeight +
-                                    20),
+                                    10),
                           ),
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               _buildSection(
                                 "Accesorios",
@@ -283,30 +283,25 @@ class _VirtualClosetScreenState extends State<VirtualClosetScreen> {
     bool isAccessories = false,
     bool isShoes = false,
   }) {
-    // Ajustamos las proporciones para que sean más pequeñas
     double sectionHeight;
     double scale;
 
     if (isAccessories) {
-      sectionHeight =
-          MediaQuery.of(context).size.height * 0.12; // Reducido de 0.15
-      scale = 0.45; // Reducido de 0.5
+      sectionHeight = MediaQuery.of(context).size.height * 0.15;
+      scale = 0.7;
     } else if (isShoes) {
-      sectionHeight =
-          MediaQuery.of(context).size.height * 0.15; // Reducido de 0.18
-      scale = 0.65; // Reducido de 0.7
+      sectionHeight = MediaQuery.of(context).size.height * 0.17;
+      scale = 0.75;
     } else {
-      sectionHeight =
-          MediaQuery.of(context).size.height * 0.2; // Reducido de 0.25
-      scale = 0.9; // Reducido de 1.0
+      sectionHeight = MediaQuery.of(context).size.height * 0.22;
+      scale = 0.95;
     }
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(
-              horizontal: 20, vertical: 4), // Reducido el padding vertical
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
           alignment: Alignment.centerLeft,
           child: Text(
             title,
@@ -322,8 +317,8 @@ class _VirtualClosetScreenState extends State<VirtualClosetScreen> {
           height: sectionHeight,
           decoration: BoxDecoration(
             border: Border(
-              top: BorderSide(color: Colors.grey.shade200),
-              bottom: BorderSide(color: Colors.grey.shade200),
+              top: BorderSide(color: Colors.grey.shade200, width: 0.5),
+              bottom: BorderSide(color: Colors.grey.shade200, width: 0.5),
             ),
           ),
           child: Stack(
@@ -352,7 +347,7 @@ class _VirtualClosetScreenState extends State<VirtualClosetScreen> {
                       }
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      padding: const EdgeInsets.symmetric(vertical: 5),
                       child: Transform.scale(
                         scale: scale,
                         child: Container(

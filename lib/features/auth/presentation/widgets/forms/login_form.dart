@@ -4,6 +4,8 @@ import 'package:pin/core/services/authentication_service.dart';
 import 'package:pin/core/utils/NavigationMenu/NavigationMenu.dart';
 import 'package:pin/features/auth/presentation/widgets/components/showRecoverPasswordDialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart';
+import 'package:pin/features/auth/presentation/screens/sign_up_screen.dart';
 
 import '../../../../../core/constants/constants.dart';
 
@@ -22,6 +24,7 @@ class _LoginFormState extends State<LoginForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isHoveredRecuperar = false;
   bool _isLoading = false;
+  bool _isHoveredRegistro = false;
 
   final AuthMethod _authMethod = AuthMethod();
 
@@ -140,7 +143,7 @@ class _LoginFormState extends State<LoginForm> {
                 ),
               ),
               validator: (value) =>
-              value!.isEmpty ? 'Introduce tu correo electrónico' : null,
+                  value!.isEmpty ? 'Introduce tu correo electrónico' : null,
             ),
             const SizedBox(height: 10),
             TextFormField(
@@ -161,11 +164,10 @@ class _LoginFormState extends State<LoginForm> {
                   color: PrimaryColor,
                 ),
                 prefixIcon: Padding(
-                  padding: const EdgeInsets.all(
-                      8.0), // Adjust padding to center the icon
+                  padding: const EdgeInsets.all(8.0),
                   child: SvgPicture.asset(
                     'assets/icons/key.svg',
-                    height: 35, // Set size to 35px
+                    height: 35,
                     width: 35,
                   ),
                 ),
@@ -177,8 +179,26 @@ class _LoginFormState extends State<LoginForm> {
                 ),
               ),
               validator: (value) =>
-              value!.isEmpty ? 'Introduce tu contraseña' : null,
+                  value!.isEmpty ? 'Introduce tu contraseña' : null,
             ),
+            const SizedBox(height: 40),
+            _isLoading
+                ? const CircularProgressIndicator()
+                : ElevatedButton(
+                    onPressed: loginUser,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30)),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 13, horizontal: 30),
+                    ),
+                    child: const Text('Iniciar Sesión',
+                        style: TextStyle(
+                            fontSize: 17,
+                            fontFamily: 'UrbaneMedium',
+                            color: SecondaryColor)),
+                  ),
             const SizedBox(height: 20),
             // Recuperar Contraseña Link
             MouseRegion(
@@ -197,11 +217,11 @@ class _LoginFormState extends State<LoginForm> {
                   showRecoverPasswordDialog(context);
                 },
                 child: RichText(
-                  textAlign: TextAlign.left,
+                  textAlign: TextAlign.center,
                   text: TextSpan(
                     style: TextStyle(
                       color:
-                      _isHoveredRecuperar ? Colors.grey : Color(0xFF000000),
+                          _isHoveredRecuperar ? Colors.grey : Color(0xFF000000),
                       fontFamily: 'OpenSans-Bold',
                       fontSize: 15,
                       fontStyle: FontStyle.normal,
@@ -209,16 +229,14 @@ class _LoginFormState extends State<LoginForm> {
                       letterSpacing: -0.26,
                     ),
                     children: [
+                      TextSpan(text: '¿Has olvidado tu contraseña? '),
                       TextSpan(
-                          text: '¿Has olvidado tu contraseña? Recupérala '),
-                      TextSpan(
-                        text: 'aquí',
+                        text: 'Recupérala aquí',
                         style: TextStyle(
-                          decoration: TextDecoration
-                              .underline, // Esto subraya la palabra "aquí"
+                          decoration: TextDecoration.underline,
                           color: _isHoveredRecuperar
                               ? Colors.grey
-                              : Color(0xFF000000), // Color opcional
+                              : Color(0xFF000000),
                         ),
                       ),
                     ],
@@ -226,25 +244,48 @@ class _LoginFormState extends State<LoginForm> {
                 ),
               ),
             ),
-            const SizedBox(height: 40),
-            _isLoading
-                ? const CircularProgressIndicator()
-                : ElevatedButton(
-              onPressed: loginUser,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30)),
-                padding: const EdgeInsets.symmetric(
-                    vertical: 13, horizontal: 30),
+            const SizedBox(height: 20),
+            // Registrarse Link (este se mueve desde login_screen.dart)
+            MouseRegion(
+              onEnter: (_) {
+                setState(() {
+                  _isHoveredRegistro = true;
+                });
+              },
+              onExit: (_) {
+                setState(() {
+                  _isHoveredRegistro = false;
+                });
+              },
+              child: GestureDetector(
+                onTap: () {
+                  Get.to(() => const SignUpScreen());
+                },
+                child: RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: TextStyle(
+                      color:
+                          _isHoveredRegistro ? Colors.grey : Color(0xFF000000),
+                      fontFamily: 'UrbaneLight',
+                      fontSize: 15,
+                      letterSpacing: -0.26,
+                    ),
+                    children: [
+                      TextSpan(text: '¿No tienes una cuenta? '),
+                      TextSpan(
+                        text: 'Regístrate aquí',
+                        style: TextStyle(
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              child: const Text('Iniciar Sesión',
-                  style: TextStyle(
-                      fontSize: 17,
-                      fontFamily: 'UrbaneMedium',
-                      color: SecondaryColor)),
             ),
             const SizedBox(height: 20),
+            // Google Sign In Button
             ElevatedButton(
               onPressed: signInWithGoogle,
               style: ElevatedButton.styleFrom(
@@ -264,7 +305,8 @@ class _LoginFormState extends State<LoginForm> {
                       style: TextStyle(fontSize: 16, color: Colors.black)),
                 ],
               ),
-            )
+            ),
+            const SizedBox(height: 40),
           ],
         ),
       ),

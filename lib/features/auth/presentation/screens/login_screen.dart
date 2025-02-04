@@ -4,7 +4,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:pin/core/utils/NavigationMenu/NavigationMenu.dart';
 import '../widgets/forms/login_form.dart';
-import 'package:pin/features/auth/presentation/screens/sign_up_screen.dart';
 import 'package:pin/core/utils/NavigationMenu/controllers/navigationController.dart';
 
 class Login extends StatefulWidget {
@@ -18,7 +17,7 @@ class _LoginState extends State<Login> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final NavigationController navigationController =
       Get.find<NavigationController>();
-  bool _isHovered = false;
+  bool _isHoveredCatalogue = false;
 
   Future<String> _loginUser(
       {required String email, required String password}) async {
@@ -65,74 +64,60 @@ class _LoginState extends State<Login> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: isMobile ? 50 : 75),
-                  // Top Logo and Register Link
+                  // Top Logo and Back Button
                   Padding(
                     padding:
                         EdgeInsets.symmetric(horizontal: horizontalPadding),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Logo
-                        SvgPicture.asset(
-                          'assets/icons/logo.svg',
-                          height: isMobile ? 17 : 35,
-                        ),
-
-                        // Register Link
+                        // Volver al catálogo button
                         MouseRegion(
-                          onEnter: (_) {
-                            setState(() {
-                              _isHovered = true;
-                            });
-                          },
-                          onExit: (_) {
-                            setState(() {
-                              _isHovered = false;
-                            });
-                          },
-                          child: GestureDetector(
-                            onTap: () {
-                              Get.to(() => const SignUpScreen());
-                            },
-                            child: Column(
+                          onEnter: (_) =>
+                              setState(() => _isHoveredCatalogue = true),
+                          onExit: (_) =>
+                              setState(() => _isHoveredCatalogue = false),
+                          child: TextButton(
+                            onPressed: _navigateToCatalogue,
+                            style: TextButton.styleFrom(
+                              foregroundColor: _isHoveredCatalogue
+                                  ? Colors.grey
+                                  : Colors.black,
+                              padding: EdgeInsets.zero,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                SizedBox(
-                                    height: 15), // Adjust the height as needed
-                                Align(
-                                  alignment: Alignment.bottomRight,
-                                  child: RichText(
-                                    textAlign: TextAlign.right,
-                                    text: TextSpan(
-                                      style: TextStyle(
-                                        color: _isHovered
-                                            ? Colors.grey
-                                            : const Color(0xFF000000),
-                                        fontFamily: 'UrbaneLight',
-                                        fontSize: isMobile ? 14 : 15,
-                                        letterSpacing: -0.26,
-                                      ),
-                                      children: [
-                                        TextSpan(
-                                            text: '¿No tienes una cuenta?\n'),
-                                        TextSpan(
-                                          text: 'Regístrate',
-                                          style: TextStyle(
-                                            decoration: TextDecoration
-                                                .underline, // Subraya "Regístrate"
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                Icon(
+                                  Icons.arrow_back,
+                                  size: isMobile ? 18 : 20,
+                                  color: _isHoveredCatalogue
+                                      ? Colors.grey
+                                      : Colors.black,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Volver al catálogo',
+                                  style: TextStyle(
+                                    fontFamily: 'UrbaneLight',
+                                    fontSize: isMobile ? 14 : 15,
+                                    letterSpacing: -0.26,
                                   ),
                                 ),
                               ],
                             ),
                           ),
                         ),
+
+                        // Logo
+                        SvgPicture.asset(
+                          'assets/icons/logo.svg',
+                          height: isMobile ? 17 : 35,
+                        ),
                       ],
                     ),
                   ),
-                  SizedBox(height: isMobile ? 120 : 192),
+                  SizedBox(height: isMobile ? 100 : 172),
 
                   // Login Form
                   LoginForm(onLogin: _handleLogin),

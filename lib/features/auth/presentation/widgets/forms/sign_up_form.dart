@@ -16,14 +16,16 @@ class SignUpForm extends StatefulWidget {
 class _SignUpFormState extends State<SignUpForm> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final CreateUserService _createUserService = CreateUserService();
   final _formKey = GlobalKey<FormState>();
 
   final List<String> allSizes = ['XS', 'S', 'M', 'L', 'XL'];
-  final MultiSelectController<String> _multiSelectController = MultiSelectController();
+  final MultiSelectController<String> _multiSelectController =
+      MultiSelectController();
 
   DateTime? _selectedBirthday;
   String? _selectedGender = 'Hombre';
@@ -107,7 +109,8 @@ class _SignUpFormState extends State<SignUpForm> {
                 hintText: "Introducir contraseña",
                 prefixIcon: const Icon(Icons.lock),
                 suffixIcon: IconButton(
-                  icon: Icon(_showPassword ? Icons.visibility : Icons.visibility_off),
+                  icon: Icon(
+                      _showPassword ? Icons.visibility : Icons.visibility_off),
                   onPressed: () {
                     setState(() {
                       _showPassword = !_showPassword;
@@ -128,7 +131,9 @@ class _SignUpFormState extends State<SignUpForm> {
                 hintText: "Confirmar contraseña",
                 prefixIcon: const Icon(Icons.lock),
                 suffixIcon: IconButton(
-                  icon: Icon(_showConfirmPassword ? Icons.visibility : Icons.visibility_off),
+                  icon: Icon(_showConfirmPassword
+                      ? Icons.visibility
+                      : Icons.visibility_off),
                   onPressed: () {
                     setState(() {
                       _showConfirmPassword = !_showConfirmPassword;
@@ -170,12 +175,15 @@ class _SignUpFormState extends State<SignUpForm> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              style: TextStyle(fontSize: 14, fontFamily: 'UrbaneMedium', color: Colors.black87),
+              style: TextStyle(
+                  fontSize: 14,
+                  fontFamily: 'UrbaneMedium',
+                  color: Colors.black87),
               items: ['Hombre', 'Mujer', 'Otro']
                   .map((gender) => DropdownMenuItem(
-                value: gender,
-                child: Text(gender),
-              ))
+                        value: gender,
+                        child: Text(gender),
+                      ))
                   .toList(),
               onChanged: (String? newValue) {
                 setState(() {
@@ -184,50 +192,26 @@ class _SignUpFormState extends State<SignUpForm> {
               },
             ),
             SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const Text(
-                  'Fecha de Nacimiento',
-                  style: TextStyle(
-                    fontFamily: 'UrbaneMedium',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+            TextFormField(
+              readOnly: true,
+              onTap: _pickBirthday,
+              decoration: InputDecoration(
+                hintText: _selectedBirthday == null
+                    ? "Fecha de Nacimiento"
+                    : "${_selectedBirthday!.day}/${_selectedBirthday!.month}/${_selectedBirthday!.year}",
+                prefixIcon: Icon(Icons.calendar_today),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: OutlinedButton(
-                      onPressed: _pickBirthday,
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Colors.black, width: 1.5),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.calendar_today, color: Colors.black),
-                          const SizedBox(width: 8),
-                          Text(
-                            _selectedBirthday == null
-                                ? "Seleccionar"
-                                : "${_selectedBirthday!.toLocal()}".split(' ')[0],
-                            style: TextStyle(color: Colors.black),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                suffixIcon: Icon(Icons.arrow_drop_down),
+              ),
+              style: TextStyle(fontSize: 14, color: Colors.black87),
             ),
             const SizedBox(height: 10),
             MultiDropdown<String>(
-              items: allSizes.map((size) => DropdownItem<String>(label: size, value: size)).toList(),
+              items: allSizes
+                  .map((size) => DropdownItem<String>(label: size, value: size))
+                  .toList(),
               controller: _multiSelectController,
               enabled: true,
               searchEnabled: false, // Disable the search bar
@@ -250,7 +234,8 @@ class _SignUpFormState extends State<SignUpForm> {
               dropdownDecoration: const DropdownDecoration(
                 marginTop: 10, // Display content underneath
                 maxHeight: 500,
-                borderRadius: BorderRadius.all(Radius.circular(10)), // Rounded borders
+                borderRadius:
+                    BorderRadius.all(Radius.circular(10)), // Rounded borders
               ),
               dropdownItemDecoration: DropdownItemDecoration(
                 selectedIcon: const Icon(Icons.check_box, color: Colors.black),
@@ -298,10 +283,9 @@ class _SignUpFormState extends State<SignUpForm> {
   }
 
   void _pickBirthday() async {
-
     DateTime? selectedDate = await showDatePicker(
       context: context,
-      initialDate:  DateTime.now(),
+      initialDate: DateTime.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
       builder: (BuildContext context, Widget? child) {
@@ -351,7 +335,7 @@ class _SignUpFormState extends State<SignUpForm> {
       // Use default image URL if no image is picked
       if (_pickedImage == null) {
         _pickedImage =
-        "https://firebasestorage.googleapis.com/v0/b/swappy-pin.appspot.com/o/profile_images%2Fdefault_user.png?alt=media&token=92bbfc56-8927-41a0-b81c-2394b90bf38c";
+            "https://firebasestorage.googleapis.com/v0/b/swappy-pin.appspot.com/o/profile_images%2Fdefault_user.png?alt=media&token=92bbfc56-8927-41a0-b81c-2394b90bf38c";
       }
 
       String res = await _createUserService.createUser(

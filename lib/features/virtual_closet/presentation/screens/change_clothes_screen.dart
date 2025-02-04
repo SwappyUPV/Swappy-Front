@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pin/core/services/chat_service_2.dart';
 import 'package:pin/features/exchanges/screens/details/details_screen.dart';
 import 'package:pin/features/virtual_closet/presentation/screens/virtual_closet_screen.dart';
 import 'package:pin/features/virtual_closet/presentation/widgets/change_clothes_app_bar.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/services/catalogue.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
-import 'package:pin/features/CustomAppBar.dart';
 import '/core/services/product.dart';
 
 class ChangeClothes extends StatefulWidget {
@@ -73,6 +70,73 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
     });
   }
 
+  void _cancelSelection() {
+    setState(() {
+      _selectedProducts.clear();
+    });
+  }
+
+  Future<void> _deleteSelectedProducts() async {
+    // Mostrar diálogo de confirmación
+    bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar eliminación'),
+          content: Text(
+              '¿Estás seguro de que deseas eliminar ${_selectedProducts.length} prenda(s)?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              child: const Text('Eliminar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true) {
+      try {
+        for (var product in _selectedProducts) {
+          await _productService.deleteProduct(product.id);
+        }
+
+        // Limpiar selección y recargar lista
+        setState(() {
+          _selectedProducts.clear();
+        });
+        if (_cachedUserId != null) {
+          await _fetchClothesForUser(_cachedUserId!);
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Prendas eliminadas correctamente'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error al eliminar las prendas: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   void _confirmSelection() {
     Navigator.pop(context, _selectedProducts);
   }
@@ -81,7 +145,8 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
     for (var product in _selectedProducts) {
       bool newStatus = !product.inCloset;
       String productId = product.id;
-      String result = await _productService.updateInClosetStatus(productId, newStatus);
+      String result =
+          await _productService.updateInClosetStatus(productId, newStatus);
       print(result);
     }
 
@@ -97,7 +162,8 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
         onIconPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const VirtualClosetScreen()),
+            MaterialPageRoute(
+                builder: (context) => const VirtualClosetScreen()),
           );
         },
       ),
@@ -109,7 +175,10 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
                 ? const Center(
                     child: Text(
                       "No has subido ninguna prenda",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey),
                     ),
                   )
                 : SingleChildScrollView(
@@ -118,7 +187,8 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
                       children: _categorizedClothes.entries.map((entry) {
                         final category = entry.key;
                         final products = entry.value;
-                        final inClosetCount = products.where((p) => p.inCloset).length;
+                        final inClosetCount =
+                            products.where((p) => p.inCloset).length;
 
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,11 +216,16 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
                               ),
                             ),
                             SizedBox(
-                              height: products.length > 1 ? 300 : 150, // Ajusta la altura según el número de prendas
+                              height: products.length > 1
+                                  ? 300
+                                  : 150, // Ajusta la altura según el número de prendas
                               child: GridView.builder(
                                 scrollDirection: Axis.horizontal,
-                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: products.length > 1 ? 2 : 1, // 2 filas si hay más de 1 prenda
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: products.length > 1
+                                      ? 2
+                                      : 1, // 2 filas si hay más de 1 prenda
                                   mainAxisSpacing: 8.0,
                                   crossAxisSpacing: 8.0,
                                   childAspectRatio: 1,
@@ -158,7 +233,8 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
                                 itemCount: products.length,
                                 itemBuilder: (context, index) {
                                   final product = products[index];
-                                  final isSelected = _selectedProducts.contains(product);
+                                  final isSelected =
+                                      _selectedProducts.contains(product);
 
                                   return GestureDetector(
                                     onLongPress: () {
@@ -166,27 +242,28 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
                                         _toggleProductSelection(product);
                                       }
                                     },
-                                   onTap: () async {
-                                    if (!widget.fromExchange) {
-                                      bool? deleted = await Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => DetailsScreen(
-                                            product: product,
-                                            showActionButtons: false,
-                                            showEditButtons: true,
+                                    onTap: () async {
+                                      if (!widget.fromExchange) {
+                                        bool? deleted = await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => DetailsScreen(
+                                              product: product,
+                                              showActionButtons: false,
+                                              showEditButtons: true,
+                                            ),
                                           ),
-                                        ),
-                                      );
+                                        );
 
-                                      if (deleted == true) {
-                                        _fetchClothesForUser(_cachedUserId!); // Recarga la lista de ropa
+                                        if (deleted == true) {
+                                          _fetchClothesForUser(
+                                              _cachedUserId!); // Recarga la lista de ropa
+                                        }
+                                      } else {
+                                        _toggleProductSelection(product);
                                       }
-                                    } else {
-                                      _toggleProductSelection(product);
-                                    }
-                                  },
-                                  child: Container(
+                                    },
+                                    child: Container(
                                       decoration: BoxDecoration(
                                         border: Border.all(
                                           color: isSelected
@@ -194,12 +271,17 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
                                               : product.inCloset
                                                   ? Colors.black
                                                   : Colors.grey[400]!,
-                                          width: isSelected ? 4 : product.inCloset ? 2 : 1,
+                                          width: isSelected
+                                              ? 4
+                                              : product.inCloset
+                                                  ? 2
+                                                  : 1,
                                         ),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8.0),
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
                                         child: Image.network(
                                           product.image,
                                           width: 100,
@@ -219,14 +301,67 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
                   ),
           ),
           if (_selectedProducts.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton(
-                onPressed: widget.fromExchange ? _confirmSelection : _invertInClosetStatus,
-                child: Text(widget.fromExchange
-                    ? "Confirmar y añadir prendas"
-                    : "Confirmar selección de prendas"),
-              ),
+            Column(
+              children: [
+                if (!widget.fromExchange)
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        left: 16.0, right: 16.0, bottom: 8.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _deleteSelectedProducts,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: Text(
+                          "Eliminar ${_selectedProducts.length} prenda(s)",
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _cancelSelection,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            side: const BorderSide(color: Colors.black),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: const Text(
+                            "Cancelar selección",
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: widget.fromExchange
+                              ? _confirmSelection
+                              : _invertInClosetStatus,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: Text(
+                            widget.fromExchange
+                                ? "Confirmar y añadir"
+                                : "Confirmar selección",
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
         ],
       ),
