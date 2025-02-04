@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb, compute;
 import 'dart:io';
 import 'package:image/image.dart' as img;
 import 'dart:typed_data';
+import 'package:pin/core/services/background_remover.dart';
 
 class ImagePickerWidget extends StatefulWidget {
   final dynamic pickedImage;
@@ -23,6 +24,7 @@ class ImagePickerWidget extends StatefulWidget {
 
 class _ImagePickerWidgetState extends State<ImagePickerWidget> {
   bool _isProcessing = false;
+  bool _isRemovingBackground = false;
   XFile? _tempImage;
 
   // Dimensiones de visualización
@@ -127,6 +129,53 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
     }
   }
 
+  Future<void> _removeBackground() async {
+    if (widget.pickedImage == null || _isRemovingBackground) return;
+
+    setState(() => _isRemovingBackground = true);
+
+    try {
+      final Uint8List imageBytes;
+      if (kIsWeb) {
+        imageBytes = await widget.pickedImage.readAsBytes();
+      } else {
+        imageBytes = await File(widget.pickedImage.path).readAsBytes();
+      }
+
+      final processedBytes =
+          await BackgroundRemoverService.removeBackground(imageBytes);
+
+      if (processedBytes != null) {
+        final processedImage = kIsWeb
+            ? XFile.fromData(processedBytes)
+            : await _saveToTempFile(processedBytes);
+
+        widget.onImagePicked(processedImage);
+
+        if (widget.onProcessingComplete != null) {
+          widget.onProcessingComplete!(processedImage);
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('¡Fondo removido con éxito!')),
+          );
+        }
+      } else {
+        throw Exception('No se pudo procesar la imagen');
+      }
+    } catch (e) {
+      print('Error removing background: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al remover el fondo')),
+        );
+      }
+    } finally {
+      setState(() => _isRemovingBackground = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -137,9 +186,9 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
       children: [
         Padding(
           padding: EdgeInsets.symmetric(horizontal: sidePadding),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return ElevatedButton.icon(
+          child: Column(
+            children: [
+              ElevatedButton.icon(
                 onPressed: _isProcessing ? null : _pickImage,
                 icon: const Icon(Icons.add, size: 24),
                 label: Text(
@@ -149,7 +198,6 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
                     color: Color(0xFF000000),
                     fontFamily: 'OpenSans',
                     fontSize: 16,
-                    fontStyle: FontStyle.normal,
                     fontWeight: FontWeight.w600,
                     height: 1.0,
                   ),
@@ -164,8 +212,35 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
-              );
-            },
+              ),
+              if (widget.pickedImage != null) ...[
+                const SizedBox(height: 8),
+                ElevatedButton.icon(
+                  onPressed: _isRemovingBackground ? null : _removeBackground,
+                  icon: const Icon(Icons.auto_fix_high, size: 24),
+                  label: Text(
+                    _isRemovingBackground ? 'Procesando...' : 'Remover fondo',
+                    style: const TextStyle(
+                      color: Color(0xFF000000),
+                      fontFamily: 'OpenSans',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      height: 1.0,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    side: const BorderSide(color: Colors.black),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
         if (widget.pickedImage != null)
@@ -180,7 +255,7 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
                   width: DISPLAY_WIDTH,
                   height: DISPLAY_HEIGHT,
                   decoration: BoxDecoration(
-                    color: Colors.black,
+                    color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
@@ -199,7 +274,7 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
                                     (1 - 2 * MARGIN_PERCENTAGE),
                               )
                             : Image.file(
-                                widget.pickedImage,
+                                File(widget.pickedImage.path),
                                 fit: BoxFit.contain,
                                 width:
                                     DISPLAY_WIDTH * (1 - 2 * MARGIN_PERCENTAGE),
@@ -210,7 +285,7 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
                     ),
                   ),
                 ),
-                if (_isProcessing)
+                if (_isRemovingBackground || _isProcessing)
                   Container(
                     width: DISPLAY_WIDTH,
                     height: DISPLAY_HEIGHT,
@@ -218,14 +293,26 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
                       color: Colors.black.withOpacity(0.7),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Center(
-                      child: Text(
-                        'Procesando...',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontFamily: 'UrbaneMedium',
-                        ),
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            _isRemovingBackground
+                                ? 'Removiendo fondo...'
+                                : 'Procesando...',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontFamily: 'OpenSans',
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

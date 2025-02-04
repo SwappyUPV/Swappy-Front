@@ -33,6 +33,7 @@ dependencies:
   get: ^4.6.6  # O la versión más reciente
   image_picker: ^1.1.2
   universal_html: ^2.2.4
+  http: ^1.2.0  # Agregando la dependencia de http
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
