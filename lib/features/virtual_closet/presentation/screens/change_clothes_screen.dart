@@ -106,7 +106,12 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
         children: [
           Expanded(
             child: _categorizedClothes.isEmpty
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(
+                    child: Text(
+                      "No has subido ninguna prenda",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
+                    ),
+                  )
                 : SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,22 +166,27 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
                                         _toggleProductSelection(product);
                                       }
                                     },
-                                    onTap: () {
-                                      if (!widget.fromExchange) {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => DetailsScreen(
-                                              product: product,
-                                              showActionButtons: false,
-                                            ),
+                                   onTap: () async {
+                                    if (!widget.fromExchange) {
+                                      bool? deleted = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => DetailsScreen(
+                                            product: product,
+                                            showActionButtons: false,
+                                            showEditButtons: true,
                                           ),
-                                        );
-                                      } else {
-                                        _toggleProductSelection(product);
+                                        ),
+                                      );
+
+                                      if (deleted == true) {
+                                        _fetchClothesForUser(_cachedUserId!); // Recarga la lista de ropa
                                       }
-                                    },
-                                    child: Container(
+                                    } else {
+                                      _toggleProductSelection(product);
+                                    }
+                                  },
+                                  child: Container(
                                       decoration: BoxDecoration(
                                         border: Border.all(
                                           color: isSelected

@@ -163,4 +163,13 @@ class ProductService {
       return "Error al actualizar el estado 'enCloset': $e";
     }
   }
+
+  Future<String> deleteProduct(String productId) async {
+    try {
+      await _firestore.collection('clothes').doc(productId).delete();
+      return "Producto eliminado exitosamente.";
+    } catch (e) {
+      return "Error al eliminar el producto: $e";
+    }
+  }
 }
