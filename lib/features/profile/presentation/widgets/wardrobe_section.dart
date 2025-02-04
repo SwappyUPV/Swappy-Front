@@ -85,19 +85,22 @@ class _WardrobeSectionState extends State<WardrobeSection> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      'Armario',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'UrbaneMedium',
+                GestureDetector(
+                  onTap: () {},
+                  child: Row(
+                    children: [
+                      Text(
+                        'Armario',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'UrbaneMedium',
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 11),
-                    Icon(Icons.arrow_forward_ios, size: 12),
-                  ],
+                      const SizedBox(width: 11),
+                      Icon(Icons.arrow_forward_ios, size: 12),
+                    ],
+                  ),
                 ),
                 SvgPicture.asset(
                   'assets/icons/Filtrar.svg',
@@ -108,9 +111,7 @@ class _WardrobeSectionState extends State<WardrobeSection> {
             ),
           ),
           const SizedBox(height: 23),
-          _isLoading
-              ? const CircularProgressIndicator()
-              : _buildWardrobeGrid(),
+          _isLoading ? const CircularProgressIndicator() : _buildWardrobeGrid(),
         ],
       ),
     );
@@ -135,7 +136,8 @@ class _WardrobeSectionState extends State<WardrobeSection> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ProductDetailScreen(product: _products[index]),
+                  builder: (context) =>
+                      ProductDetailScreen(product: _products[index]),
                 ),
               );
             },

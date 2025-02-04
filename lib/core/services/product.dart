@@ -126,6 +126,11 @@ class ProductService {
             (index) => (33 + index).toString()); // Genera tallas del 33 al 45
       }
 
+      if (category.toLowerCase() == 'accesorios') {
+        // Para accesorios, solo retornamos "Talla única"
+        return ['Talla única'];
+      }
+
       DocumentSnapshot categoryDoc = await _firestore
           .collection('size_categories')
           .doc(category.toLowerCase())

@@ -50,6 +50,14 @@ class _CategorySelectorState extends State<CategorySelector> {
     });
   }
 
+  void _collapseOtherMenus(String currentMenu) {
+    _controllers.forEach((menu, controller) {
+      if (menu != currentMenu) {
+        controller.collapse();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -64,6 +72,7 @@ class _CategorySelectorState extends State<CategorySelector> {
               _updateSizesForCategory(value);
             }
             widget.onCategorySelected(value!);
+            _controllers['Categoría']?.collapse();
           },
         ),
         _buildCustomExpansionTile(
@@ -73,6 +82,7 @@ class _CategorySelectorState extends State<CategorySelector> {
           (value) {
             setState(() => selectedStyle = value);
             widget.onStyleSelected(value!);
+            _controllers['Estilo']?.collapse();
           },
         ),
         _buildCustomExpansionTile(
@@ -82,6 +92,7 @@ class _CategorySelectorState extends State<CategorySelector> {
           (value) {
             setState(() => selectedSize = value);
             widget.onSizeSelected(value!);
+            _controllers['Talla']?.collapse();
           },
         ),
         _buildCustomExpansionTile(
@@ -91,6 +102,7 @@ class _CategorySelectorState extends State<CategorySelector> {
           (value) {
             setState(() => selectedQuality = value);
             widget.onQualitySelected(value!);
+            _controllers['Calidad']?.collapse();
           },
         ),
       ],
@@ -157,10 +169,13 @@ class _CategorySelectorState extends State<CategorySelector> {
               ),
               onExpansionChanged: (expanded) {
                 setState(() => isExpanded = expanded);
+                if (expanded) {
+                  _collapseOtherMenus(title);
+                }
               },
               children: [
                 Container(
-                  color: Colors.white, // Background for dropdown items
+                  color: Colors.white,
                   child: Column(
                     children: items.map((item) {
                       final isSelected = selectedValue == item;
@@ -178,7 +193,6 @@ class _CategorySelectorState extends State<CategorySelector> {
                                 : null,
                             onTap: () {
                               onChanged(isSelected ? null : item);
-                              _controllers[title]?.collapse();
                             },
                           ),
                           if (item != items.last)
