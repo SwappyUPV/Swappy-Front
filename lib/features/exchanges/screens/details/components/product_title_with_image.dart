@@ -40,34 +40,46 @@ class _ProductTitleWithImageState extends State<ProductTitleWithImage> {
     final List<Widget> imageWidgets =
         widget.product.image != null && widget.product.image.isNotEmpty
             ? [
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Image.network(
-                    widget.product.image, // Imagen de producto
-                    fit: BoxFit.contain,
+                Container(
+                  color: Colors.white,
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Image.network(
+                      widget.product.image,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
               ]
             : [
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Image.asset(
-                    'assets/images/product1.png',
-                    fit: BoxFit.contain,
+                Container(
+                  color: Colors.white,
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Image.asset(
+                      'assets/images/product1.png',
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Image.asset(
-                    'assets/images/product2.png',
-                    fit: BoxFit.contain,
+                Container(
+                  color: Colors.white,
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Image.asset(
+                      'assets/images/product2.png',
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Image.asset(
-                    'assets/images/product3.png',
-                    fit: BoxFit.contain,
+                Container(
+                  color: Colors.white,
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Image.asset(
+                      'assets/images/product3.png',
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
               ];
@@ -94,7 +106,11 @@ class _ProductTitleWithImageState extends State<ProductTitleWithImage> {
               const SizedBox(height: kDefaultPaddin),
               const SizedBox(height: kDefaultPaddin),
               // PageView for images
-              SizedBox(
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 height: MediaQuery.of(context).size.height * 0.5,
                 child: PageView(
                   controller: _pageController,
@@ -122,7 +138,6 @@ class _ProductTitleWithImageState extends State<ProductTitleWithImage> {
               ),
             ],
           ),
-          // Resto del código...
         ],
       ),
     );

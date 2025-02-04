@@ -67,15 +67,15 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
     double marginPercentage = args[3];
     int quality = args[4];
 
-    final img.Image? image = img.decodeImage(bytes);
-    if (image == null) {
+    final img.Image? originalImage = img.decodeImage(bytes);
+    if (originalImage == null) {
       return bytes;
     }
 
     double availableWidth = displayWidth * (1 - 2 * marginPercentage);
     double availableHeight = displayHeight * (1 - 2 * marginPercentage);
 
-    double ratio = image.width / image.height;
+    double ratio = originalImage.width / originalImage.height;
     int targetWidth = availableWidth.toInt();
     int targetHeight = availableHeight.toInt();
 
@@ -85,29 +85,22 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
       targetWidth = (availableHeight * ratio).toInt();
     }
 
+    // Redimensionar manteniendo la transparencia
     final img.Image resizedImage = img.copyResize(
-      image,
+      originalImage,
       width: targetWidth,
       height: targetHeight,
       interpolation: img.Interpolation.linear,
     );
 
-    final img.Image finalImage = img.Image(
-      width: displayWidth.toInt(),
-      height: displayHeight.toInt(),
-    );
-
-    int x = ((displayWidth - targetWidth) / 2).toInt();
-    int y = ((displayHeight - targetHeight) / 2).toInt();
-
-    img.compositeImage(finalImage, resizedImage, dstX: x, dstY: y);
-
-    return Uint8List.fromList(img.encodeJpg(finalImage, quality: quality));
+    // Codificar directamente la imagen redimensionada como PNG
+    return Uint8List.fromList(img.encodePng(resizedImage));
   }
 
   Future<File> _saveToTempFile(Uint8List bytes) async {
     final tempDir = await Directory.systemTemp.createTemp();
-    final tempFile = File('${tempDir.path}/processed_image.jpg');
+    final tempFile =
+        File('${tempDir.path}/processed_image.png'); // Cambiar extensión a .png
     await tempFile.writeAsBytes(bytes);
     return tempFile;
   }
@@ -264,23 +257,26 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
                           EdgeInsets.all(DISPLAY_WIDTH * MARGIN_PERCENTAGE),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: kIsWeb
-                            ? Image.network(
-                                widget.pickedImage.path,
-                                fit: BoxFit.contain,
-                                width:
-                                    DISPLAY_WIDTH * (1 - 2 * MARGIN_PERCENTAGE),
-                                height: DISPLAY_HEIGHT *
-                                    (1 - 2 * MARGIN_PERCENTAGE),
-                              )
-                            : Image.file(
-                                File(widget.pickedImage.path),
-                                fit: BoxFit.contain,
-                                width:
-                                    DISPLAY_WIDTH * (1 - 2 * MARGIN_PERCENTAGE),
-                                height: DISPLAY_HEIGHT *
-                                    (1 - 2 * MARGIN_PERCENTAGE),
-                              ),
+                        child: Container(
+                          color: Colors.white,
+                          child: kIsWeb
+                              ? Image.network(
+                                  widget.pickedImage.path,
+                                  fit: BoxFit.contain,
+                                  width: DISPLAY_WIDTH *
+                                      (1 - 2 * MARGIN_PERCENTAGE),
+                                  height: DISPLAY_HEIGHT *
+                                      (1 - 2 * MARGIN_PERCENTAGE),
+                                )
+                              : Image.file(
+                                  File(widget.pickedImage.path),
+                                  fit: BoxFit.contain,
+                                  width: DISPLAY_WIDTH *
+                                      (1 - 2 * MARGIN_PERCENTAGE),
+                                  height: DISPLAY_HEIGHT *
+                                      (1 - 2 * MARGIN_PERCENTAGE),
+                                ),
+                        ),
                       ),
                     ),
                   ),
