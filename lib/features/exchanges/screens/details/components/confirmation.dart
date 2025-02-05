@@ -22,12 +22,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
     super.initState();
     // Iniciar un temporizador para regresar a ChatsScreen después de 3 segundos
     Timer(const Duration(seconds: 3), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) =>
-              ChatsScreen(), // Asegúrate de que ChatsScreen esté disponible
-        ),
-      );
+       Navigator.of(context).pop();
     });
   }
 

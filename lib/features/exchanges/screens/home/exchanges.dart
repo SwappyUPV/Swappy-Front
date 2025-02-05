@@ -315,8 +315,9 @@ class ExchangesState extends State<Exchanges> {
     });
   }
 
-  void _cancelExchange() {
-    showDialog(
+  void _cancelExchange() async {
+    // Esperamos la respuesta del usuario en el diálogo
+    bool? confirmado = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -326,23 +327,15 @@ class ExchangesState extends State<Exchanges> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(false); // Regresamos 'false' si el usuario cancela
               },
               child: const Text('Cancelar'),
             ),
             TextButton(
               onPressed: () async {
+                // Realizar la cancelación del intercambio
                 await _exchangeService.cancelExchange(widget.exchangeId!);
-                Navigator.of(context).pop();
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const ConfirmationScreen(
-                      title: 'Intercambio cancelado',
-                      description: 'El intercambio ha sido cancelado.',
-                      image: 'assets/images/Help_lightTheme.png',
-                    ),
-                  ),
-                );
+                Navigator.of(context).pop(true); // Regresamos 'true' si el usuario confirma
               },
               child: const Text('Sí, cancelar'),
             ),
@@ -350,7 +343,23 @@ class ExchangesState extends State<Exchanges> {
         );
       },
     );
+
+    // Si el usuario confirma la cancelación (confirmado == true), navega a la pantalla de confirmación
+    if (confirmado == true) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => const ConfirmationScreen(
+            title: 'Intercambio cancelado',
+            description: 'El intercambio ha sido cancelado.',
+            image: 'assets/images/Help_lightTheme.png',
+          ),
+        ),
+      );
+      await Future.delayed(Duration(seconds: 3));
+      Navigator.of(context).pop();
+    }
   }
+
   Future<void> _doTrade() async {
   await doTrade1();
 
@@ -438,48 +447,56 @@ class ExchangesState extends State<Exchanges> {
       print('Error al actualizar userId: $e');
     }
   }
+
   void _confirmChanges() async {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirmar Intercambio'),
-          content: const Text('¿Estás seguro de realizar este intercambio?'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () async {
-                await _createExchange();
-                setState(() {
-                  products.clear();
-                  products.addAll(modifiedItems);
-                  hasChanges = false;
-                  hasResponded = false;
-                  Rewards.currentPoints += 200;
-                });
-                Navigator.of(context).pop();
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const ConfirmationScreen(
-                      title: 'Intercambio Confirmado',
-                      description: 'El intercambio se ha enviado con éxito.',
-                      image: 'assets/images/Help_lightTheme.png',
-                    ),
-                  ),
-                );
-              },
-              child: const Text('Confirmar'),
-            ),
-          ],
-        );
-      },
+  // Mostrar el diálogo y esperar la respuesta del usuario
+  bool? confirmado = await showDialog<bool>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Confirmar Intercambio'),
+        content: const Text('¿Estás seguro de realizar este intercambio?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false); // Enviar 'false' si el usuario cancela
+            },
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await _createExchange();
+              setState(() {
+                products.clear();
+                products.addAll(modifiedItems);
+                hasChanges = false;
+                hasResponded = false;
+                Rewards.currentPoints += 200;
+              });
+              Navigator.of(context).pop(true); // Enviar 'true' si el usuario confirma
+            },
+            child: const Text('Confirmar'),
+          ),
+        ],
+      );
+    },
+  );
+
+  // Si el usuario confirma (confirmado == true), navega a la pantalla de confirmación
+  if (confirmado == true) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const ConfirmationScreen(
+          title: 'Intercambio Confirmado',
+          description: 'El intercambio se ha enviado con éxito.',
+          image: 'assets/images/Help_lightTheme.png',
+        ),
+      ),
     );
+    await Future.delayed(Duration(seconds: 3));
+    Navigator.of(context).pop();
   }
+}
 
   void _cancelChanges() {
     setState(() {
@@ -599,13 +616,13 @@ class ExchangesState extends State<Exchanges> {
                         ),
                         const SizedBox(width: 16),
                         if (isOther) // Solo muestra el botón "Aceptar Cambio" si isOther es true
-                        TextButton(
-                          onPressed: _doTrade,
-                          child: const Text(
-                            "Aceptar Cambio",
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          TextButton(
+                            onPressed: _doTrade,
+                            child: const Text(
+                              "Aceptar Cambio",
+                              style: TextStyle(fontSize: 16, color: Colors.grey),
+                            ),
                           ),
-                        ),
                         TextButton(
                           onPressed: _cancelChanges,
                           child: const Text(
