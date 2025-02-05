@@ -44,7 +44,6 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
       _fetchClothesForUser(_cachedUserId!);
     }
   }
-
   Future<void> _fetchClothesForUser(String userId) async {
     try {
       List<Product> clothes = await _catalogService.getClothByUserId(userId);
@@ -164,12 +163,18 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
     return Scaffold(
       appBar: ChangeClothesAppBar(
         onIconPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => const VirtualClosetScreen()),
-          );
+          if (widget.fromExchange) {
+            Navigator.of(context).pop(); // Si fromExchange es true, hace un pop
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const VirtualClosetScreen(),
+              ),
+            ); // Si fromExchange es false, hace un push a VirtualClosetScreen
+          }
         },
+
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -272,12 +277,12 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
                                         border: Border.all(
                                           color: isSelected
                                               ? Colors.black
-                                              : product.inCloset
+                                              : (product.inCloset && !widget.fromExchange)
                                                   ? Colors.black
                                                   : Colors.grey[400]!,
                                           width: isSelected
                                               ? 4
-                                              : product.inCloset
+                                              : (product.inCloset && !widget.fromExchange)
                                                   ? 2
                                                   : 1,
                                         ),
