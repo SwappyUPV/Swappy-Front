@@ -34,38 +34,53 @@ class _DetailsScreenState extends State<DetailsScreen> {
   bool _isTryingOn = false;
   Uint8List? _tryOnResult;
 
-  Future<void> _tryOnVirtually() async {
+  Future<void> _pickImageAndTryOn() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
     setState(() {
       _isTryingOn = true;
       _tryOnResult = null;
     });
 
     try {
-      const String demoPersonImageUrl =
-          "https://huggingface.co/spaces/yisol/IDM-VTON/resolve/main/demo_images/person.jpg";
-
-      debugPrint('Iniciando prueba virtual con imagen: $demoPersonImageUrl');
+        final String selectedImagePath = pickedFile.path;
+        debugPrint('Iniciando prueba virtual con la imagen seleccionada: $selectedImagePath');
       debugPrint('Imagen de prenda: ${widget.product.image}');
 
-      final result = await VirtualTryOnService.tryOnGarment(
-        humanImageUrl: demoPersonImageUrl,
-        garmentImageUrl: widget.product.image,
-        garmentDescription: widget.product.title,
-        isChecked: true,
-        isCheckedCrop: false,
-        denoiseSteps: 30,
-        seed: 42,
-      );
+        // Convertir la imagen seleccionada a bytes (Uint8List)
+        Uint8List selectedImageBytes = await pickedFile.readAsBytes();
 
-      if (result != null) {
-        setState(() {
-          _tryOnResult = result;
-        });
+        // Ahora llamamos al servicio con la imagen seleccionada y la imagen de la ropa
+        String? resultImageUrl = await VirtualTryOnService.tryOnClothesAndGetImageUrl(
+          selectedImageBytes, // Pasamos los bytes de la imagen seleccionada
+          widget.product.image, // Pasamos la URL de la imagen de la ropa
+        );
+
+        if (resultImageUrl != null) {
+          // Ahora obtenemos la imagen desde la URL
+          Uint8List? resultImage = await VirtualTryOnService.getImageFromUrl(resultImageUrl);
+
+          if (resultImage != null) {
+            // Cuando la imagen esté lista, navega a la nueva pantalla para mostrarla
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => VirtualTryOnResultScreen(tryOnImage: resultImage),
+              ),
+            );
+          } else {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Error al obtener la imagen de la prueba virtual')),
+              );
+            }
+          }
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Error al procesar la prueba virtual')),
+              const SnackBar(content: Text('Error al procesar la prueba virtual')),
           );
         }
       }
@@ -80,6 +95,13 @@ class _DetailsScreenState extends State<DetailsScreen> {
       setState(() {
         _isTryingOn = false;
       });
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se seleccionó ninguna imagen')),
+        );
+      }
     }
   }
 
@@ -126,12 +148,12 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       Description(product: widget.product),
                       const SizedBox(height: kPadding),
                       Characteristics(product: widget.product),
-                      const SizedBox(height: kPadding * 2),
+                      const SizedBox(height: kPadding),
                       Row(
                         children: [
                           Expanded(
                             child: ElevatedButton(
-                              onPressed: _isTryingOn ? null : _tryOnVirtually,
+                              onPressed: _isTryingOn ? null : _pickImageAndTryOn,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.white,
                                 foregroundColor: Colors.black,
@@ -145,9 +167,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                 ),
                               ),
                               child: Text(
-                                _isTryingOn
-                                    ? 'Procesando...'
-                                    : 'Probar virtualmente',
+                                _isTryingOn ? 'Procesando...' : 'Prueba virtual',
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -169,7 +189,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           ),
                         ),
                       ],
-                      const SizedBox(height: kPadding * 2),
+                      const SizedBox(height: kPadding - 10),
                       if (widget.showActionButtons) ...[
                         const SizedBox(height: kPadding),
                         Row(

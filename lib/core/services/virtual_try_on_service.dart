@@ -3,121 +3,163 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
+import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';  // Para realizar solicitudes multipart
+import 'dart:io';  // Para trabajar con archivos de imagen
+import 'package:image_picker/image_picker.dart';  // Si usas image_picker para seleccionar la imagen
+import 'dart:html' as html;
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+import 'package:http/http.dart' as http;
+import 'package:file_picker/file_picker.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:html' as html;
+import 'package:image/image.dart' as img;
 
 class VirtualTryOnService {
   static const String _apiUrl = 'https://yisol-idm-vton.hf.space/api/predict';
 
-  static Future<Uint8List?> tryOnGarment({
-    required String humanImageUrl,
-    required String garmentImageUrl,
-    required String garmentDescription,
-    bool isChecked = true,
-    bool isCheckedCrop = false,
-    int denoiseSteps = 30,
-    int seed = 42,
-  }) async {
+  static Future<String?> tryOnClothesAndGetImageUrl(Uint8List personImageBytes, String clothesImageUrl) async {
+
+    var clothesResponse = await http.get(Uri.parse(clothesImageUrl));
+    if (clothesResponse.statusCode != 200) {
+      print("Error descargando la imagen de la prenda");
+      return "";
+    }
+
+    Uint8List clothesImageBytes = clothesResponse.bodyBytes;
+
+    // Convertir la imagen de la prenda a PNG
+    img.Image? image = img.decodeImage(clothesImageBytes);
+    if (image == null) {
+      print("Error al decodificar la imagen de la prenda");
+      return "";
+    }
+    Uint8List pngBytes = Uint8List.fromList(img.encodePng(image));
+    String clothesFileName = "converted_clothes.png";
+
+    var uri = Uri.https("try-on-clothes.p.rapidapi.com", "/portrait/editing/try-on-clothes");
+    var request = http.MultipartRequest("POST", uri);
+
+    request.headers.addAll({
+      'x-rapidapi-key': "871410ef94msh6db4dc310d7d923p14f776jsna4303bde21e9",
+      'x-rapidapi-host': "try-on-clothes.p.rapidapi.com",
+    });
+
+    request.fields['task_type'] = 'async';
+    request.fields['clothes_type'] = 'upper_body';
+    request.files.add(http.MultipartFile.fromBytes('person_image', personImageBytes, filename: 'person_image'));
+    request.files.add(http.MultipartFile.fromBytes('clothes_image', pngBytes, filename: clothesFileName));
+
     try {
-      debugPrint('Descargando imagen humana desde: $humanImageUrl');
-      debugPrint('Descargando imagen de prenda desde: $garmentImageUrl');
+      var response = await request.send();
+      await Future.delayed(Duration(seconds: 5));
+      if (response.statusCode == 200) {
+        var responseData = await response.stream.bytesToString();
+        var jsonResponse = jsonDecode(responseData);
+        String taskId = jsonResponse['task_id'];
+        print("Task ID: $taskId");
 
-      // Primero descargamos las imágenes para convertirlas a base64
-      final humanResponse = await http
-          .get(Uri.parse(humanImageUrl))
-          .timeout(const Duration(seconds: 30));
+        // Esperar y consultar el resultado del trabajo asincrónico
+        await Future.delayed(Duration(seconds: 10));
 
-      debugPrint(
-          'Estado de respuesta imagen humana: ${humanResponse.statusCode}');
-      if (humanResponse.statusCode != 200) {
-        debugPrint('Error en imagen humana: ${humanResponse.body}');
-        throw Exception(
-            'Error al descargar la imagen humana: ${humanResponse.statusCode}');
-      }
+        var taskResultResponse = await http.get(
+          Uri.https("try-on-clothes.p.rapidapi.com", "/api/rapidapi/query-async-task-result", {"task_id": taskId}),
+          headers: {
+            'x-rapidapi-key': "871410ef94msh6db4dc310d7d923p14f776jsna4303bde21e9",
+            'x-rapidapi-host': "try-on-clothes.p.rapidapi.com",
+          },
+        );
 
-      final garmentResponse = await http
-          .get(Uri.parse(garmentImageUrl))
-          .timeout(const Duration(seconds: 30));
+        print(taskResultResponse.body);
 
-      debugPrint(
-          'Estado de respuesta imagen prenda: ${garmentResponse.statusCode}');
-      if (garmentResponse.statusCode != 200) {
-        debugPrint('Error en imagen prenda: ${garmentResponse.body}');
-        throw Exception(
-            'Error al descargar la imagen de la prenda: ${garmentResponse.statusCode}');
-      }
+        if (taskResultResponse.statusCode == 200) {
+          var taskResultData = jsonDecode(taskResultResponse.body);
+          if (taskResultData['data'] != null && taskResultData['data']['image'] != null) {
+            // Retorna la URL de la imagen de la respuesta de la tarea
+            String imageUrl = taskResultData['data']['image'];
 
-      // Procesar la imagen de la prenda para remover el fondo negro
-      final garmentImage = img.decodeImage(garmentResponse.bodyBytes);
-      if (garmentImage != null) {
-        // Convertir píxeles negros a transparentes
-        for (var i = 0; i < garmentImage.length; i++) {
-          final x = i % garmentImage.width;
-          final y = i ~/ garmentImage.width;
-          final pixel = garmentImage.getPixel(x, y);
-          final r = pixel.r.toInt();
-          final g = pixel.g.toInt();
-          final b = pixel.b.toInt();
-
-          // Si el pixel es negro o muy cercano a negro
-          if (r < 30 && g < 30 && b < 30) {
-            garmentImage.setPixel(
-                x, y, img.ColorRgba8(r, g, b, 0)); // Hacer transparente
-          }
-        }
-
-        // Codificar la imagen procesada como PNG (para mantener la transparencia)
-        final processedGarmentBytes = img.encodePng(garmentImage);
-        final garmentBase64 = base64Encode(processedGarmentBytes);
-        final humanBase64 = base64Encode(humanResponse.bodyBytes);
-
-        debugPrint('Imágenes convertidas a base64 correctamente');
-        debugPrint('Enviando solicitud a la API...');
-
-        final response = await http
-            .post(
-              Uri.parse(_apiUrl),
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-              },
-              body: jsonEncode({
-                "fn_index": 0,
-                "data": [
-                  {"image": humanBase64, "mask": null},
-                  {"image": garmentBase64, "mask": null},
-                  garmentDescription,
-                  isChecked,
-                  isCheckedCrop,
-                  denoiseSteps,
-                  seed
-                ],
-                "session_hash": DateTime.now().millisecondsSinceEpoch.toString()
-              }),
-            )
-            .timeout(const Duration(minutes: 2));
-
-        debugPrint('Respuesta recibida. Estado: ${response.statusCode}');
-
-        if (response.statusCode == 200) {
-          final responseData = jsonDecode(response.body);
-          debugPrint('Response data: $responseData');
-
-          if (responseData['data'] != null && responseData['data'].length > 0) {
-            final outputImageBase64 = responseData['data'][0];
-            return base64Decode(outputImageBase64.split(',').last);
+            // Corregir la URL eliminando los caracteres de escape '\'
+            String correctedImageUrl = imageUrl.replaceAll(r'\/', '/');
+            print("Image URL: $correctedImageUrl");
+            return correctedImageUrl;
           } else {
-            throw Exception('Respuesta vacía del servidor');
+            print("No se encontró la URL de la imagen en la respuesta.");
+            return null;
           }
         } else {
-          debugPrint('Error response: ${response.body}');
-          throw Exception(
-              'Error al procesar la imagen: ${response.statusCode} - ${response.body}');
+          print("Error al obtener el resultado de la tarea asincrónica: ${taskResultResponse.statusCode}");
+          return null;
         }
       } else {
-        throw Exception('Error al procesar la imagen de la prenda');
+        print("Error en la solicitud: ${response.statusCode}");
+        return null;
       }
     } catch (e) {
-      debugPrint('Error en VirtualTryOnService: $e');
+      print("Request failed: $e");
       return null;
     }
   }
+
+  static Future<String?> queryAsyncTaskResult(String taskId) async {
+    var uri = Uri.https("try-on-clothes.p.rapidapi.com", "/api/rapidapi/query-async-task-result", {"task_id": taskId});
+
+    try {
+      var response = await http.get(uri, headers: {
+        'x-rapidapi-key': "e74b3e8abfmshd437b375b1486fep15f172jsn8653ffba2102",
+        'x-rapidapi-host': "try-on-clothes.p.rapidapi.com",
+      });
+      await Future.delayed(Duration(seconds: 5));
+      if (response.statusCode == 200) {
+        print("Task Result: ${response.body}");
+        return response.body;
+      } else {
+        print("Error: ${response.statusCode}");
+        print("Response: ${response.body}");
+      }
+    } catch (e) {
+      print("Request failed: $e");
+    }
+    return "";
+  }
+
+  static Future<String?>? getImageUrlFromResponse(String jsonResponse) {
+    try {
+      // Decodificar el JSON
+      var decodedResponse = jsonDecode(jsonResponse);
+
+      // Verificar si la respuesta contiene la clave 'data' y 'image'
+      if (decodedResponse['data'] != null && decodedResponse['data']['image'] != null) {
+        return decodedResponse['data']['image']; // Retorna la URL de la imagen
+      } else {
+        print("No se encontró la URL de la imagen en la respuesta.");
+        return null;
+      }
+    } catch (e) {
+      print("Error al decodificar la respuesta: $e");
+      return null;
+    }
+  }
+
+  static Future<Uint8List?> getImageFromUrl(String imageUrl) async {
+    try {
+      var response = await http.get(Uri.parse(imageUrl));
+
+      if (response.statusCode == 200) {
+        return response.bodyBytes;
+      } else {
+        print("Error al obtener la imagen: ${response.statusCode}");
+        return null;
+      }
+    } catch (e) {
+      print("Error al realizar la petición para obtener la imagen: $e");
+      return null;
+    }
+  }
+
 }
