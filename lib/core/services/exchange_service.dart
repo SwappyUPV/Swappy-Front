@@ -1,17 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:pin/core/services/chat_service.dart';
 import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart';
 import 'package:pin/features/exchanges/models/Exchange.dart';
-
+import 'package:pin/core/services/chat_service_2.dart';
 class ExchangeService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final ChatService _chatService = ChatService();
+  final FirebaseDatabase _database = FirebaseDatabase.instance;
+  final ChatService2 chat_service_2 = ChatService2();
 
   Future<String> createExchange({
     required String senderId,
     required String receiverId,
     required List<String> itemsOffered,
     required List<String> itemsRequested,
+    required String status,
   }) async {
     try {
       DocumentReference exchangeRef =
@@ -20,7 +24,7 @@ class ExchangeService {
         'receiverId': receiverId,
         'itemsOffered': itemsOffered,
         'itemsRequested': itemsRequested,
-        'status': 'pendiente',
+        'status': status,
         'timestamp': FieldValue.serverTimestamp(),
         'lastModified': FieldValue.serverTimestamp(),
         'points': 100,
@@ -35,12 +39,9 @@ class ExchangeService {
 
   Future<String> cancelExchange(String exchangeId) async {
     try {
-      await _firestore.collection('exchanges').doc(exchangeId).update({
-        'status': 'cancelado',
-        'lastModified': FieldValue.serverTimestamp(),
-      });
-
-      return "Intercambio cancelado con éxito";
+      await _firestore.collection('exchanges').doc(exchangeId).delete();
+      await chat_service_2.deleteMessageByContent(exchangeId);
+      return "Intercambio borrado con éxito";
     } catch (e) {
       print('Error al cancelar el intercambio: $e');
       return "Error al cancelar el intercambio";
@@ -85,7 +86,7 @@ class ExchangeService {
       if (currentUserId == null) return;
 
       // Verifica si ya existe un chat con el usuario objetivo
-      final chatId = await getOrCreateChat(currentUserId, targetUserId);
+      String chatId = await getOrCreateChat(currentUserId, targetUserId);
 
       // Envía el mensaje de notificación de intercambio en el chat correspondiente
       await sendExchangeNotification(chatId: chatId, senderId: currentUserId);
@@ -98,59 +99,29 @@ class ExchangeService {
     required String chatId,
     required String senderId,
   }) async {
-    try {
-      final messageId = FirebaseFirestore.instance
-          .collection('chats')
-          .doc(chatId)
-          .collection('messages')
-          .doc()
-          .id; // Generar un ID único para el mensaje
-      await _firestore
-          .collection('chats')
-          .doc(chatId)
-          .collection('messages')
-          .add({
-        'content': '¡Tienes un nuevo intercambio!',
-        'id': messageId,
-        'sender': senderId,
-        'status': 'viewed', // Estado del mensaje
-        'timestamp': FieldValue.serverTimestamp(),
-        'type': 'exchangeNotification',
-      });
-    } catch (e) {
-      print('Error al enviar la notificación de intercambio: $e');
-    }
+    String? exchangeId = await getFirstExchangeId(senderId);
+    print('exchangeId: $exchangeId');
+    chat_service_2.sendMessage(chatId, exchangeId! , senderId, tipo: 'exchangeNotification');
   }
 
-  Future<String> getOrCreateChat(
-      String currentUserId, String targetUserId) async {
-    final query1 = await FirebaseFirestore.instance
-        .collection('chats')
-        .where('users', arrayContains: currentUserId)
-        .get();
+  Future<String> getOrCreateChat(String currentUserId, String targetUserId) async {
+    String? chatId = await chat_service_2.getChatId(currentUserId, targetUserId); //ERROR AQUI
 
-// Luego, busca los documentos donde el array contiene targetUserId
-    final query2 = await FirebaseFirestore.instance
-        .collection('chats')
-        .where('users', arrayContains: targetUserId)
-        .get();
-
-// Filtra los documentos que están presentes en ambas consultas
-    final chatDoc = query1.docs.where((doc) {
-      return query2.docs.any((doc2) => doc.id == doc2.id);
-    }).toList();
-
-    if (chatDoc.isNotEmpty) {
-      return chatDoc.first.id;
+    if (chatId != null) {
+      return chatId;
     } else {
       // Crea un nuevo chat si no existe
-      final chatDocRef = await _firestore.collection('chats').add({
-        'users': [currentUserId, targetUserId],
-        'isActive': false,
-        'isRecent': true,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-      return chatDocRef.id;
+      await chat_service_2.startNewChat(targetUserId);
+
+      // Espera nuevamente la obtención del ID del chat
+      chatId = await chat_service_2.getChatId(currentUserId, targetUserId); //ERROR AQUI
+
+      // Verifica que el chatId no sea null antes de retornarlo
+      if (chatId != null) {
+        return chatId;
+      } else {
+        throw Exception("Error al obtener o crear el chat.");
+      }
     }
   }
 
@@ -193,7 +164,21 @@ class ExchangeService {
       rethrow;
     }
   }
+  Future<String?> getFirstExchangeId(String userId) async {
+    try {
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('exchanges')
+          .where('senderId', isEqualTo: userId)
+          .get();
 
+      if (querySnapshot.docs.isNotEmpty) {
+        return querySnapshot.docs.first.id;
+      }
+      return null; // Retorna null si no hay documentos
+    } catch (e) {
+      print('Error al obtener los intercambios: $e');
+      rethrow;
+    }}
   Future<String> updateExchangeStatus({
     required String exchangeId,
     required String status,

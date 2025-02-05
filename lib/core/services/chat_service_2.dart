@@ -121,7 +121,7 @@ class ChatService2 {
     });
   }
 
-  Future<void> sendMessage(String chatId, String messageText, String userId) async {
+  Future<void> sendMessage(String chatId, String messageText, String userId, {String? tipo}) async {
     if (userId.isEmpty) {
       print("Attempting to send message with empty userId");
       return;
@@ -131,7 +131,7 @@ class ChatService2 {
       'id': chatId,
       'content': messageText,
       'sender': userId,
-      'type': "text",
+      'type': tipo ?? "text",
       'status': "notViewed",
       'timestamp': ServerValue.timestamp,
     };
@@ -275,6 +275,41 @@ class ChatService2 {
       }
     });
   }
+  Future<void> deleteMessageByContent(String targetContent) async {
+    DatabaseReference chatsRef = _database.ref().child('chats');
+
+    try {
+      // Obtener todos los chats
+      DataSnapshot chatsSnapshot = await chatsRef.get();
+
+      if (chatsSnapshot.exists) {
+        Map<dynamic, dynamic> chats = chatsSnapshot.value as Map<dynamic, dynamic>;
+
+        for (var chatEntry in chats.entries) {
+          String chatId = chatEntry.key; // ID del chat
+          DatabaseReference messagesRef = chatsRef.child(chatId).child('messages');
+
+          // Obtener los mensajes de cada chat
+          DataSnapshot messagesSnapshot = await messagesRef.orderByChild('content').equalTo(targetContent).get();
+
+          if (messagesSnapshot.exists) {
+            Map<dynamic, dynamic> messages = messagesSnapshot.value as Map<dynamic, dynamic>;
+
+            for (var messageEntry in messages.entries) {
+              String messageId = messageEntry.key; // ID del mensaje
+              await messagesRef.child(messageId).remove();
+              print("Mensaje eliminado: $messageId en el chat: $chatId");
+            }
+          }
+        }
+      } else {
+        print("No hay chats en la base de datos.");
+      }
+    } catch (e) {
+      print("Error eliminando el mensaje: $e");
+    }
+  }
+
 
   Future<bool> doesChatExist(String otherUserId) async {
     final String? userId = await getUserId();
@@ -296,6 +331,73 @@ class ChatService2 {
     }
     return false;
   }
+
+  Future<String?> getChatId(String mainUser, String otherUserId) async {
+
+    final DatabaseEvent event = await _database.ref().child('chats').once();
+    final dataSnapshot = event.snapshot;
+
+    if (dataSnapshot.value != null) {
+      final Map<dynamic, dynamic> chatsMap = dataSnapshot.value as Map<dynamic, dynamic>;
+
+      // IDs de los usuarios a buscar
+      final String user1 = mainUser;
+      final String user2 = otherUserId;
+
+      // Buscar el chat que contenga ambos usuarios
+      String? chatIdEncontrado;
+
+      chatsMap.forEach((chatId, chatData) {
+        if (chatData["users"] != null) {
+          final List<dynamic> users = (chatData["users"] as Map).values.toList();
+
+          if (users.contains(user1) && users.contains(user2)) {
+            chatIdEncontrado = chatId;
+          }
+        }
+      });
+
+      if (chatIdEncontrado != null) {
+
+        print("Chat encontrado: $chatIdEncontrado");
+        return chatIdEncontrado;
+      } else {
+
+        print("No se encontró un chat con esos usuarios.");
+        return null;
+      }
+    }// Retorna null si no se encuentra el chat
+  }
+  Future<String?> getuser1byExchangeId(String Id) async {
+
+    final DatabaseEvent event = await _database.ref().child('chats').once();
+    final dataSnapshot = event.snapshot;
+
+    if (dataSnapshot.value != null) {
+      final Map<dynamic, dynamic> chatsMap = dataSnapshot.value as Map<dynamic, dynamic>;
+
+      String? userIdEncontrado;
+
+      chatsMap.forEach((chatId, chatData) {
+        if (chatData["messages"] != null) {
+          final List<dynamic> messages = (chatData["messages"] as Map).values.toList();
+
+
+        }
+      });
+
+      if (userIdEncontrado != null) {
+
+        print("User1 encontrado: $userIdEncontrado");
+        return userIdEncontrado;
+      } else {
+
+        print("No se encontró un user1 con este exchangeId.");
+        return null;
+      }
+    }// Retorna null si no se encuentra el chat
+  }
+
 
   Stream<List<UserModel>> searchUsersByName(String name) {
     return _firestore

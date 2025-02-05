@@ -37,9 +37,12 @@ class UserHeader extends StatelessWidget {
             height: imageSize,
             child: Hero(
               tag: "userImage_$nombreUsuario",
-              child: Image.asset(
-                fotoUrl,
+              child: Image.network(
+                fotoUrl, // Cargar imagen desde la URL
                 fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(Icons.error); // Mostrar un ícono si hay un error
+                },
               ),
             ),
           ),

@@ -12,13 +12,18 @@ class ExchangeNotification extends StatelessWidget {
   final ChatMessageModel? exchange;
   final bool isClickable;
   final String receiver;
+  final String? User1;
+  final String? User2;
 
   ExchangeNotification({
     super.key,
     required this.exchange,
     required this.receiver,
     this.isClickable = true,
+    this.User1,
+    this.User2,
   });
+
 
   Future<String> _getUserName(String? uid) async {
     if (uid == null || uid.isEmpty) {
@@ -33,20 +38,19 @@ class ExchangeNotification extends StatelessWidget {
     }
     return 'Usuario desconocido'; // Valor por defecto si no se encuentra el usuario
   }
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context){
     final FirebaseAuth _auth = FirebaseAuth.instance;
     final String currentUserUid = _auth.currentUser?.uid ?? '';
 
     return FutureBuilder<String>(
       future: _getUserName(
-        exchange != null && exchange!.sender != currentUserUid
+       exchange?.sender != currentUserUid
             ? exchange!
                 .sender // Si el usuario actual no es el remitente, obtener el nombre del remitente
-            : exchange
-                ?.receiver, // Si es el remitente, obtener el nombre del receptor
+            : this.User2, // Si es el remitente, obtener el nombre del receptor
       ),
+
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -54,14 +58,13 @@ class ExchangeNotification extends StatelessWidget {
           return const Center(
               child: Text("Error al cargar el nombre del usuario"));
         }
-
         final userName = snapshot.data ??
             'Usuario desconocido'; // Usar un valor predeterminado si es null
         final String messageText = exchange != null
             ? (isClickable
                 ? (exchange!.sender == currentUserUid
-                    ? 'Enviaste a $userName una nueva oferta de intercambio'
-                    : 'Has recibido una nueva oferta de intercambio de $userName')
+                    ? 'Enviaste una nueva oferta de intercambio'
+                    : 'Has recibido una nueva oferta de intercambio')
                 : (exchange!.sender == currentUserUid
                     ? 'Intercambio enviado'
                     : 'Intercambio recibido'))
@@ -75,7 +78,7 @@ class ExchangeNotification extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (context) => Exchanges(
                         selectedProduct: null,
-                        exchangeId: exchange?.id,
+                        exchangeId: exchange?.content,
                       ),
                     ),
                   );

@@ -75,6 +75,8 @@ class BodyState extends State<Body> {
                             receiver: widget.chat.user1 == widget.userId
                                 ? widget.chat.user2
                                 : widget.chat.user1,
+                            User1: widget.chat.user1,
+                            User2: widget.chat.user2,
                           )
                         else
                           Messages(
