@@ -4,6 +4,7 @@ import 'package:pin/core/services/chat_service.dart';
 import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart';
 import 'package:pin/features/exchanges/models/Exchange.dart';
 import 'package:pin/core/services/chat_service_2.dart';
+
 class ExchangeService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final ChatService _chatService = ChatService();
@@ -29,6 +30,9 @@ class ExchangeService {
         'lastModified': FieldValue.serverTimestamp(),
         'points': 100,
       });
+
+      // Notificar el nuevo intercambio usando el ID recién creado
+      await notifyNewExchangeWithId(receiverId, exchangeRef.id);
 
       return "Intercambio creado con éxito: ${exchangeRef.id}";
     } catch (e) {
@@ -85,11 +89,42 @@ class ExchangeService {
       final String? currentUserId = await _chatService.getUserId();
       if (currentUserId == null) return;
 
+      // Obtener el último intercambio creado
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('exchanges')
+          .where('senderId', isEqualTo: currentUserId)
+          .where('receiverId', isEqualTo: targetUserId)
+          .orderBy('timestamp', descending: true)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        String exchangeId = querySnapshot.docs.first.id;
+
+        // Verifica si ya existe un chat con el usuario objetivo
+        String chatId = await getOrCreateChat(currentUserId, targetUserId);
+
+        // Envía el mensaje de notificación de intercambio en el chat correspondiente
+        await sendExchangeNotification(
+            chatId: chatId, senderId: currentUserId, exchangeId: exchangeId);
+      }
+    } catch (e) {
+      print('Error al notificar nuevo intercambio: $e');
+    }
+  }
+
+  Future<void> notifyNewExchangeWithId(
+      String targetUserId, String exchangeId) async {
+    try {
+      final String? currentUserId = await _chatService.getUserId();
+      if (currentUserId == null) return;
+
       // Verifica si ya existe un chat con el usuario objetivo
       String chatId = await getOrCreateChat(currentUserId, targetUserId);
 
       // Envía el mensaje de notificación de intercambio en el chat correspondiente
-      await sendExchangeNotification(chatId: chatId, senderId: currentUserId);
+      await sendExchangeNotification(
+          chatId: chatId, senderId: currentUserId, exchangeId: exchangeId);
     } catch (e) {
       print('Error al notificar nuevo intercambio: $e');
     }
@@ -98,14 +133,22 @@ class ExchangeService {
   Future<void> sendExchangeNotification({
     required String chatId,
     required String senderId,
+    required String exchangeId,
   }) async {
-    String? exchangeId = await getFirstExchangeId(senderId);
-    print('exchangeId: $exchangeId');
-    chat_service_2.sendMessage(chatId, exchangeId! , senderId, tipo: 'exchangeNotification');
+    try {
+      await chat_service_2.sendMessage(chatId, exchangeId, senderId,
+          tipo: 'exchangeNotification');
+      print('Notificación de intercambio enviada correctamente');
+    } catch (e) {
+      print('Error al enviar la notificación de intercambio: $e');
+      throw e;
+    }
   }
 
-  Future<String> getOrCreateChat(String currentUserId, String targetUserId) async {
-    String? chatId = await chat_service_2.getChatId(currentUserId, targetUserId); //ERROR AQUI
+  Future<String> getOrCreateChat(
+      String currentUserId, String targetUserId) async {
+    String? chatId = await chat_service_2.getChatId(
+        currentUserId, targetUserId); //ERROR AQUI
 
     if (chatId != null) {
       return chatId;
@@ -114,7 +157,8 @@ class ExchangeService {
       await chat_service_2.startNewChat(targetUserId);
 
       // Espera nuevamente la obtención del ID del chat
-      chatId = await chat_service_2.getChatId(currentUserId, targetUserId); //ERROR AQUI
+      chatId = await chat_service_2.getChatId(
+          currentUserId, targetUserId); //ERROR AQUI
 
       // Verifica que el chatId no sea null antes de retornarlo
       if (chatId != null) {
@@ -164,21 +208,26 @@ class ExchangeService {
       rethrow;
     }
   }
+
   Future<String?> getFirstExchangeId(String userId) async {
     try {
       QuerySnapshot querySnapshot = await _firestore
           .collection('exchanges')
           .where('senderId', isEqualTo: userId)
+          .orderBy('timestamp', descending: true)
+          .limit(1)
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
         return querySnapshot.docs.first.id;
       }
-      return null; // Retorna null si no hay documentos
+      return null;
     } catch (e) {
       print('Error al obtener los intercambios: $e');
       rethrow;
-    }}
+    }
+  }
+
   Future<String> updateExchangeStatus({
     required String exchangeId,
     required String status,

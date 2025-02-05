@@ -32,11 +32,7 @@ class ChatService2 {
       yield [];
       return;
     }
-    yield* _database
-        .ref()
-        .child('chats')
-        .onValue
-        .map((event) {
+    yield* _database.ref().child('chats').onValue.map((event) {
       final data = event.snapshot.value;
 
       if (data == null || data is! Map) {
@@ -46,7 +42,9 @@ class ChatService2 {
         final chats = (data).entries.map((entry) {
           final chatData = Map<String, dynamic>.from(entry.value as Map);
           final usersMap = chatData['users'] as Map<dynamic, dynamic>?;
-          final users = usersMap != null ? usersMap.keys.map((key) => key.toString()).toList() : <String>[];
+          final users = usersMap != null
+              ? usersMap.keys.map((key) => key.toString()).toList()
+              : <String>[];
           return Chat(
             uid: entry.key,
             name1: chatData['name1'] ?? 'Unknown',
@@ -55,7 +53,8 @@ class ChatService2 {
             image2: chatData['image2'] ?? 'assets/images/user.png',
             user1: chatData['user1'] ?? 'Unknown',
             user2: chatData['user2'] ?? 'Unknown',
-            timestamp: DateTime.fromMillisecondsSinceEpoch(chatData['timestamp']),
+            timestamp:
+                DateTime.fromMillisecondsSinceEpoch(chatData['timestamp']),
             isActive: chatData['isActive'] ?? false,
             isRecent: chatData['isRecent'] ?? true,
             users: users,
@@ -115,13 +114,15 @@ class ChatService2 {
         .map((event) {
       final data = event.snapshot.value as Map?;
       if (data != null) {
-        return ChatMessageModel.fromJson(data.values.first as Map<String, dynamic>);
+        return ChatMessageModel.fromJson(
+            data.values.first as Map<String, dynamic>);
       }
       return null;
     });
   }
 
-  Future<void> sendMessage(String chatId, String messageText, String userId, {String? tipo}) async {
+  Future<void> sendMessage(String chatId, String messageText, String userId,
+      {String? tipo}) async {
     if (userId.isEmpty) {
       print("Attempting to send message with empty userId");
       return;
@@ -133,7 +134,7 @@ class ChatService2 {
       'sender': userId,
       'type': tipo ?? "text",
       'status': "notViewed",
-      'timestamp': ServerValue.timestamp,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
     };
 
     try {
@@ -148,7 +149,8 @@ class ChatService2 {
           if (user != userId) {
             final unreadCountRef = chatRef.child('unreadCount').child(user);
             final unreadCountSnapshot = await unreadCountRef.once();
-            final currentUnreadCount = unreadCountSnapshot.snapshot.value as int? ?? 0;
+            final currentUnreadCount =
+                unreadCountSnapshot.snapshot.value as int? ?? 0;
             await unreadCountRef.set(currentUnreadCount + 1);
           }
         }
@@ -180,7 +182,10 @@ class ChatService2 {
           //print("Processing message: $message with ID: $messageId");
           if (message['sender'] != userId && message['status'] == 'notViewed') {
             //print("Updating message status to viewed for message ID: $messageId");
-            await chatRef.child('messages').child(messageId).update({'status': 'viewed'});
+            await chatRef
+                .child('messages')
+                .child(messageId)
+                .update({'status': 'viewed'});
           }
         }
       } else {
@@ -190,7 +195,6 @@ class ChatService2 {
       print("Error marking chat as read: $e");
     }
   }
-
 
   Future<ChatMessageModel?> getLatestMessage(String chatId) async {
     final String? userId = await getUserId();
@@ -226,7 +230,8 @@ class ChatService2 {
       if (data != null) {
         try {
           final messageData = (data as Map<dynamic, dynamic>).values.first;
-          return ChatMessageModel.fromJson(Map<String, dynamic>.from(messageData as Map));
+          return ChatMessageModel.fromJson(
+              Map<String, dynamic>.from(messageData as Map));
         } catch (e) {
           print("Error parsing latest message: $e");
           return null;
@@ -237,12 +242,12 @@ class ChatService2 {
     });
   }
 
-
   Future<Chat?> getChatById(String chatId) async {
     final String? userId = await getUserId();
     if (userId == null) return null;
 
-    final chatSnapshot = await _database.ref().child('chats').child(chatId).once();
+    final chatSnapshot =
+        await _database.ref().child('chats').child(chatId).once();
     if (chatSnapshot.snapshot.value != null) {
       return Chat.fromJson(chatSnapshot.snapshot.value as Map<String, dynamic>);
     }
@@ -263,11 +268,15 @@ class ChatService2 {
         return [];
       }
       try {
-        final messages = (data as Map<dynamic, dynamic>).entries.map((entry) {
-          final messageData = Map<String, dynamic>.from(entry.value as Map);
-          messageData['id'] = entry.key; // Ensure the id field is assigned
-          return ChatMessageModel.fromJson(messageData);
-        }).where((message) => message.content.isNotEmpty).toList(); // Filter out empty messages
+        final messages = (data as Map<dynamic, dynamic>)
+            .entries
+            .map((entry) {
+              final messageData = Map<String, dynamic>.from(entry.value as Map);
+              messageData['id'] = entry.key; // Ensure the id field is assigned
+              return ChatMessageModel.fromJson(messageData);
+            })
+            .where((message) => message.content.isNotEmpty)
+            .toList(); // Filter out empty messages
         return messages;
       } catch (e) {
         print("Error parsing messages: $e");
@@ -275,6 +284,7 @@ class ChatService2 {
       }
     });
   }
+
   Future<void> deleteMessageByContent(String targetContent) async {
     DatabaseReference chatsRef = _database.ref().child('chats');
 
@@ -283,17 +293,23 @@ class ChatService2 {
       DataSnapshot chatsSnapshot = await chatsRef.get();
 
       if (chatsSnapshot.exists) {
-        Map<dynamic, dynamic> chats = chatsSnapshot.value as Map<dynamic, dynamic>;
+        Map<dynamic, dynamic> chats =
+            chatsSnapshot.value as Map<dynamic, dynamic>;
 
         for (var chatEntry in chats.entries) {
           String chatId = chatEntry.key; // ID del chat
-          DatabaseReference messagesRef = chatsRef.child(chatId).child('messages');
+          DatabaseReference messagesRef =
+              chatsRef.child(chatId).child('messages');
 
           // Obtener los mensajes de cada chat
-          DataSnapshot messagesSnapshot = await messagesRef.orderByChild('content').equalTo(targetContent).get();
+          DataSnapshot messagesSnapshot = await messagesRef
+              .orderByChild('content')
+              .equalTo(targetContent)
+              .get();
 
           if (messagesSnapshot.exists) {
-            Map<dynamic, dynamic> messages = messagesSnapshot.value as Map<dynamic, dynamic>;
+            Map<dynamic, dynamic> messages =
+                messagesSnapshot.value as Map<dynamic, dynamic>;
 
             for (var messageEntry in messages.entries) {
               String messageId = messageEntry.key; // ID del mensaje
@@ -309,7 +325,6 @@ class ChatService2 {
       print("Error eliminando el mensaje: $e");
     }
   }
-
 
   Future<bool> doesChatExist(String otherUserId) async {
     final String? userId = await getUserId();
@@ -333,12 +348,12 @@ class ChatService2 {
   }
 
   Future<String?> getChatId(String mainUser, String otherUserId) async {
-
     final DatabaseEvent event = await _database.ref().child('chats').once();
     final dataSnapshot = event.snapshot;
 
     if (dataSnapshot.value != null) {
-      final Map<dynamic, dynamic> chatsMap = dataSnapshot.value as Map<dynamic, dynamic>;
+      final Map<dynamic, dynamic> chatsMap =
+          dataSnapshot.value as Map<dynamic, dynamic>;
 
       // IDs de los usuarios a buscar
       final String user1 = mainUser;
@@ -349,7 +364,8 @@ class ChatService2 {
 
       chatsMap.forEach((chatId, chatData) {
         if (chatData["users"] != null) {
-          final List<dynamic> users = (chatData["users"] as Map).values.toList();
+          final List<dynamic> users =
+              (chatData["users"] as Map).values.toList();
 
           if (users.contains(user1) && users.contains(user2)) {
             chatIdEncontrado = chatId;
@@ -358,46 +374,41 @@ class ChatService2 {
       });
 
       if (chatIdEncontrado != null) {
-
         print("Chat encontrado: $chatIdEncontrado");
         return chatIdEncontrado;
       } else {
-
         print("No se encontró un chat con esos usuarios.");
         return null;
       }
-    }// Retorna null si no se encuentra el chat
+    } // Retorna null si no se encuentra el chat
   }
-  Future<String?> getuser1byExchangeId(String Id) async {
 
+  Future<String?> getuser1byExchangeId(String Id) async {
     final DatabaseEvent event = await _database.ref().child('chats').once();
     final dataSnapshot = event.snapshot;
 
     if (dataSnapshot.value != null) {
-      final Map<dynamic, dynamic> chatsMap = dataSnapshot.value as Map<dynamic, dynamic>;
+      final Map<dynamic, dynamic> chatsMap =
+          dataSnapshot.value as Map<dynamic, dynamic>;
 
       String? userIdEncontrado;
 
       chatsMap.forEach((chatId, chatData) {
         if (chatData["messages"] != null) {
-          final List<dynamic> messages = (chatData["messages"] as Map).values.toList();
-
-
+          final List<dynamic> messages =
+              (chatData["messages"] as Map).values.toList();
         }
       });
 
       if (userIdEncontrado != null) {
-
         print("User1 encontrado: $userIdEncontrado");
         return userIdEncontrado;
       } else {
-
         print("No se encontró un user1 con este exchangeId.");
         return null;
       }
-    }// Retorna null si no se encuentra el chat
+    } // Retorna null si no se encuentra el chat
   }
-
 
   Stream<List<UserModel>> searchUsersByName(String name) {
     return _firestore
@@ -442,9 +453,11 @@ class ChatService2 {
       final String? userId = await getUserId();
       if (userId == null) return 0;
 
-      final chatSnapshot = await _database.ref().child('chats').child(chatId).once();
+      final chatSnapshot =
+          await _database.ref().child('chats').child(chatId).once();
       if (chatSnapshot.snapshot.value != null) {
-        final unreadCountMap = (chatSnapshot.snapshot.value as Map)['unreadCount'] as Map?;
+        final unreadCountMap =
+            (chatSnapshot.snapshot.value as Map)['unreadCount'] as Map?;
         return unreadCountMap != null && unreadCountMap.containsKey(userId)
             ? unreadCountMap[userId] as int
             : 0;
@@ -470,5 +483,4 @@ class ChatService2 {
       return null;
     }
   }
-
 }
