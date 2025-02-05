@@ -40,7 +40,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
   Future<void> _pickImageAndTryOn() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedFile =
+        await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
       setState(() {
@@ -50,41 +51,48 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
       try {
         final String selectedImagePath = pickedFile.path;
-        debugPrint('Iniciando prueba virtual con la imagen seleccionada: $selectedImagePath');
+        debugPrint(
+            'Iniciando prueba virtual con la imagen seleccionada: $selectedImagePath');
         debugPrint('Imagen de prenda: ${widget.product.image}');
 
         // Convertir la imagen seleccionada a bytes (Uint8List)
         Uint8List selectedImageBytes = await pickedFile.readAsBytes();
 
         // Ahora llamamos al servicio con la imagen seleccionada y la imagen de la ropa
-        String? resultImageUrl = await VirtualTryOnService.tryOnClothesAndGetImageUrl(
+        String? resultImageUrl =
+            await VirtualTryOnService.tryOnClothesAndGetImageUrl(
           selectedImageBytes, // Pasamos los bytes de la imagen seleccionada
           widget.product.image, // Pasamos la URL de la imagen de la ropa
         );
 
         if (resultImageUrl != null) {
           // Ahora obtenemos la imagen desde la URL
-          Uint8List? resultImage = await VirtualTryOnService.getImageFromUrl(resultImageUrl);
+          Uint8List? resultImage =
+              await VirtualTryOnService.getImageFromUrl(resultImageUrl);
 
           if (resultImage != null) {
             // Cuando la imagen esté lista, navega a la nueva pantalla para mostrarla
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => VirtualTryOnResultScreen(tryOnImage: resultImage),
+                builder: (context) =>
+                    VirtualTryOnResultScreen(tryOnImage: resultImage),
               ),
             );
           } else {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Error al obtener la imagen de la prueba virtual')),
+                const SnackBar(
+                    content: Text(
+                        'Error al obtener la imagen de la prueba virtual')),
               );
             }
           }
         } else {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Error al procesar la prueba virtual')),
+              const SnackBar(
+                  content: Text('Error al procesar la prueba virtual')),
             );
           }
         }
@@ -92,7 +100,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
         debugPrint('Error en prueba virtual: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Error al procesar la prueba virtual')),
+            const SnackBar(
+                content: Text('Error al procesar la prueba virtual')),
           );
         }
       } finally {
@@ -118,9 +127,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
       backgroundColor: Colors.white,
       appBar: DetailsAppBar(
         onIconPressed: () {
-            Navigator.of(context).pop(); // Si fromExchange es true, hace un pop
+          Navigator.of(context).pop(); // Si fromExchange es true, hace un pop
         },
-
       ),
       body: Stack(
         children: [
@@ -152,7 +160,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         children: [
                           Expanded(
                             child: ElevatedButton(
-                              onPressed: _isTryingOn ? null : _pickImageAndTryOn,
+                              onPressed:
+                                  _isTryingOn ? null : _pickImageAndTryOn,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.white,
                                 foregroundColor: Colors.black,
@@ -166,7 +175,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                 ),
                               ),
                               child: Text(
-                                _isTryingOn ? 'Procesando...' : 'Prueba virtual',
+                                _isTryingOn
+                                    ? 'Procesando...'
+                                    : 'Prueba virtual',
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -178,14 +189,30 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       ),
                       if (_tryOnResult != null) ...[
                         const SizedBox(height: kPadding),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.memory(
-                            _tryOnResult!,
-                            fit: BoxFit.contain,
-                            width: double.infinity,
-                            height: 400,
-                          ),
+                        Container(
+                          width: double.infinity,
+                          height: MediaQuery.of(context).size.height * 0.6,
+                          padding: EdgeInsets.all(kPadding),
+                          child: _tryOnResult != null
+                              ? Center(
+                                  child: Container(
+                                    constraints: BoxConstraints(
+                                      maxWidth:
+                                          MediaQuery.of(context).size.width *
+                                              0.9,
+                                      maxHeight:
+                                          MediaQuery.of(context).size.height *
+                                              0.5,
+                                    ),
+                                    child: Image.memory(
+                                      _tryOnResult!,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                )
+                              : Center(
+                                  child: Text('No hay imagen para mostrar'),
+                                ),
                         ),
                       ],
                       const SizedBox(height: kPadding - 10),
@@ -226,12 +253,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           children: [
                             Expanded(
                               child: ElevatedButton(
-                                 onPressed: () {
+                                onPressed: () {
                                   // Acción para modificar
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const UploadProductScreen(showModifyButton: true),
+                                      builder: (context) =>
+                                          const UploadProductScreen(
+                                              showModifyButton: true),
                                     ),
                                   );
                                 },
@@ -250,17 +279,17 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   Navigator.pop(context,
                                       true); // Devuelve "true" al cerrar la pantalla
                                 },
-                                 style: ElevatedButton.styleFrom(
-                                minimumSize: Size(double.infinity, 50),
-                                backgroundColor: Colors.red,
-                              ),
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize: Size(double.infinity, 50),
+                                  backgroundColor: Colors.red,
+                                ),
                                 child: const Text('Borrar'),
                               ),
                             ),
                           ],
                         ),
                       ],
-                      const SizedBox(height: kPadding/2),
+                      const SizedBox(height: kPadding / 2),
                       TextButton(
                         onPressed: () {
                           // Acción a realizar al presionar el botón

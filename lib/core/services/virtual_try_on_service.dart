@@ -4,9 +4,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';  // Para realizar solicitudes multipart
-import 'dart:io';  // Para trabajar con archivos de imagen
-import 'package:image_picker/image_picker.dart';  // Si usas image_picker para seleccionar la imagen
+import 'package:dio/dio.dart'; // Para realizar solicitudes multipart
+import 'dart:io'; // Para trabajar con archivos de imagen
+import 'package:image_picker/image_picker.dart'; // Si usas image_picker para seleccionar la imagen
 import 'dart:html' as html;
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -24,8 +24,8 @@ import 'package:image/image.dart' as img;
 class VirtualTryOnService {
   static const String _apiUrl = 'https://yisol-idm-vton.hf.space/api/predict';
 
-  static Future<String?> tryOnClothesAndGetImageUrl(Uint8List personImageBytes, String clothesImageUrl) async {
-
+  static Future<String?> tryOnClothesAndGetImageUrl(
+      Uint8List personImageBytes, String clothesImageUrl) async {
     var clothesResponse = await http.get(Uri.parse(clothesImageUrl));
     if (clothesResponse.statusCode != 200) {
       print("Error descargando la imagen de la prenda");
@@ -43,7 +43,8 @@ class VirtualTryOnService {
     Uint8List pngBytes = Uint8List.fromList(img.encodePng(image));
     String clothesFileName = "converted_clothes.png";
 
-    var uri = Uri.https("try-on-clothes.p.rapidapi.com", "/portrait/editing/try-on-clothes");
+    var uri = Uri.https(
+        "try-on-clothes.p.rapidapi.com", "/portrait/editing/try-on-clothes");
     var request = http.MultipartRequest("POST", uri);
 
     request.headers.addAll({
@@ -53,8 +54,11 @@ class VirtualTryOnService {
 
     request.fields['task_type'] = 'async';
     request.fields['clothes_type'] = 'upper_body';
-    request.files.add(http.MultipartFile.fromBytes('person_image', personImageBytes, filename: 'person_image'));
-    request.files.add(http.MultipartFile.fromBytes('clothes_image', pngBytes, filename: clothesFileName));
+    request.files.add(http.MultipartFile.fromBytes(
+        'person_image', personImageBytes,
+        filename: 'person_image'));
+    request.files.add(http.MultipartFile.fromBytes('clothes_image', pngBytes,
+        filename: clothesFileName));
 
     try {
       var response = await request.send();
@@ -65,13 +69,14 @@ class VirtualTryOnService {
         String taskId = jsonResponse['task_id'];
         print("Task ID: $taskId");
 
-        // Esperar y consultar el resultado del trabajo asincrónico
-        await Future.delayed(Duration(seconds: 10));
+        await Future.delayed(Duration(seconds: 15));
 
         var taskResultResponse = await http.get(
-          Uri.https("try-on-clothes.p.rapidapi.com", "/api/rapidapi/query-async-task-result", {"task_id": taskId}),
+          Uri.https("try-on-clothes.p.rapidapi.com",
+              "/api/rapidapi/query-async-task-result", {"task_id": taskId}),
           headers: {
-            'x-rapidapi-key': "871410ef94msh6db4dc310d7d923p14f776jsna4303bde21e9",
+            'x-rapidapi-key':
+                "871410ef94msh6db4dc310d7d923p14f776jsna4303bde21e9",
             'x-rapidapi-host': "try-on-clothes.p.rapidapi.com",
           },
         );
@@ -80,7 +85,8 @@ class VirtualTryOnService {
 
         if (taskResultResponse.statusCode == 200) {
           var taskResultData = jsonDecode(taskResultResponse.body);
-          if (taskResultData['data'] != null && taskResultData['data']['image'] != null) {
+          if (taskResultData['data'] != null &&
+              taskResultData['data']['image'] != null) {
             // Retorna la URL de la imagen de la respuesta de la tarea
             String imageUrl = taskResultData['data']['image'];
 
@@ -93,7 +99,8 @@ class VirtualTryOnService {
             return null;
           }
         } else {
-          print("Error al obtener el resultado de la tarea asincrónica: ${taskResultResponse.statusCode}");
+          print(
+              "Error al obtener el resultado de la tarea asincrónica: ${taskResultResponse.statusCode}");
           return null;
         }
       } else {
@@ -107,14 +114,15 @@ class VirtualTryOnService {
   }
 
   static Future<String?> queryAsyncTaskResult(String taskId) async {
-    var uri = Uri.https("try-on-clothes.p.rapidapi.com", "/api/rapidapi/query-async-task-result", {"task_id": taskId});
+    var uri = Uri.https("try-on-clothes.p.rapidapi.com",
+        "/api/rapidapi/query-async-task-result", {"task_id": taskId});
 
     try {
       var response = await http.get(uri, headers: {
         'x-rapidapi-key': "e74b3e8abfmshd437b375b1486fep15f172jsn8653ffba2102",
         'x-rapidapi-host': "try-on-clothes.p.rapidapi.com",
       });
-      await Future.delayed(Duration(seconds: 5));
+      await Future.delayed(Duration(seconds: 15));
       if (response.statusCode == 200) {
         print("Task Result: ${response.body}");
         return response.body;
@@ -134,7 +142,8 @@ class VirtualTryOnService {
       var decodedResponse = jsonDecode(jsonResponse);
 
       // Verificar si la respuesta contiene la clave 'data' y 'image'
-      if (decodedResponse['data'] != null && decodedResponse['data']['image'] != null) {
+      if (decodedResponse['data'] != null &&
+          decodedResponse['data']['image'] != null) {
         return decodedResponse['data']['image']; // Retorna la URL de la imagen
       } else {
         print("No se encontró la URL de la imagen en la respuesta.");
@@ -161,5 +170,4 @@ class VirtualTryOnService {
       return null;
     }
   }
-
 }
