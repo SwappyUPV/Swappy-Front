@@ -14,6 +14,9 @@ import 'package:pin/core/services/exchange_service.dart';
 import 'components/item_grid.dart';
 import 'package:pin/features/profile/presentation/screens/profile_screen.dart';
 import 'package:pin/features/rewards/rewards.dart'; // Asegúrate de importar Rewards
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:pin/core/services/catalogue.dart';
 
 class Exchanges extends StatefulWidget {
   final Product? selectedProduct;
@@ -24,7 +27,7 @@ class Exchanges extends StatefulWidget {
     super.key,
     this.selectedProduct,
     this.exchangeId,
-    this.receiverId,
+    this.receiverId
   });
 
   @override
@@ -35,10 +38,18 @@ class ExchangesState extends State<Exchanges> {
   bool hasResponded = false;
   bool hasChanges = false;
   String? currentUserId;
-  bool isNewExchange =
-      false; // Nueva variable para identificar si es un nuevo intercambio
+  String? receiverUserId;
+  String? currentUserName;
+  String? receiverUserName;
+  String? UserName;
+  String? urlUser;
+  bool isOther = false;
+  String? urlReceiver;
+  bool isNewExchange = true;
   bool isOwner = false;
+  bool pinga = true;
   List<Product> modifiedItems = [];
+  List<Product> otherItems = [];
   Product? selectedProduct;
   final ExchangeService _exchangeService = ExchangeService();
   final ChatService _chatService = ChatService();
@@ -46,18 +57,182 @@ class ExchangesState extends State<Exchanges> {
   @override
   void initState() {
     super.initState();
-    _loadUserId();
-    isNewExchange = widget.exchangeId == null || widget.exchangeId!.isEmpty;
-    selectedProduct = widget.selectedProduct;
+    _loadUserIds();
+    isNewExchange = widget.exchangeId == null;
+    if(widget.selectedProduct != null) {
+      setState(() {
+        modifiedItems.add(widget.selectedProduct!);
+      });
+    }
+    if(widget.exchangeId != null) {
+
+      _loadListas();
+
+    }
+    print(isOther);
   }
 
-  Future<void> _loadUserId() async {
-    String? userId = await _chatService.getUserId();
+  Future<void> _loadListas() async {
+    Exchange cambio = await _exchangeService.getExchangeById(widget.exchangeId.toString()) as Exchange;
+
     setState(() {
-      currentUserId = userId;
+      receiverUserId = cambio.receiverId;
+    });
+
+    List<String> modifiedItemsList = cambio.itemsOffered;
+    List<String> otherItemsList = cambio.itemsRequested;
+    print(modifiedItemsList);
+    print(otherItemsList);
+
+    // Asegurarse de que currentUserId no sea null
+    if (currentUserId == null) {
+      print("Error: currentUserId es null");
+      return;
+    }
+
+    if (cambio.senderId == currentUserId) {
+      setState(() {
+        isOwner = true;
+      });
+      getProductsByIdsMoodified(modifiedItemsList);
+      getProductsByIdsOther(otherItemsList);
+    } else {
+      setState(() {
+        this.isOther = true;
+        receiverUserId = cambio.senderId;
+
+      });
+      getProductsByIdsMoodified(otherItemsList);
+      getProductsByIdsOther(modifiedItemsList);
+    }
+
+    _NameUser();
+    _ImgUser();
+    _NameReceiver();
+    _ImgReceiver();
+
+    print("isOther: $isOther");
+  }
+
+  Future<void> getProductsByIdsMoodified(List<String> clothesIds) async {
+    List<Product> clothes = [];
+    for (var id in clothesIds) {
+      Product? cloth = await CatalogService().getClothById(id);
+      print(cloth!.category);
+      clothes.add(cloth!);
+    }
+    setState(() {
+      modifiedItems = clothes;
     });
   }
+  Future<void> getProductsByIdsOther(List<String> clothesIds) async {
+    List<Product> clothes = [];
+    for (var id in clothesIds) {
+      Product? cloth = await CatalogService().getClothById(id);
+      clothes.add(cloth!);
+    }
+    setState(() {
+      otherItems = clothes;
+    });
+  }
+  Future<void> _loadUserIds() async {
+    String? userId = await _chatService.getUserId();
 
+    setState(() {
+      currentUserId = userId;
+      receiverUserId = widget.receiverId;
+    });
+    _NameUser();
+    _NameReceiver();
+    _ImgUser();
+    _ImgReceiver();
+
+  }
+  Future<void> _NameUser() async {
+    try {
+      String name1 = '';
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('uid', whereIn: [currentUserId])
+          .get()
+          .then((QuerySnapshot querySnapshot) {
+        if (querySnapshot.docs.isNotEmpty) {
+          var name = querySnapshot.docs.first['name'];  // Accessing the 'name' field
+          name1 = name;
+        }
+      });
+
+      setState(() {
+        currentUserName = name1;
+      });
+    } catch (e) {
+      print("Error al obtener datos de Firebase (Top): $e");
+    }
+  }
+
+  Future<void> _NameReceiver() async {
+    try {
+      String name1 = '';
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('uid', whereIn: [receiverUserId])
+          .get()
+          .then((QuerySnapshot querySnapshot) {
+        if (querySnapshot.docs.isNotEmpty) {
+          var name = querySnapshot.docs.first['name'];  // Accessing the 'name' field
+          name1 = name;
+        }
+      });
+
+      setState(() {
+        receiverUserName = name1;
+      });
+    } catch (e) {
+      print("Error al obtener datos de Firebase (Top): $e");
+    }
+  }
+  Future<void> _ImgUser() async {
+    try {
+      String url1 = '';
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('uid', whereIn: [currentUserId])
+          .get()
+          .then((QuerySnapshot querySnapshot) {
+        if (querySnapshot.docs.isNotEmpty) {
+          var url = querySnapshot.docs.first['profilePicture'];  // Accessing the 'profilePicture' field
+          url1 = url;
+        }
+      });
+
+      setState(() {
+        urlUser = url1;
+      });
+    } catch (e) {
+      print("Error al obtener datos de Firebase (Top): $e");
+    }
+  }
+  Future<void> _ImgReceiver() async {
+    try {
+      String url1 = '';
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('uid', whereIn: [receiverUserId])
+          .get()
+          .then((QuerySnapshot querySnapshot) {
+        if (querySnapshot.docs.isNotEmpty) {
+          var url = querySnapshot.docs.first['profilePicture'];  // Accessing the 'profilePicture' field
+          url1 = url;
+        }
+      });
+
+      setState(() {
+        urlReceiver = url1;
+      });
+    } catch (e) {
+      print("Error al obtener datos de Firebase (Top): $e");
+    }
+  }
   Future<String> _getUser() async {
     String? userId = await _chatService.getUserId();
     return userId ??
@@ -65,16 +240,30 @@ class ExchangesState extends State<Exchanges> {
   }
 
   Future<void> _createExchange() async {
+    if(isOther){
+      await _exchangeService.cancelExchange(widget.exchangeId!);
+
+    }
     // Obtener el userId si es necesario
     String? senderId = await _chatService.getUserId();
+    String? receiverId = receiverUserId;
+    List<String> itemsOfferedIds = [];
+    List<String> itemsRequestedIds = [];
+    for (var producto in modifiedItems) {
+        itemsOfferedIds.add(producto.id);
+    }
+    for (var producto in otherItems) {
+      itemsRequestedIds.add(producto.id);
+    }
 
     // Crear un nuevo intercambio si no existe exchangeId
-    if (isNewExchange) {
+
       final newExchange = await _exchangeService.createExchange(
         senderId: senderId!,
-        receiverId: widget.receiverId ?? '',
-        itemsOffered: [],
-        itemsRequested: [],
+        receiverId: receiverId ?? '',
+        itemsOffered: itemsOfferedIds,
+        itemsRequested: itemsRequestedIds,
+        status: 'pendiente',
       );
 
       if (newExchange != null) {
@@ -86,10 +275,9 @@ class ExchangesState extends State<Exchanges> {
           isNewExchange = false; // Ahora ya no es un intercambio nuevo
         });
 
-        if (widget.receiverId != null) {
-          await _exchangeService.notifyNewExchange(widget.receiverId!);
-        }
-      }
+
+        await _exchangeService.notifyNewExchange(receiverId ?? '');
+
     } else {
       // Obtener intercambio si exchangeId existe
       _exchangeService
@@ -110,7 +298,6 @@ class ExchangesState extends State<Exchanges> {
       });
     }
   }
-
   void _addItem() {
     Navigator.push(
       context,
@@ -121,7 +308,6 @@ class ExchangesState extends State<Exchanges> {
       ),
     );
   }
-
   void _removeItem(int id) {
     setState(() {
       modifiedItems.removeWhere((item) => item.id == id);
@@ -165,7 +351,93 @@ class ExchangesState extends State<Exchanges> {
       },
     );
   }
+  Future<void> _doTrade() async {
+  await doTrade1();
 
+  await _exchangeService.cancelExchange(widget.exchangeId!);
+  Navigator.of(context).pop();
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (context) => const ConfirmationScreen(
+        title: 'Intercambio completado',
+        description: 'El intercambio ha sido completado.',
+        image: 'assets/images/Help_lightTheme.png',
+      ),
+    ),
+  );
+  }
+  Future<void> doTrade1() async{
+    for (var producto in modifiedItems) {
+      /*print("ID del producto: ${producto.id}");
+      try {
+        // Realizar la consulta en la colección 'users'
+        final snapshot = await FirebaseFirestore.instance
+            .collection('clothes')
+            .where('id', isEqualTo: producto.id)
+            .get();
+
+        // Verificar si hay documentos que coincidan
+        if (snapshot.docs.isNotEmpty) {
+          print("culo");
+          // Accedemos al primer documento y actualizamos el campo 'uid' con el nuevo valor
+          await FirebaseFirestore.instance
+              .collection('clothes')
+              .doc(snapshot.docs.first.id)  // Usamos el id del primer documento encontrado
+              .update({
+            'userId': receiverUserId,  // Actualizamos el campo 'uid'
+          });
+
+          print("userId actualizado correctamente.");
+        } else {
+          print("No se encontró el usuario con el uid proporcionado.");
+        }
+      } catch (e) {
+        print("Error al actualizar el userId: $e");
+      }*/
+      await updateUserIdByClothesId(producto.id, receiverUserId!);
+    }
+    for (var producto in otherItems) {
+      /*
+      print("ID del producto: ${producto.id}");
+      try {
+        // Realizar la consulta en la colección 'users'
+        final snapshot = await FirebaseFirestore.instance
+            .collection('clothes')
+            .where('id', isEqualTo: producto.id)
+            .get();
+
+        // Verificar si hay documentos que coincidan
+        if (snapshot.docs.isNotEmpty) {
+          // Accedemos al primer documento y actualizamos el campo 'uid' con el nuevo valor
+          await FirebaseFirestore.instance
+              .collection('clothes')
+              .doc(snapshot.docs.first.id)  // Usamos el id del primer documento encontrado
+              .update({
+            'userId': currentUserId,  // Actualizamos el campo 'uid'
+          });
+
+          print("userId actualizado correctamente.");
+        } else {
+          print("No se encontró el usuario con el uid proporcionado.");
+        }
+      } catch (e) {
+        print("Error al actualizar el userId: $e");
+      }
+    */
+    await updateUserIdByClothesId(producto.id, currentUserId!);
+    }
+  }
+  Future<void> updateUserIdByClothesId(String clothesId, String newUserId) async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final DocumentReference docRef = firestore.collection('clothes').doc(clothesId);
+
+    try {
+      await docRef.update({'userId': newUserId});
+      print('userId actualizado correctamente.');
+    } catch (e) {
+      print('Error al actualizar userId: $e');
+    }
+  }
   void _confirmChanges() async {
     showDialog(
       context: context,
@@ -195,7 +467,7 @@ class ExchangesState extends State<Exchanges> {
                   MaterialPageRoute(
                     builder: (context) => const ConfirmationScreen(
                       title: 'Intercambio Confirmado',
-                      description: 'El intercambio se ha completado con éxito.',
+                      description: 'El intercambio se ha enviado con éxito.',
                       image: 'assets/images/Help_lightTheme.png',
                     ),
                   ),
@@ -222,7 +494,7 @@ class ExchangesState extends State<Exchanges> {
   Widget build(BuildContext context) {
     final bool isWeb = MediaQuery.of(context).size.width > 600;
     final double maxWidth =
-        isWeb ? 500.0 : MediaQuery.of(context).size.width * 0.7;
+    isWeb ? 500.0 : MediaQuery.of(context).size.width * 0.7;
     double iconSize = kIsWeb ? 35 : 26;
     double fontSize = kIsWeb ? 20 : 15;
 
@@ -230,7 +502,6 @@ class ExchangesState extends State<Exchanges> {
       // El userId no está disponible todavía, podrías mostrar un loader
       return Center(child: CircularProgressIndicator());
     }
-
     // Ahora que tienes el currentUserId, puedes usarlo para la lógica
     bool isSender =
         widget.exchangeId != null && widget.receiverId != currentUserId;
@@ -251,9 +522,9 @@ class ExchangesState extends State<Exchanges> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            const UserHeader(
-              nombreUsuario: "Manuel Díaz",
-              fotoUrl: "assets/images/user_2.png",
+            UserHeader(
+              nombreUsuario: currentUserName ?? "Usuario1",
+              fotoUrl: urlUser ?? "assets/images/user_2.png",
               esMio: true,
             ),
             ItemGrid(
@@ -270,7 +541,7 @@ class ExchangesState extends State<Exchanges> {
                   hasChanges = true;
                 });
               },
-              showButtons: hasResponded || isNewExchange,
+              showButtons: isOther || isNewExchange,
             ),
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0),
@@ -282,16 +553,33 @@ class ExchangesState extends State<Exchanges> {
                 ],
               ),
             ),
-            const UserHeader(
-              nombreUsuario: "Juan García",
-              fotoUrl: "assets/images/user_3.png",
+            UserHeader(
+              nombreUsuario: receiverUserName ?? "Usuario2",
+              fotoUrl: urlReceiver ?? "assets/images/user_2.png",
               esMio: false,
+            ),
+            ItemGrid(
+              items: otherItems,
+              onAddItem: (List<Product> selectedProducts) {
+                setState(() {
+                  otherItems.addAll(selectedProducts);
+                  hasChanges = true;
+                });
+              },
+              onDeleteItem: (Product product) {
+                setState(() {
+                  otherItems.remove(product);
+                  hasChanges = true;
+                });
+              },
+              showButtons:  isOther || isNewExchange,
+              id: receiverUserId,
             ),
             const SizedBox(height: 20),
             Center(
               child: Column(
                 children: [
-                  if (isNewExchange || hasResponded)
+                  if (isOther || isNewExchange)
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -304,12 +592,19 @@ class ExchangesState extends State<Exchanges> {
                                   horizontal: 40, vertical: 16),
                               textStyle: const TextStyle(fontSize: 16),
                             ),
-                            child: Text(hasChanges
+                            child: Text(isOther
                                 ? "Enviar contrapropuesta"
                                 : "Confirmar"),
                           ),
                         ),
                         const SizedBox(width: 16),
+                        TextButton(
+                          onPressed: _doTrade,
+                          child: const Text(
+                            "Aceptar Cambio",
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          ),
+                        ),
                         TextButton(
                           onPressed: _cancelChanges,
                           child: const Text(

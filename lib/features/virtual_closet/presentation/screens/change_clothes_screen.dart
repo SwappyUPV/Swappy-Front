@@ -9,8 +9,8 @@ import '/core/services/product.dart';
 
 class ChangeClothes extends StatefulWidget {
   final bool fromExchange;
-
-  const ChangeClothes({super.key, required this.fromExchange});
+  final String? id; // ID del usuario para obtener su ropa
+  const ChangeClothes({super.key, required this.fromExchange, this.id});
 
   @override
   _ChangeClothesScreenState createState() => _ChangeClothesScreenState();
@@ -23,6 +23,7 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
   String? _cachedUserId;
   Map<String, List<Product>> _categorizedClothes = {};
   List<Product> _selectedProducts = [];
+  
 
   @override
   void initState() {
@@ -35,7 +36,10 @@ class _ChangeClothesScreenState extends State<ChangeClothes> {
     setState(() {
       _cachedUserId = userId;
     });
-
+    if(widget.fromExchange && widget.id != null) {
+      _cachedUserId = widget.id;
+      userId = widget.id;
+    }
     if (_cachedUserId != null) {
       _fetchClothesForUser(_cachedUserId!);
     }
