@@ -619,7 +619,7 @@ class ExchangesState extends State<Exchanges> {
                           TextButton(
                             onPressed: _doTrade,
                             child: const Text(
-                              "Aceptar Cambio",
+                              "Aceptar intercambio",
                               style: TextStyle(fontSize: 16, color: Colors.grey),
                             ),
                           ),
