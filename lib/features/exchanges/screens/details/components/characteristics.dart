@@ -32,7 +32,7 @@ class Characteristics extends StatelessWidget {
               ],
             ),
           ),
-          Expanded(
+          Center(
             child: Column(
               children: [
                 const Text(
@@ -53,7 +53,7 @@ class Characteristics extends StatelessWidget {
             child: Column(
               children: [
                 const Text(
-                  "Estilos",
+                  "Estilo",
                   style: TextStyle(
                       color: kTextColor, fontSize: 14), // Reducido a 12
                 ),

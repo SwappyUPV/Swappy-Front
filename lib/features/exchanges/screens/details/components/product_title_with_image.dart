@@ -16,12 +16,15 @@ class ProductTitleWithImage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            product.title,
-            style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: MediaQuery.of(context).size.width > 600 ? 28 : 24),
+          Center(
+            child: Text(
+              product.title,
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: MediaQuery.of(context).size.width > 600 ? 28 : 24,
+                  ),
+            ),
           ),
           const SizedBox(height: kDefaultPaddin),
           Center(

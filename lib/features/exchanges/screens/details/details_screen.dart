@@ -12,6 +12,9 @@ import 'components/product_title_with_image.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
 import 'package:pin/features/exchanges/screens/home/exchanges.dart';
 import 'package:pin/core/services/product.dart';
+import 'package:image_picker/image_picker.dart';
+import 'components/VirtualTryOnResult.dart';
+import 'components/Details_app_bar.dart';
 
 class DetailsScreen extends StatefulWidget {
   const DetailsScreen({
@@ -39,15 +42,15 @@ class _DetailsScreenState extends State<DetailsScreen> {
     final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-    setState(() {
-      _isTryingOn = true;
-      _tryOnResult = null;
-    });
+      setState(() {
+        _isTryingOn = true;
+        _tryOnResult = null;
+      });
 
-    try {
+      try {
         final String selectedImagePath = pickedFile.path;
         debugPrint('Iniciando prueba virtual con la imagen seleccionada: $selectedImagePath');
-      debugPrint('Imagen de prenda: ${widget.product.image}');
+        debugPrint('Imagen de prenda: ${widget.product.image}');
 
         // Convertir la imagen seleccionada a bytes (Uint8List)
         Uint8List selectedImageBytes = await pickedFile.readAsBytes();
@@ -77,24 +80,24 @@ class _DetailsScreenState extends State<DetailsScreen> {
               );
             }
           }
-      } else {
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Error al procesar la prueba virtual')),
+            );
+          }
+        }
+      } catch (e) {
+        debugPrint('Error en prueba virtual: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Error al procesar la prueba virtual')),
+            const SnackBar(content: Text('Error al procesar la prueba virtual')),
           );
         }
-      }
-    } catch (e) {
-      debugPrint('Error en prueba virtual: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error al procesar la prueba virtual')),
-        );
-      }
-    } finally {
-      setState(() {
-        _isTryingOn = false;
-      });
+      } finally {
+        setState(() {
+          _isTryingOn = false;
+        });
       }
     } else {
       if (mounted) {
@@ -107,21 +110,16 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ProductService productService = ProductService();
     final Size size = MediaQuery.of(context).size;
+    final ProductService productService = ProductService();
 
     return Scaffold(
-      backgroundColor: widget.product.color,
-      appBar: AppBar(
-        backgroundColor: widget.product.color,
-        elevation: 0,
-        leading: IconButton(
-          icon: SvgPicture.asset(
-            'assets/icons/back.svg',
-            colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
+      backgroundColor: Colors.white,
+      appBar: DetailsAppBar(
+        onIconPressed: () {
+            Navigator.of(context).pop(); // Si fromExchange es true, hace un pop
+        },
+
       ),
       body: Stack(
         children: [
@@ -228,40 +226,34 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             Expanded(
                               child: ElevatedButton(
                                 onPressed: () {
-                                  // Acción para probar
-                                },
-                                child: const Text('Probar'),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () {
                                   // Acción para modificar
                                 },
                                 child: const Text('Modificar'),
                               ),
                             ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  String result = await productService
+                                      .deleteProduct(widget.product.id);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(result)),
+                                  );
+                                  Navigator.pop(context,
+                                      true); // Devuelve "true" al cerrar la pantalla
+                                },
+                                 style: ElevatedButton.styleFrom(
+                                minimumSize: Size(double.infinity, 50),
+                                backgroundColor: Colors.red,
+                              ),
+                                child: const Text('Borrar'),
+                              ),
+                            ),
                           ],
                         ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () async {
-                            String result = await productService
-                                .deleteProduct(widget.product.id);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(result)),
-                            );
-                            Navigator.pop(context,
-                                true); // Devuelve "true" al cerrar la pantalla
-                          },
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: Size(double.infinity, 50),
-                            backgroundColor: Colors.red,
-                          ),
-                          child: const Text('Borrar'),
-                        ),
                       ],
+                      const SizedBox(height: kPadding/2),
                       TextButton(
                         onPressed: () {
                           // Acción a realizar al presionar el botón
