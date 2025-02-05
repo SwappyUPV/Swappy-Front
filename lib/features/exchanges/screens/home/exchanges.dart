@@ -23,12 +23,8 @@ class Exchanges extends StatefulWidget {
   final String? exchangeId;
   final String? receiverId;
 
-  const Exchanges({
-    super.key,
-    this.selectedProduct,
-    this.exchangeId,
-    this.receiverId
-  });
+  const Exchanges(
+      {super.key, this.selectedProduct, this.exchangeId, this.receiverId});
 
   @override
   ExchangesState createState() => ExchangesState();
@@ -59,21 +55,20 @@ class ExchangesState extends State<Exchanges> {
     super.initState();
     _loadUserIds();
     isNewExchange = widget.exchangeId == null;
-    if(widget.selectedProduct != null) {
+    if (widget.selectedProduct != null) {
       setState(() {
-        modifiedItems.add(widget.selectedProduct!);
+        otherItems.add(widget.selectedProduct!);
       });
     }
-    if(widget.exchangeId != null) {
-
+    if (widget.exchangeId != null) {
       _loadListas();
-
     }
     print(isOther);
   }
 
   Future<void> _loadListas() async {
-    Exchange cambio = await _exchangeService.getExchangeById(widget.exchangeId.toString()) as Exchange;
+    Exchange cambio = await _exchangeService
+        .getExchangeById(widget.exchangeId.toString()) as Exchange;
 
     setState(() {
       receiverUserId = cambio.receiverId;
@@ -100,7 +95,6 @@ class ExchangesState extends State<Exchanges> {
       setState(() {
         this.isOther = true;
         receiverUserId = cambio.senderId;
-
       });
       getProductsByIdsMoodified(otherItemsList);
       getProductsByIdsOther(modifiedItemsList);
@@ -125,6 +119,7 @@ class ExchangesState extends State<Exchanges> {
       modifiedItems = clothes;
     });
   }
+
   Future<void> getProductsByIdsOther(List<String> clothesIds) async {
     List<Product> clothes = [];
     for (var id in clothesIds) {
@@ -135,6 +130,7 @@ class ExchangesState extends State<Exchanges> {
       otherItems = clothes;
     });
   }
+
   Future<void> _loadUserIds() async {
     String? userId = await _chatService.getUserId();
 
@@ -146,8 +142,8 @@ class ExchangesState extends State<Exchanges> {
     _NameReceiver();
     _ImgUser();
     _ImgReceiver();
-
   }
+
   Future<void> _NameUser() async {
     try {
       String name1 = '';
@@ -156,11 +152,12 @@ class ExchangesState extends State<Exchanges> {
           .where('uid', whereIn: [currentUserId])
           .get()
           .then((QuerySnapshot querySnapshot) {
-        if (querySnapshot.docs.isNotEmpty) {
-          var name = querySnapshot.docs.first['name'];  // Accessing the 'name' field
-          name1 = name;
-        }
-      });
+            if (querySnapshot.docs.isNotEmpty) {
+              var name = querySnapshot
+                  .docs.first['name']; // Accessing the 'name' field
+              name1 = name;
+            }
+          });
 
       setState(() {
         currentUserName = name1;
@@ -178,11 +175,12 @@ class ExchangesState extends State<Exchanges> {
           .where('uid', whereIn: [receiverUserId])
           .get()
           .then((QuerySnapshot querySnapshot) {
-        if (querySnapshot.docs.isNotEmpty) {
-          var name = querySnapshot.docs.first['name'];  // Accessing the 'name' field
-          name1 = name;
-        }
-      });
+            if (querySnapshot.docs.isNotEmpty) {
+              var name = querySnapshot
+                  .docs.first['name']; // Accessing the 'name' field
+              name1 = name;
+            }
+          });
 
       setState(() {
         receiverUserName = name1;
@@ -191,6 +189,7 @@ class ExchangesState extends State<Exchanges> {
       print("Error al obtener datos de Firebase (Top): $e");
     }
   }
+
   Future<void> _ImgUser() async {
     try {
       String url1 = '';
@@ -199,11 +198,12 @@ class ExchangesState extends State<Exchanges> {
           .where('uid', whereIn: [currentUserId])
           .get()
           .then((QuerySnapshot querySnapshot) {
-        if (querySnapshot.docs.isNotEmpty) {
-          var url = querySnapshot.docs.first['profilePicture'];  // Accessing the 'profilePicture' field
-          url1 = url;
-        }
-      });
+            if (querySnapshot.docs.isNotEmpty) {
+              var url = querySnapshot.docs.first[
+                  'profilePicture']; // Accessing the 'profilePicture' field
+              url1 = url;
+            }
+          });
 
       setState(() {
         urlUser = url1;
@@ -212,6 +212,7 @@ class ExchangesState extends State<Exchanges> {
       print("Error al obtener datos de Firebase (Top): $e");
     }
   }
+
   Future<void> _ImgReceiver() async {
     try {
       String url1 = '';
@@ -220,11 +221,12 @@ class ExchangesState extends State<Exchanges> {
           .where('uid', whereIn: [receiverUserId])
           .get()
           .then((QuerySnapshot querySnapshot) {
-        if (querySnapshot.docs.isNotEmpty) {
-          var url = querySnapshot.docs.first['profilePicture'];  // Accessing the 'profilePicture' field
-          url1 = url;
-        }
-      });
+            if (querySnapshot.docs.isNotEmpty) {
+              var url = querySnapshot.docs.first[
+                  'profilePicture']; // Accessing the 'profilePicture' field
+              url1 = url;
+            }
+          });
 
       setState(() {
         urlReceiver = url1;
@@ -233,6 +235,7 @@ class ExchangesState extends State<Exchanges> {
       print("Error al obtener datos de Firebase (Top): $e");
     }
   }
+
   Future<String> _getUser() async {
     String? userId = await _chatService.getUserId();
     return userId ??
@@ -240,9 +243,8 @@ class ExchangesState extends State<Exchanges> {
   }
 
   Future<void> _createExchange() async {
-    if(isOther){
+    if (isOther) {
       await _exchangeService.cancelExchange(widget.exchangeId!);
-
     }
     // Obtener el userId si es necesario
     String? senderId = await _chatService.getUserId();
@@ -250,7 +252,7 @@ class ExchangesState extends State<Exchanges> {
     List<String> itemsOfferedIds = [];
     List<String> itemsRequestedIds = [];
     for (var producto in modifiedItems) {
-        itemsOfferedIds.add(producto.id);
+      itemsOfferedIds.add(producto.id);
     }
     for (var producto in otherItems) {
       itemsRequestedIds.add(producto.id);
@@ -258,26 +260,24 @@ class ExchangesState extends State<Exchanges> {
 
     // Crear un nuevo intercambio si no existe exchangeId
 
-      final newExchange = await _exchangeService.createExchange(
-        senderId: senderId!,
-        receiverId: receiverId ?? '',
-        itemsOffered: itemsOfferedIds,
-        itemsRequested: itemsRequestedIds,
-        status: 'pendiente',
+    final newExchange = await _exchangeService.createExchange(
+      senderId: senderId!,
+      receiverId: receiverId ?? '',
+      itemsOffered: itemsOfferedIds,
+      itemsRequested: itemsRequestedIds,
+      status: 'pendiente',
+    );
+
+    if (newExchange != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Intercambio creado con éxito")),
       );
+      setState(() {
+        // Actualizar el estado si es necesario
+        isNewExchange = false; // Ahora ya no es un intercambio nuevo
+      });
 
-      if (newExchange != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Intercambio creado con éxito")),
-        );
-        setState(() {
-          // Actualizar el estado si es necesario
-          isNewExchange = false; // Ahora ya no es un intercambio nuevo
-        });
-
-
-        await _exchangeService.notifyNewExchange(receiverId ?? '');
-
+      await _exchangeService.notifyNewExchange(receiverId ?? '');
     } else {
       // Obtener intercambio si exchangeId existe
       _exchangeService
@@ -298,6 +298,7 @@ class ExchangesState extends State<Exchanges> {
       });
     }
   }
+
   void _addItem() {
     Navigator.push(
       context,
@@ -308,6 +309,7 @@ class ExchangesState extends State<Exchanges> {
       ),
     );
   }
+
   void _removeItem(int id) {
     setState(() {
       modifiedItems.removeWhere((item) => item.id == id);
@@ -327,7 +329,8 @@ class ExchangesState extends State<Exchanges> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(false); // Regresamos 'false' si el usuario cancela
+                Navigator.of(context)
+                    .pop(false); // Regresamos 'false' si el usuario cancela
               },
               child: const Text('Cancelar'),
             ),
@@ -335,7 +338,8 @@ class ExchangesState extends State<Exchanges> {
               onPressed: () async {
                 // Realizar la cancelación del intercambio
                 await _exchangeService.cancelExchange(widget.exchangeId!);
-                Navigator.of(context).pop(true); // Regresamos 'true' si el usuario confirma
+                Navigator.of(context)
+                    .pop(true); // Regresamos 'true' si el usuario confirma
               },
               child: const Text('Sí, cancelar'),
             ),
@@ -361,21 +365,22 @@ class ExchangesState extends State<Exchanges> {
   }
 
   Future<void> _doTrade() async {
-  await doTrade1();
+    await doTrade1();
 
-  await _exchangeService.cancelExchange(widget.exchangeId!);
-  Navigator.of(context).pop();
-  Navigator.of(context).push(
-    MaterialPageRoute(
-      builder: (context) => const ConfirmationScreen(
-        title: 'Intercambio completado',
-        description: 'El intercambio ha sido completado.',
-        image: 'assets/images/Help_lightTheme.png',
+    await _exchangeService.cancelExchange(widget.exchangeId!);
+    Navigator.of(context).pop();
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const ConfirmationScreen(
+          title: 'Intercambio completado',
+          description: 'El intercambio ha sido completado.',
+          image: 'assets/images/Help_lightTheme.png',
+        ),
       ),
-    ),
-  );
+    );
   }
-  Future<void> doTrade1() async{
+
+  Future<void> doTrade1() async {
     for (var producto in modifiedItems) {
       /*print("ID del producto: ${producto.id}");
       try {
@@ -433,12 +438,15 @@ class ExchangesState extends State<Exchanges> {
         print("Error al actualizar el userId: $e");
       }
     */
-    await updateUserIdByClothesId(producto.id, currentUserId!);
+      await updateUserIdByClothesId(producto.id, currentUserId!);
     }
   }
-  Future<void> updateUserIdByClothesId(String clothesId, String newUserId) async {
+
+  Future<void> updateUserIdByClothesId(
+      String clothesId, String newUserId) async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
-    final DocumentReference docRef = firestore.collection('clothes').doc(clothesId);
+    final DocumentReference docRef =
+        firestore.collection('clothes').doc(clothesId);
 
     try {
       await docRef.update({'userId': newUserId});
@@ -449,54 +457,56 @@ class ExchangesState extends State<Exchanges> {
   }
 
   void _confirmChanges() async {
-  // Mostrar el diálogo y esperar la respuesta del usuario
-  bool? confirmado = await showDialog<bool>(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Confirmar Intercambio'),
-        content: const Text('¿Estás seguro de realizar este intercambio?'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false); // Enviar 'false' si el usuario cancela
-            },
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () async {
-              await _createExchange();
-              setState(() {
-                products.clear();
-                products.addAll(modifiedItems);
-                hasChanges = false;
-                hasResponded = false;
-                Rewards.currentPoints += 200;
-              });
-              Navigator.of(context).pop(true); // Enviar 'true' si el usuario confirma
-            },
-            child: const Text('Confirmar'),
-          ),
-        ],
-      );
-    },
-  );
-
-  // Si el usuario confirma (confirmado == true), navega a la pantalla de confirmación
-  if (confirmado == true) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const ConfirmationScreen(
-          title: 'Intercambio Confirmado',
-          description: 'El intercambio se ha enviado con éxito.',
-          image: 'assets/images/Help_lightTheme.png',
-        ),
-      ),
+    // Mostrar el diálogo y esperar la respuesta del usuario
+    bool? confirmado = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar Intercambio'),
+          content: const Text('¿Estás seguro de realizar este intercambio?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context)
+                    .pop(false); // Enviar 'false' si el usuario cancela
+              },
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await _createExchange();
+                setState(() {
+                  products.clear();
+                  products.addAll(modifiedItems);
+                  hasChanges = false;
+                  hasResponded = false;
+                  Rewards.currentPoints += 200;
+                });
+                Navigator.of(context)
+                    .pop(true); // Enviar 'true' si el usuario confirma
+              },
+              child: const Text('Confirmar'),
+            ),
+          ],
+        );
+      },
     );
-    await Future.delayed(Duration(seconds: 3));
-    Navigator.of(context).pop();
+
+    // Si el usuario confirma (confirmado == true), navega a la pantalla de confirmación
+    if (confirmado == true) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => const ConfirmationScreen(
+            title: 'Intercambio Confirmado',
+            description: 'El intercambio se ha enviado con éxito.',
+            image: 'assets/images/Help_lightTheme.png',
+          ),
+        ),
+      );
+      await Future.delayed(Duration(seconds: 3));
+      Navigator.of(context).pop();
+    }
   }
-}
 
   void _cancelChanges() {
     setState(() {
@@ -511,7 +521,7 @@ class ExchangesState extends State<Exchanges> {
   Widget build(BuildContext context) {
     final bool isWeb = MediaQuery.of(context).size.width > 600;
     final double maxWidth =
-    isWeb ? 500.0 : MediaQuery.of(context).size.width * 0.7;
+        isWeb ? 500.0 : MediaQuery.of(context).size.width * 0.7;
     double iconSize = kIsWeb ? 35 : 26;
     double fontSize = kIsWeb ? 20 : 15;
 
@@ -589,7 +599,7 @@ class ExchangesState extends State<Exchanges> {
                   hasChanges = true;
                 });
               },
-              showButtons:  isOther || isNewExchange,
+              showButtons: isOther || isNewExchange,
               id: receiverUserId,
             ),
             const SizedBox(height: 20),
@@ -620,7 +630,8 @@ class ExchangesState extends State<Exchanges> {
                             onPressed: _doTrade,
                             child: const Text(
                               "Aceptar intercambio",
-                              style: TextStyle(fontSize: 16, color: Colors.grey),
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.grey),
                             ),
                           ),
                         TextButton(

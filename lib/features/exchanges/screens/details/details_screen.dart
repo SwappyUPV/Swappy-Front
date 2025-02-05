@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get.dart';
 import 'package:pin/core/services/virtual_try_on_service.dart';
 import 'package:pin/core/constants/constants.dart';
 
@@ -16,6 +15,8 @@ import 'package:image_picker/image_picker.dart';
 import 'components/VirtualTryOnResult.dart';
 import 'components/Details_app_bar.dart';
 import 'package:pin/features/add_product/presentation/screens/upload_product_screen.dart';
+import 'package:pin/core/services/chat_service.dart';
+import 'package:pin/core/services/exchange_service.dart';
 
 class DetailsScreen extends StatefulWidget {
   const DetailsScreen({
@@ -37,6 +38,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
   static const double kPadding = 16.0;
   bool _isTryingOn = false;
   Uint8List? _tryOnResult;
+  final ChatService _chatService = ChatService();
+  final ExchangeService _exchangeService = ExchangeService();
 
   Future<void> _pickImageAndTryOn() async {
     final ImagePicker picker = ImagePicker();
@@ -231,12 +234,19 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             const SizedBox(width: 16),
                             Expanded(
                               child: ElevatedButton(
-                                onPressed: () {
+                                onPressed: () async {
+                                  // Obtener el ID del usuario actual
+                                  String? currentUserId =
+                                      await _chatService.getUserId();
+                                  if (currentUserId == null) return;
+
+                                  // Navegar a la pantalla de intercambios con el producto preseleccionado
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => Exchanges(
                                         selectedProduct: widget.product,
+                                        receiverId: widget.product.userId,
                                       ),
                                     ),
                                   );

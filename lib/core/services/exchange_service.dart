@@ -19,6 +19,7 @@ class ExchangeService {
     required String status,
   }) async {
     try {
+      // Crear el intercambio
       DocumentReference exchangeRef =
           await _firestore.collection('exchanges').add({
         'senderId': senderId,
@@ -31,10 +32,15 @@ class ExchangeService {
         'points': 100,
       });
 
-      // Notificar el nuevo intercambio usando el ID recién creado
-      await notifyNewExchangeWithId(receiverId, exchangeRef.id);
+      // Obtener o crear el chat y enviar la notificación
+      String chatId = await getOrCreateChat(senderId, receiverId);
+      await sendExchangeNotification(
+        chatId: chatId,
+        senderId: senderId,
+        exchangeId: exchangeRef.id,
+      );
 
-      return "Intercambio creado con éxito: ${exchangeRef.id}";
+      return exchangeRef.id;
     } catch (e) {
       print('Error al crear el intercambio: $e');
       return "Error al crear el intercambio";
