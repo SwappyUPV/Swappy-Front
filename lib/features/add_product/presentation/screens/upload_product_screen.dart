@@ -6,6 +6,9 @@ import 'package:pin/features/add_product/presentation/widgets/photo_upload_secti
 import 'package:pin/features/add_product/presentation/widgets/pricing_section.dart';
 import 'package:pin/features/add_product/presentation/widgets/product_details_form.dart';
 import 'package:pin/features/add_product/presentation/widgets/promotion_section.dart';
+import 'package:get/get.dart';
+import 'package:pin/core/utils/NavigationMenu/controllers/navigationController.dart';
+import 'package:pin/core/utils/NavigationMenu/NavigationMenu.dart';
 
 //todo: when uploading a product, the resetForm should also update the CategorySelector, Pricing and PromotionSection clearing them
 class UploadProductScreen extends StatefulWidget {
@@ -22,6 +25,8 @@ class _UploadProductState extends State<UploadProductScreen> {
   // State variables
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final NavigationController navigationController =
+      Get.find<NavigationController>();
   List<String> selectedStyles = [];
   String selectedSize = '';
   int? price = 0;
@@ -153,10 +158,8 @@ class _UploadProductState extends State<UploadProductScreen> {
                                       const EdgeInsets.symmetric(vertical: 12),
                                 ),
                                 onPressed: () {
-                                  Navigator.of(context).pushNamedAndRemoveUntil(
-                                    '/catalogue',
-                                    (route) => false,
-                                  );
+                                  navigationController.updateIndex(0);
+                                    Get.offAll(() => NavigationMenu());
                                 },
                                 child: const Text(
                                   'Ir al catálogo',
