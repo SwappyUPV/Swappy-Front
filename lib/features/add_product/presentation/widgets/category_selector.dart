@@ -5,29 +5,29 @@ class CategorySelector extends StatefulWidget {
   final List<String> categories;
   final List<String> styles;
   final List<String> sizes;
-  final List<String> qualities; // Add this line
+  final List<String> qualities;
   final ValueChanged<String> onCategorySelected;
   final ValueChanged<String> onStyleSelected;
   final ValueChanged<String> onSizeSelected;
-  final ValueChanged<String> onQualitySelected; // Add this line
+  final ValueChanged<String> onQualitySelected;
 
   const CategorySelector({
     Key? key,
     required this.categories,
     required this.styles,
     required this.sizes,
-    required this.qualities, // Add this line
+    required this.qualities,
     required this.onCategorySelected,
     required this.onStyleSelected,
     required this.onSizeSelected,
-    required this.onQualitySelected, // Add this line
+    required this.onQualitySelected,
   }) : super(key: key);
 
   @override
-  State<CategorySelector> createState() => _CategorySelectorState();
+  State<CategorySelector> createState() => CategorySelectorState();
 }
 
-class _CategorySelectorState extends State<CategorySelector> {
+class CategorySelectorState extends State<CategorySelector> {
   String? selectedCategory;
   String? selectedStyle;
   String? selectedSize;
@@ -41,6 +41,22 @@ class _CategorySelectorState extends State<CategorySelector> {
   };
 
   final ProductService _productService = ProductService();
+
+  void resetSelections() {
+    setState(() {
+      selectedCategory = null;
+      selectedStyle = null;
+      selectedSize = null;
+      selectedQuality = null;
+      availableSizes = [];
+
+      // Notificar al padre que los valores se han reiniciado
+      widget.onCategorySelected('');
+      widget.onStyleSelected('');
+      widget.onSizeSelected('');
+      widget.onQualitySelected('');
+    });
+  }
 
   void _updateSizesForCategory(String category) async {
     final sizes = await _productService.getSizes(category);

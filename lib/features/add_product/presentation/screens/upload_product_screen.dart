@@ -15,7 +15,7 @@ class UploadProductScreen extends StatefulWidget {
   const UploadProductScreen({
     super.key,
     this.showModifyButton = false,
-    });
+  });
 
   final bool showModifyButton;
   @override
@@ -25,6 +25,7 @@ class UploadProductScreen extends StatefulWidget {
 class _UploadProductState extends State<UploadProductScreen> {
   final _formKey = GlobalKey<FormState>();
   final ProductService _productService = ProductService();
+  final _categorySelectorKey = GlobalKey<CategorySelectorState>();
 
   // State variables
   final TextEditingController _titleController = TextEditingController();
@@ -85,10 +86,14 @@ class _UploadProductState extends State<UploadProductScreen> {
       isPublic = false;
       isPromoted = false;
     });
+
+    // Reiniciar el CategorySelector
+    _categorySelectorKey.currentState?.resetSelections();
   }
 
   Future<void> _uploadProduct() async {
     if (_formKey.currentState!.validate()) {
+      // Validar imagen
       if (_pickedImage == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Por favor, seleccione una imagen')),
@@ -96,7 +101,28 @@ class _UploadProductState extends State<UploadProductScreen> {
         return;
       }
 
-      _formKey.currentState!.save();
+      // Validar campos de selección obligatorios
+      if (selectedCategory.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Por favor, seleccione una categoría')),
+        );
+        return;
+      }
+
+      if (selectedStyles.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Por favor, seleccione al menos un estilo')),
+        );
+        return;
+      }
+
+      if (selectedSize.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Por favor, seleccione una talla')),
+        );
+        return;
+      }
 
       if (selectedQuality == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -104,6 +130,8 @@ class _UploadProductState extends State<UploadProductScreen> {
         );
         return;
       }
+
+      _formKey.currentState!.save();
 
       try {
         String result = await _productService.uploadProduct(
@@ -163,7 +191,7 @@ class _UploadProductState extends State<UploadProductScreen> {
                                 ),
                                 onPressed: () {
                                   navigationController.updateIndex(0);
-                                    Get.offAll(() => NavigationMenu());
+                                  Get.offAll(() => NavigationMenu());
                                 },
                                 child: const Text(
                                   'Ir al catálogo',
@@ -233,13 +261,14 @@ class _UploadProductState extends State<UploadProductScreen> {
 
     return Scaffold(
       appBar: widget.showModifyButton
-      ? UploadProductAppBar(
-          isModifyMode: true, 
-          onIconPressed: () {
-            Navigator.of(context).pop(); // Si fromExchange es true, hace un pop
-          },
-        )
-      : const UploadProductAppBar(),  // Aquí se crea sin parámetros si showModifyButton es false
+          ? UploadProductAppBar(
+              isModifyMode: true,
+              onIconPressed: () {
+                Navigator.of(context)
+                    .pop(); // Si fromExchange es true, hace un pop
+              },
+            )
+          : const UploadProductAppBar(), // Aquí se crea sin parámetros si showModifyButton es false
       body: SingleChildScrollView(
         child: Container(
           color: Colors.white, // Background color for the entire screen
@@ -260,6 +289,7 @@ class _UploadProductState extends State<UploadProductScreen> {
                 ),
                 const Divider(color: Color(0xFFD9D9D9), thickness: 20),
                 CategorySelector(
+                  key: _categorySelectorKey,
                   categories: clothingCategories,
                   styles: predefinedStyles,
                   sizes: predefinedSizes,
@@ -299,13 +329,15 @@ class _UploadProductState extends State<UploadProductScreen> {
     );
   }
 
-   Widget _buildPublishButton() {
+  Widget _buildPublishButton() {
     return Container(
       width: double.infinity,
       color: const Color(0xFFD9D9D9),
       padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 30),
       child: GestureDetector(
-        onTap: widget.showModifyButton ? _saveProduct : _uploadProduct, // Acción diferente según showModifyButton
+        onTap: widget.showModifyButton
+            ? _saveProduct
+            : _uploadProduct, // Acción diferente según showModifyButton
         child: Container(
           decoration: BoxDecoration(
             color: Colors.black,
@@ -314,7 +346,9 @@ class _UploadProductState extends State<UploadProductScreen> {
           padding: const EdgeInsets.symmetric(vertical: 17),
           child: Center(
             child: Text(
-              widget.showModifyButton ? 'Guardar' : 'Finalizar y publicar', // Cambiar texto según showModifyButton
+              widget.showModifyButton
+                  ? 'Guardar'
+                  : 'Finalizar y publicar', // Cambiar texto según showModifyButton
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 17,
@@ -331,8 +365,8 @@ class _UploadProductState extends State<UploadProductScreen> {
 
   // Método que se usará cuando showModifyButton sea true
   void _saveProduct() async {
-    // Lógica para guardar el producto cuando se está en el modo de modificación
     if (_formKey.currentState!.validate()) {
+      // Validar imagen
       if (_pickedImage == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Por favor, seleccione una imagen')),
@@ -340,7 +374,28 @@ class _UploadProductState extends State<UploadProductScreen> {
         return;
       }
 
-      _formKey.currentState!.save();
+      // Validar campos de selección obligatorios
+      if (selectedCategory.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Por favor, seleccione una categoría')),
+        );
+        return;
+      }
+
+      if (selectedStyles.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Por favor, seleccione al menos un estilo')),
+        );
+        return;
+      }
+
+      if (selectedSize.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Por favor, seleccione una talla')),
+        );
+        return;
+      }
 
       if (selectedQuality == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -348,6 +403,8 @@ class _UploadProductState extends State<UploadProductScreen> {
         );
         return;
       }
+
+      _formKey.currentState!.save();
 
       try {
         String result = await _productService.uploadProduct(
@@ -460,7 +517,8 @@ class _UploadProductState extends State<UploadProductScreen> {
           );
         }
       } catch (e) {
-        Navigator.of(context).pop(); // Close the loading dialog in case of error
+        Navigator.of(context)
+            .pop(); // Close the loading dialog in case of error
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al guardar el producto: $e')),
         );
