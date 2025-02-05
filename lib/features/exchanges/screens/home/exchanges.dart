@@ -598,6 +598,7 @@ class ExchangesState extends State<Exchanges> {
                           ),
                         ),
                         const SizedBox(width: 16),
+                        if (isOther) // Solo muestra el botón "Aceptar Cambio" si isOther es true
                         TextButton(
                           onPressed: _doTrade,
                           child: const Text(
