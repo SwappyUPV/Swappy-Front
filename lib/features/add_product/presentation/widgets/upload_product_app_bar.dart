@@ -1,17 +1,29 @@
 import 'package:flutter/material.dart';
 
 class UploadProductAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const UploadProductAppBar({Key? key}) : super(key: key);
+  final bool isModifyMode; // Booleano que controla el título y el botón
+  final VoidCallback? onIconPressed;
+
+  // Constructor modificado para aceptar el parámetro booleano
+  const UploadProductAppBar({
+    Key? key,
+    this.onIconPressed,
+    this.isModifyMode = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 56,
-      color: Colors.black,
-      alignment: Alignment.center,
-      child: const Text(
-        'SUBE UNA PRENDA',
-        style: TextStyle(
+    return AppBar(
+      backgroundColor: Colors.black,
+      leading: isModifyMode 
+        ? IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: onIconPressed,
+          )
+        : null, // Si no es modifyMode, no muestra el icono
+      title: Text(
+        isModifyMode ? 'MODIFICAR' : 'SUBE UNA PRENDA',
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 16,
           fontWeight: FontWeight.w500,
@@ -19,9 +31,10 @@ class UploadProductAppBar extends StatelessWidget implements PreferredSizeWidget
           letterSpacing: -0.32,
         ),
       ),
+      centerTitle: true,
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(56);
+  Size get preferredSize => const Size.fromHeight(56); // Tamaño del AppBar
 }

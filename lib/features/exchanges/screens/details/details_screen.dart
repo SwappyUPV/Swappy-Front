@@ -15,6 +15,7 @@ import 'package:pin/core/services/product.dart';
 import 'package:image_picker/image_picker.dart';
 import 'components/VirtualTryOnResult.dart';
 import 'components/Details_app_bar.dart';
+import 'package:pin/features/add_product/presentation/screens/upload_product_screen.dart';
 
 class DetailsScreen extends StatefulWidget {
   const DetailsScreen({
@@ -225,8 +226,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           children: [
                             Expanded(
                               child: ElevatedButton(
-                                onPressed: () {
+                                 onPressed: () {
                                   // Acción para modificar
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const UploadProductScreen(showModifyButton: true),
+                                    ),
+                                  );
                                 },
                                 child: const Text('Modificar'),
                               ),

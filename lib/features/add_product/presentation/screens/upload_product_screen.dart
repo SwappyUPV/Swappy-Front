@@ -12,8 +12,12 @@ import 'package:pin/core/utils/NavigationMenu/NavigationMenu.dart';
 
 //todo: when uploading a product, the resetForm should also update the CategorySelector, Pricing and PromotionSection clearing them
 class UploadProductScreen extends StatefulWidget {
-  const UploadProductScreen({super.key});
+  const UploadProductScreen({
+    super.key,
+    this.showModifyButton = false,
+    });
 
+  final bool showModifyButton;
   @override
   State<UploadProductScreen> createState() => _UploadProductState();
 }
@@ -228,7 +232,14 @@ class _UploadProductState extends State<UploadProductScreen> {
     }
 
     return Scaffold(
-      appBar: UploadProductAppBar(),
+      appBar: widget.showModifyButton
+      ? UploadProductAppBar(
+          isModifyMode: true, 
+          onIconPressed: () {
+            Navigator.of(context).pop(); // Si fromExchange es true, hace un pop
+          },
+        )
+      : const UploadProductAppBar(),  // Aquí se crea sin parámetros si showModifyButton es false
       body: SingleChildScrollView(
         child: Container(
           color: Colors.white, // Background color for the entire screen
@@ -288,23 +299,23 @@ class _UploadProductState extends State<UploadProductScreen> {
     );
   }
 
-  Widget _buildPublishButton() {
+   Widget _buildPublishButton() {
     return Container(
       width: double.infinity,
       color: const Color(0xFFD9D9D9),
       padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 30),
       child: GestureDetector(
-        onTap: _uploadProduct,
+        onTap: widget.showModifyButton ? _saveProduct : _uploadProduct, // Acción diferente según showModifyButton
         child: Container(
           decoration: BoxDecoration(
             color: Colors.black,
             borderRadius: BorderRadius.circular(20),
           ),
           padding: const EdgeInsets.symmetric(vertical: 17),
-          child: const Center(
+          child: Center(
             child: Text(
-              'Finalizar y publicar',
-              style: TextStyle(
+              widget.showModifyButton ? 'Guardar' : 'Finalizar y publicar', // Cambiar texto según showModifyButton
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 17,
                 fontWeight: FontWeight.w500,
@@ -316,5 +327,144 @@ class _UploadProductState extends State<UploadProductScreen> {
         ),
       ),
     );
+  }
+
+  // Método que se usará cuando showModifyButton sea true
+  void _saveProduct() async {
+    // Lógica para guardar el producto cuando se está en el modo de modificación
+    if (_formKey.currentState!.validate()) {
+      if (_pickedImage == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Por favor, seleccione una imagen')),
+        );
+        return;
+      }
+
+      _formKey.currentState!.save();
+
+      if (selectedQuality == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Por favor, seleccione una calidad')),
+        );
+        return;
+      }
+
+      try {
+        String result = await _productService.uploadProduct(
+          title: _titleController.text,
+          description: _descriptionController.text,
+          styles: selectedStyles,
+          size: selectedSize,
+          price: isExchangeOnly ? null : price,
+          quality: selectedQuality!,
+          image: _pickedImage,
+          category: selectedCategory,
+          isExchangeOnly: isExchangeOnly,
+          isPublic: isPublic,
+          enCloset: false,
+        );
+
+        if (result.startsWith("Producto guardado con éxito")) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return WillPopScope(
+                onWillPop: () async => false,
+                child: Dialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Container(
+                    width: 300,
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.check_circle,
+                            color: Colors.green, size: 60),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Guardado correctamente',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.black,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                                onPressed: () {
+                                  navigationController.updateIndex(0);
+                                  Get.offAll(() => NavigationMenu());
+                                },
+                                child: const Text(
+                                  'Ir al catálogo',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  side: const BorderSide(color: Colors.black),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  _resetForm();
+                                },
+                                child: const Text(
+                                  'Seguir',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(result)),
+          );
+        }
+      } catch (e) {
+        Navigator.of(context).pop(); // Close the loading dialog in case of error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al guardar el producto: $e')),
+        );
+      }
+    }
   }
 }
