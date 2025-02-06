@@ -36,7 +36,7 @@ class VirtualTryOnService {
     var request = http.MultipartRequest("POST", uri);
 
     request.headers.addAll({
-      'x-rapidapi-key': "871410ef94msh6db4dc310d7d923p14f776jsna4303bde21e9",
+      'x-rapidapi-key': "a02f4ac1c9msh14b0444bd2e4c2bp13cd84jsnc3ce8ce6f7ef",
       'x-rapidapi-host': "try-on-clothes.p.rapidapi.com",
     });
 
@@ -64,7 +64,7 @@ class VirtualTryOnService {
               "/api/rapidapi/query-async-task-result", {"task_id": taskId}),
           headers: {
             'x-rapidapi-key':
-                "871410ef94msh6db4dc310d7d923p14f776jsna4303bde21e9",
+                "a02f4ac1c9msh14b0444bd2e4c2bp13cd84jsnc3ce8ce6f7ef",
             'x-rapidapi-host': "try-on-clothes.p.rapidapi.com",
           },
         );
@@ -107,7 +107,7 @@ class VirtualTryOnService {
 
     try {
       var response = await http.get(uri, headers: {
-        'x-rapidapi-key': "e74b3e8abfmshd437b375b1486fep15f172jsn8653ffba2102",
+        'x-rapidapi-key': "a02f4ac1c9msh14b0444bd2e4c2bp13cd84jsnc3ce8ce6f7ef",
         'x-rapidapi-host': "try-on-clothes.p.rapidapi.com",
       });
       await Future.delayed(Duration(seconds: 15));
