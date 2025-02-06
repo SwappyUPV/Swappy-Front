@@ -30,6 +30,8 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
   // Dimensiones de visualización
   static const double DISPLAY_WIDTH = 1000.0;
   static const double DISPLAY_HEIGHT = 1600.0;
+  static const double PREVIEW_WIDTH = 250.0; // Ancho de previsualización
+  static const double PREVIEW_HEIGHT = 400.0; // Alto de previsualización
   static const double MARGIN_PERCENTAGE = 0.1;
   static const int IMAGE_QUALITY = 100;
 
@@ -245,8 +247,8 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
               alignment: Alignment.center,
               children: [
                 Container(
-                  width: DISPLAY_WIDTH,
-                  height: DISPLAY_HEIGHT,
+                  width: PREVIEW_WIDTH,
+                  height: PREVIEW_HEIGHT,
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(8),
@@ -254,7 +256,7 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
                   child: Center(
                     child: Padding(
                       padding:
-                          EdgeInsets.all(DISPLAY_WIDTH * MARGIN_PERCENTAGE),
+                          EdgeInsets.all(PREVIEW_WIDTH * MARGIN_PERCENTAGE),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Container(
@@ -263,17 +265,17 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
                               ? Image.network(
                                   widget.pickedImage.path,
                                   fit: BoxFit.contain,
-                                  width: DISPLAY_WIDTH *
+                                  width: PREVIEW_WIDTH *
                                       (1 - 2 * MARGIN_PERCENTAGE),
-                                  height: DISPLAY_HEIGHT *
+                                  height: PREVIEW_HEIGHT *
                                       (1 - 2 * MARGIN_PERCENTAGE),
                                 )
                               : Image.file(
                                   File(widget.pickedImage.path),
                                   fit: BoxFit.contain,
-                                  width: DISPLAY_WIDTH *
+                                  width: PREVIEW_WIDTH *
                                       (1 - 2 * MARGIN_PERCENTAGE),
-                                  height: DISPLAY_HEIGHT *
+                                  height: PREVIEW_HEIGHT *
                                       (1 - 2 * MARGIN_PERCENTAGE),
                                 ),
                         ),
