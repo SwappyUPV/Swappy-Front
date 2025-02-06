@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:pin/core/utils/responsive.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:pin/features/catalogue/presentation/widgets/navigation_menu.dart';
-
-import '../../../../core/utils/background.dart';
+import 'package:pin/core/utils/NavigationMenu/NavigationMenu.dart';
 import '../widgets/forms/login_form.dart';
-import '../widgets/components/login_screen_top_image.dart';
+import 'package:pin/core/utils/NavigationMenu/controllers/navigationController.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -19,24 +17,7 @@ class _LoginState extends State<Login> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final NavigationController navigationController =
       Get.find<NavigationController>();
-
-  @override
-  void initState() {
-    super.initState();
-    // Comentamos el auto-login
-    // _autoLogin();
-  }
-
-  // Future<void> _autoLogin() async {
-  //   String email = 's@gmail.com'; // Reemplaza con el email predeterminado
-  //   String password = '123456'; // Reemplaza con la contraseña predeterminada
-  //
-  //   String res = await _loginUser(email: email, password: password);
-  //
-  //   if (res == 'success') {
-  //     _navigateToCatalogue();
-  //   }
-  // }
+  bool _isHoveredCatalogue = false;
 
   Future<String> _loginUser(
       {required String email, required String password}) async {
@@ -55,7 +36,6 @@ class _LoginState extends State<Login> {
 
   void _handleLogin(String email, String password) async {
     String res = await _loginUser(email: email, password: password);
-
     if (res == 'success') {
       _navigateToCatalogue();
     } else {
@@ -70,59 +50,83 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    return Background(
-      child: SingleChildScrollView(
-        child: Responsive(
-          mobile: MobileLogin(onLogin: _handleLogin),
-          desktop: Row(
-            children: [
-              Expanded(
-                child: LoginScreenTopImage(),
-              ),
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 450,
-                      child: LoginForm(),
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    final horizontalPadding = isMobile ? 20.0 : 50.0;
+
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: isMobile ? 50 : 75),
+                  // Top Logo and Back Button
+                  Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Volver al catálogo button
+                        MouseRegion(
+                          onEnter: (_) =>
+                              setState(() => _isHoveredCatalogue = true),
+                          onExit: (_) =>
+                              setState(() => _isHoveredCatalogue = false),
+                          child: TextButton(
+                            onPressed: _navigateToCatalogue,
+                            style: TextButton.styleFrom(
+                              foregroundColor: _isHoveredCatalogue
+                                  ? Colors.grey
+                                  : Colors.black,
+                              padding: EdgeInsets.zero,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.arrow_back,
+                                  size: isMobile ? 18 : 20,
+                                  color: _isHoveredCatalogue
+                                      ? Colors.grey
+                                      : Colors.black,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Volver al catálogo',
+                                  style: TextStyle(
+                                    fontFamily: 'UrbaneLight',
+                                    fontSize: isMobile ? 14 : 15,
+                                    letterSpacing: -0.26,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        // Logo
+                        SvgPicture.asset(
+                          'assets/icons/logo.svg',
+                          height: isMobile ? 17 : 35,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  SizedBox(height: isMobile ? 100 : 172),
+
+                  // Login Form
+                  LoginForm(onLogin: _handleLogin),
+                ],
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class MobileLogin extends StatelessWidget {
-  final Function(String, String) onLogin;
-
-  const MobileLogin({
-    super.key,
-    required this.onLogin,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        LoginScreenTopImage(),
-        Row(
-          children: [
-            Spacer(),
-            Expanded(
-              flex: 8,
-              child: LoginForm(),
             ),
-            Spacer(),
-          ],
-        ),
-      ],
+          );
+        },
+      ),
     );
   }
 }

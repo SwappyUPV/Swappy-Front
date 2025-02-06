@@ -13,13 +13,18 @@ class AuthMethod {
     return await _googleSignIn.signInSilently();
   }
 
+  // Google Sign-In Method
   Future<String> signInWithGoogle() async {
     String res = "Some error occurred";
     try {
-      // Start Google Sign-In process
-      GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      // Attempt silent sign-in first
+      GoogleSignInAccount? googleUser = await signInWithGoogleSilently();
       if (googleUser == null) {
-        return "Google sign-in aborted"; // User aborted the sign-in
+        // Silent sign-in failed, proceed with regular sign-in
+        googleUser = await _googleSignIn.signIn();
+        if (googleUser == null) {
+          return "Google sign-in aborted"; // User aborted the sign-in
+        }
       }
 
       // Obtain the auth details from the request
@@ -38,15 +43,30 @@ class AuthMethod {
       DocumentSnapshot userDoc = await _firestore.collection("users").doc(userCredential.user!.uid).get();
 
       if (!userDoc.exists) {
-        // If the user does not exist, add them to Firestore
+        // If the user does not exist, add them to Firestore with information from Google account or default values
         await _firestore.collection("users").doc(userCredential.user!.uid).set({
           'uid': userCredential.user!.uid,
-          'email': userCredential.user!.email,
+          'email': userCredential.user!.email ?? 'default@example.com',
+          'name': (userCredential.user!.email != null && userCredential.user!.email!.contains('@gmail.com'))
+              ? userCredential.user!.email!.split('@')[0]
+              : googleUser.displayName ?? 'Default Name',
+          'address': 'Valencia',
+          'birthday': Timestamp.fromDate(DateTime(2024, 12, 2)),
+          'gender': 'Hombre',
+          'points': '0', // Store points as string
+          'preferredSizes': ['S'],
+          'profilePicture': 'https://firebasestorage.googleapis.com/v0/b/swappy-pin.appspot.com/o/profile_images%2Fdefault_user.png?alt=media&token=92bbfc56-8927-41a0-b81c-2394b90bf38c',
+          'createdAt': FieldValue.serverTimestamp(),
+          'bio': 'Sin biografía',
+          'clothes': 0,
+          'followers': 0,
+          'following': 0,
+          'exchanges': 0,
         });
+        //googleUser.photoUrl ?? fails due to too many requests
       }
 
       res = "success";
-      print(res);
     } catch (err) {
       print('Error in signInWithGoogle: $err');
       return err.toString();
@@ -78,7 +98,7 @@ class AuthMethod {
         });
         res = "success";
       } else {
-        res = "Please fill in all fields";
+        res = "Por favor rellena todos los campos";
       }
     } catch (err) {
       print('Error in signupUser: $err');
@@ -169,6 +189,7 @@ class AuthMethod {
             userData[key] = value.toDate().toString(); // or use value.toDate() for DateTime
           }
         });
+        userData['clothes'] = userData['clothes'] ?? 0;
 
         String userModelJson = jsonEncode(userData);
         await prefs.setString('userModel', userModelJson);
@@ -183,9 +204,91 @@ class AuthMethod {
 
   // Logout
   Future<void> logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.clear();
     await _auth.signOut();
     await _auth.authStateChanges().first;
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('loggedOut', true);
   }
+
+  //Reset Password with email
+  Future<String> resetPassword(String email) async {
+    String res = "Some error occurred";
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      res = "Password reset email sent";
+    } catch (err) {
+      print('Error in resetPassword: $err');
+      res = err.toString();
+    }
+    return res;
+  }
+
+  Future<String> deleteUser() async {
+
+    String res = "Some error occurred";
+    try {
+      // Delete user document from Firestore
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      await _firestore.collection("users").doc(prefs.getString('userId')).delete();
+
+      // Delete user from Firebase Authentication
+      User? user = _auth.currentUser;
+      if (user != null && user.uid == prefs.getString('userId')) {
+        await user.delete();
+      }
+
+      res = "User deleted successfully";
+      prefs.clear();
+    } catch (err) {
+      print('Error in deleteUser: $err');
+      res = err.toString();
+    }
+    return res;
+  }
+
+  Future<void> updatePassword(String newPassword) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      await user.updatePassword(newPassword);
+    }
+  }
+
+  Future<void> updateEmail(String newEmail, String password) async {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      throw Exception("No user is currently logged in.");
+    }
+
+    try {
+      // Re-authenticate user
+      AuthCredential credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: password,
+      );
+
+      await user.reauthenticateWithCredential(credential);
+
+      // Update email in Firebase Authentication
+      await user.updateEmail(newEmail);
+
+      // Update email in Firestore (optional, depending on your structure)
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+        'email': newEmail,
+      });
+
+      print("Email updated successfully.");
+    } catch (e) {
+      print("Failed to update email: $e");
+      throw Exception("Re-authentication failed or email update error.");
+    }
+  }
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    await _auth.sendPasswordResetEmail(email: email);
+  }
+
+
+
 }

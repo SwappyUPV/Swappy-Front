@@ -1,32 +1,34 @@
-import 'package:pin/core/services/chat_service.dart';
-import 'package:pin/features/auth/data/models/user_model.dart';
 import 'package:flutter/material.dart';
+import 'package:pin/core/services/chat_service_2.dart';
+import '../../../../auth/data/models/user_model.dart';
+import '../../../../CustomAppBar.dart';
 import 'components/body.dart';
-import '../../../constants.dart';
+import 'components/new_chat_PopUp.dart';
+
+// todo: use of constants and components: code refactoring and clean up
+
+
+// todo: PRIORITY: update the read and unread messages when opening a chat instead of when going back from a chat
+// todo: make emojis live with firebase
+
+// todo: FIX NAVIGATION ROUTING (Consider creating GoRouting so links can be shared and accessed by loggedIn users to view users profiles, items...): removal of BottomNavBar in nested message class (complex to implement since the current routing isn't detecting the screens in)
+// todo: Make camera and audio functional
+
 
 class ChatsScreen extends StatefulWidget {
   @override
   ChatsScreenState createState() => ChatsScreenState();
 }
 
-class ChatsScreenState extends State<ChatsScreen> with SingleTickerProviderStateMixin {
+class ChatsScreenState extends State<ChatsScreen> {
   TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  bool _isSearching = false;
   bool _showNewChatPopup = false;
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
-  }
-
-  void _onSearchChanged() {
-    if (mounted) {
-      setState(() {
-        _searchQuery = _searchController.text;
-      });
-    }
   }
 
   @override
@@ -39,141 +41,79 @@ class ChatsScreenState extends State<ChatsScreen> with SingleTickerProviderState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildAppBar(),
+      appBar: CustomAppBar(
+        title: 'MENSAJES',
+        iconPath: 'assets/icons/new_chat.svg',
+        onIconPressed: _toggleNewChatPopup,
+        iconPosition: IconPosition.right, // Para icono a la izquierda
+      ),
       body: Stack(
         children: [
-          Body(searchQuery: _searchQuery),
-          if (_showNewChatPopup) buildNewChatPopup(),
-        ],
-      ),
-    );
-  }
-
-  AppBar buildAppBar() {
-    return AppBar(
-      backgroundColor: kPrimaryColor,
-      automaticallyImplyLeading: false,
-      title: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.chat),
-            onPressed: () {
-              if (mounted) {
-                setState(() {
-                  _showNewChatPopup = !_showNewChatPopup;
-                  _searchController.clear();
-                  _searchQuery = '';
-                });
-              }
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              if (mounted) {
-                setState(() {
-                  _isSearching = !_isSearching;
-                  if (!_isSearching) {
-                    _searchController.clear();
-                    _searchQuery = '';
-                  }
-                });
-              }
-            },
-          ),
-          if (_isSearching)
-            Expanded(
-              child: TextField(
-                controller: _searchController,
-                decoration: const InputDecoration(
-                  hintText: "Buscar...",
-                  border: InputBorder.none,
-                ),
+          Column(
+            children: [
+              Expanded(
+                child:
+                    Body(searchQuery: _searchQuery, onDeleteChat: _deleteChat),
               ),
+            ],
+          ),
+          if (_showNewChatPopup)
+            NewChatPopup(
+              searchController: _searchController,
+              searchQuery: _searchQuery,
+              onClose: _closeNewChatPopup,
+              onNewChat: _handleNewChat,
             ),
         ],
       ),
     );
   }
 
-  /// Builds a popup window to search and start a new chat
-  Widget buildNewChatPopup() {
-    return Center(
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              spreadRadius: 2,
-              blurRadius: 5,
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: "Search users by name...",
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.close),
-                  onPressed: () {
-                    if (mounted) {
-                      setState(() {
-                        _showNewChatPopup = false;
-                        _searchController.clear();
-                      });
-                    }
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: StreamBuilder<List<UserModel>>(
-                stream: ChatService().searchUsersByName(_searchQuery),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) return Center(child: Text("No users found"));
-                  final users = snapshot.data!;
+  //--------------------------------------------- HELPER METHODS --------------------------------------
 
-                  return users.isEmpty
-                      ? const Center(child: Text("No users found"))
-                      : ListView.builder(
-                    itemCount: users.length,
-                    itemBuilder: (context, index) {
-                      final user = users[index];
-                      return ListTile(
-                        title: Text(user.name),
-                        subtitle: Text(user.email),
-                        onTap: () async {
-                          final chatExists = await ChatService().doesChatExist(user.uid);
-                          if (!chatExists) {
-                            await ChatService().startNewChat(user.uid);
-                            if (mounted) {
-                              setState(() {
-                                _showNewChatPopup = false;
-                              });
-                            }
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("Chat already exists with this user")),
-                            );
-                          }
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  void _onSearchChanged() {
+    setState(() {
+      _searchQuery = _searchController.text;
+    });
+  }
+
+  void _toggleNewChatPopup() {
+    setState(() {
+      _showNewChatPopup = !_showNewChatPopup;
+      _searchController.clear();
+      _searchQuery = '';
+    });
+  }
+
+  void _closeNewChatPopup() {
+    setState(() {
+      _showNewChatPopup = false;
+      _searchController.clear();
+    });
+  }
+
+  void _handleNewChat(UserModel user) async {
+    final chatExists = await ChatService2().doesChatExist(user.uid);
+    if (!chatExists) {
+      await ChatService2().startNewChat(user.uid);
+      _closeNewChatPopup();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Chat ya existe con el usuario ${user.name}")),
+      );
+    }
+  }
+
+  Future<void> _deleteChat(String chatId) async {
+    try {
+      await ChatService2().deleteChat(chatId);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Chat eliminado")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error eliminando chat: $e")),
+      );
+    }
   }
 }

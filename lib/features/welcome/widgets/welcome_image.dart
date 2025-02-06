@@ -13,7 +13,7 @@ class WelcomeImage extends StatelessWidget {
     return Column(
       children: [
         const Text(
-          "WELCOME TO SWAPPY",
+          "Bienvenido a Swappy",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: defaultPadding * 2),
@@ -22,9 +22,7 @@ class WelcomeImage extends StatelessWidget {
             const Spacer(),
             Expanded(
               flex: 8,
-              child: SvgPicture.asset(
-                "assets/icons/chat.svg",
-              ),
+              child: Image.asset("swappy.png"),
             ),
             const Spacer(),
           ],

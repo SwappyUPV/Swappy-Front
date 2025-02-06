@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
-import '../../details/details_screen.dart';
+import 'package:pin/features/virtual_closet/presentation/screens/change_clothes_screen.dart';
+import 'package:pin/features/virtual_closet/presentation/screens/virtual_closet_screen.dart';
+import '../../details/details_screen.dart'; // Importa el VirtualCloset
 import 'item_card.dart';
 
 class ItemGrid extends StatelessWidget {
   final List<Product> items;
   final bool showButtons;
   final Function(Product) onDeleteItem;
-  final void Function()? onAddItem;
-
+  final void Function(List<Product>)? onAddItem;
+  final String? id;
   const ItemGrid({
     super.key,
     required this.items,
     required this.showButtons,
     required this.onAddItem,
     required this.onDeleteItem,
-    void Function(int id)? onRemoveItem,
+    this.id,
   });
 
   @override
@@ -41,8 +43,35 @@ class ItemGrid extends StatelessWidget {
         itemBuilder: (context, index) {
           if (index == items.length && showButtons && onAddItem != null) {
             return GestureDetector(
-              //Aquí se abrirá el armario del usuario
-              onTap: () {},
+              onTap: () async {
+                if (onAddItem != null && id != null) {
+                  // Navegar al VirtualCloset y esperar selección
+                  final List<Product>? selectedProducts = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          ChangeClothes(fromExchange: true , id : id),
+                    ),
+                  );
+                  if (selectedProducts != null) {
+                    onAddItem!(selectedProducts);
+                  }
+                }
+                else if (onAddItem != null) {
+                  // Navegar al VirtualCloset y esperar selección
+                  final List<Product>? selectedProducts = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                      const ChangeClothes(fromExchange: true),
+                    ),
+                  );
+                  if (selectedProducts != null) {
+                    onAddItem!(selectedProducts);
+                  }
+                }
+
+              },
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
@@ -59,12 +88,12 @@ class ItemGrid extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8.0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Text(
-                      'Añadir',
+                      "Añadir",
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey),
+                      style: const TextStyle(color: Colors.grey),
                     ),
                   ),
                 ],

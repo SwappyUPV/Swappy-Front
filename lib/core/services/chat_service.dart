@@ -23,35 +23,58 @@ class ChatService {
     return _cachedUserId;
   }
 
-  Stream<List<Chat>> fetchChats({bool? showActive, bool? showRecent}) async* {
+  Stream<List<Chat>> fetchChats() async* {
     final String? userId = await getUserId();
     if (userId == null) {
       yield [];
       return;
     }
 
-    // Create the base query with `array-contains`
-    Query<Map<String, dynamic>> query =
-        _firestore.collection('chats').where('users', arrayContains: userId);
+    // Fetch chats where the user is a participant
+    yield* _firestore
+        .collection('chats')
+        .where('users', arrayContains: userId)
+        .snapshots()
+        .map((snapshot) {
+      final chats = snapshot.docs.map((doc) => Chat.fromDocument(doc)).toList();
 
-    // Apply additional filters if specified
-    if (showActive == true) {
-      query = query.where('isActive', isEqualTo: showActive);
-    }
-    if (showRecent == true) {
-      query = query.where('isRecent', isEqualTo: showRecent);
-    }
-    // Fetch the chats
-    final querySnapshot = await query.get();
+      // Sort chats: unread messages first, then by timestamp descending
+      chats.sort((a, b) {
+        final unreadCountA = a.unreadCount[userId] ?? 0;
+        final unreadCountB = b.unreadCount[userId] ?? 0;
 
-    // Map the documents to Chat objects directly
-    final filteredChats = querySnapshot.docs.map((doc) {
-      return Chat.fromDocument(doc);
-    }).toList();
+        if (unreadCountA > 0 && unreadCountB == 0) {
+          return -1;
+        } else if (unreadCountA == 0 && unreadCountB > 0) {
+          return 1;
+        } else {
+          return b.timestamp.compareTo(a.timestamp);
+        }
+      });
 
-    // Yield the filtered list of chats
-    yield filteredChats;
+      return chats;
+    });
   }
+
+  Future<void> deleteChat(String chatId) async {
+    try {
+      final chatRef = _firestore.collection('chats').doc(chatId);
+      final messagesRef = chatRef.collection('messages');
+
+      // Delete all messages in the sub-collection
+      final messagesSnapshot = await messagesRef.get();
+      for (var doc in messagesSnapshot.docs) {
+        await doc.reference.delete();
+      }
+
+      // Delete the chat document
+      await chatRef.delete();
+    } catch (e) {
+      print("Error deleting chat: $e");
+      throw e;
+    }
+  }
+
 
   // Listen for only the latest incoming message
   Stream<ChatMessageModel?> listenForNewMessage(String chatId) async* {
@@ -71,8 +94,7 @@ class ChatService {
   }
 
   // Optimized method to send a message without fetching user ID each time
-  Future<void> sendMessage(
-      String chatId, String messageText, String userId) async {
+  Future<void> sendMessage(String chatId, String messageText, String userId) async {
     if (userId.isEmpty) {
       print("Attempting to send message with empty userId");
       return; // Exit if userId is empty
@@ -83,21 +105,57 @@ class ChatService {
       'content': messageText,
       'sender': userId,
       'type': "text",
-      'status': "viewed",
+      'status': "notViewed",
       'timestamp': FieldValue.serverTimestamp(),
     };
 
     try {
-      await _firestore
-          .collection('chats')
-          .doc(chatId)
-          .collection('messages')
-          .add(messageData);
+      final chatRef = _firestore.collection('chats').doc(chatId);
+      await chatRef.collection('messages').add(messageData);
+
+      // Increment unread count for other users
+      final chatDoc = await chatRef.get();
+      if (chatDoc.exists) {
+        List<String> users = List<String>.from(chatDoc['users']);
+        for (String user in users) {
+          if (user != userId) {
+            chatRef.update({
+              'unreadCount.$user': FieldValue.increment(1),
+            });
+          }
+        }
+      }
+
       print("Message sent successfully.");
     } catch (e) {
       print("Error sending message: $e");
     }
   }
+  Future<void> markChatAsRead(String chatId, String userId) async {
+    try {
+      final chatRef = _firestore.collection('chats').doc(chatId);
+
+      // Reset unread count for this user
+      await chatRef.update({
+        'unreadCount.$userId': 0,
+      });
+
+      // Optionally, mark all messages as "viewed" for this user
+      final messageQuery = await chatRef
+          .collection('messages')
+          .where('sender', isNotEqualTo: userId)
+          .where('status', isEqualTo: 'notViewed')
+          .get();
+
+      for (var message in messageQuery.docs) {
+        await message.reference.update({'status': 'viewed'});
+      }
+    } catch (e) {
+      print("Error marking chat as read: $e");
+    }
+  }
+
+
 
   // Fetch the latest message for a specific chat
   Future<ChatMessageModel?> getLatestMessage(String chatId) async {
@@ -115,6 +173,22 @@ class ChatService {
     return snapshot.docs.isNotEmpty
         ? _mapToChatMessageModel(snapshot.docs.first)
         : null;
+
+  }
+
+  Stream<ChatMessageModel?> fetchLatestMessage(String chatId) async* {
+    yield* _firestore
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .limit(1)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.isNotEmpty
+          ? _mapToChatMessageModel(snapshot.docs.first)
+          : null;
+    });
   }
 
   Future<Chat?> getChatById(String chatId) async {
@@ -138,14 +212,13 @@ class ChatService {
         timestamp: (chatData['timestamp'] as Timestamp).toDate(),
         isActive: chatData['isActive'] ?? false,
         isRecent: chatData['isRecent'] ?? true,
-        users: chatData['users'].cast<String>(),
+        users: chatData['users'].cast<String>(), unreadCount: {},
       );
     }
     return null;
   }
 
   Stream<List<ChatMessageModel>> fetchMessages(String chatId) async* {
-    final String? userId = await getUserId();
     // Start streaming messages from Firestore
     yield* _firestore
         .collection('chats')
@@ -162,7 +235,7 @@ class ChatService {
 
       // Map the documents to ChatMessageModel objects
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         // Handle the possibility of a null timestamp
         Timestamp? timestamp = data['timestamp'] as Timestamp?;
         // Extract message properties
@@ -200,7 +273,7 @@ class ChatService {
     return _firestore
         .collection('users')
         .where('name', isGreaterThanOrEqualTo: name)
-        .where('name', isLessThanOrEqualTo: name + '\uf8ff')
+        .where('name', isLessThanOrEqualTo: '$name\uf8ff')
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) {
               return UserModel.fromFirestore(doc);
@@ -231,15 +304,34 @@ class ChatService {
       'users': [currentUserId, otherUserId],
     });
 
-    // Create the messages sub-collection within the newly created chat
-    await chatDocRef.collection('messages').add({
-      'content': 'Hola', // Initial message content
-      'sender': currentUserId, // Assuming the current user is the sender
-      'status': 'viewed', // Set initial status
-      'timestamp': FieldValue.serverTimestamp(),
-      'type': 'text', // Message type, assuming it's a text message
-    });
   }
+
+
+  Future<int> getUnreadMessagesCount(String chatId) async {
+    try {
+      final String? userId = await getUserId();
+      if (userId == null) return 0;
+
+      // Fetch the chat document from Firestore
+      final chatDoc = await _firestore.collection('chats').doc(chatId).get();
+
+      if (chatDoc.exists) {
+        // Extract the unreadCount map from the chat document
+        final Map<String, dynamic>? unreadCountMap = chatDoc.data()?['unreadCount'];
+
+        // Return the unread count for the authenticated user
+        return unreadCountMap != null && unreadCountMap.containsKey(userId)
+            ? unreadCountMap[userId] as int
+            : 0; // Default to 0 if no count is available
+      }
+
+      return 0; // Default to 0 if the chat document does not exist
+    } catch (e) {
+      print("Error fetching unread messages count: $e");
+      return 0; // Return 0 in case of errors
+    }
+  }
+
 
   // Fetch a user by their ID
   Future<UserModel?> fetchUserById(String userId) async {

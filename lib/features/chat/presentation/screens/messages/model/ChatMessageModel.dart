@@ -24,4 +24,34 @@ class ChatMessageModel {
     required this.timestamp,
     this.updatedTimestamp,
   });
+
+  factory ChatMessageModel.fromJson(Map<String, dynamic> json) {
+    //print("Parsing ChatMessageModel from JSON: $json"); // Log the JSON data
+
+    final id = json['id'];
+    final type = ChatMessageType.values.firstWhere((e) =>
+    e.toString() == 'ChatMessageType.${json['type']}');
+    final content = json['content'];
+    final sender = json['sender'];
+    final receiver = json['receiver'];
+    final status = MessageStatus.values.firstWhere((e) =>
+    e.toString() == 'MessageStatus.${json['status']}');
+    final timestamp = DateTime.fromMillisecondsSinceEpoch(json['timestamp']);
+    final updatedTimestamp = json['updatedTimestamp'] != null
+        ? DateTime.fromMillisecondsSinceEpoch(json['updatedTimestamp'])
+        : null;
+
+    //print("Parsed values - id: $id, type: $type, content: $content, sender: $sender, receiver: $receiver, status: $status, timestamp: $timestamp, updatedTimestamp: $updatedTimestamp"); // Log the parsed values
+
+    return ChatMessageModel(
+      id: id,
+      type: type,
+      content: content,
+      sender: sender,
+      receiver: receiver,
+      status: status,
+      timestamp: timestamp,
+      updatedTimestamp: updatedTimestamp,
+    );
+  }
 }

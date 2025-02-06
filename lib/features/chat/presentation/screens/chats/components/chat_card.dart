@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:pin/features/chat/presentation/components/exchange_notification.dart';
+import 'package:pin/core/services/chat_service_2.dart';
+import 'package:pin/features/chat/presentation/screens/chats/components/placeholder.dart';
 import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart';
-import 'package:pin/core/services/chat_service.dart';
-import 'package:intl/intl.dart'; // For date formatting
 import 'package:pin/features/chat/presentation/screens/messages/message_screen.dart';
 import 'package:pin/features/chat/presentation/screens/messages/model/ChatMessageModel.dart';
+import 'profile_image.dart';
+import 'chat_details.dart';
+import 'package:pin/features/chat/presentation/screens/chats/components/message_status.dart'
+    as msg_status;
 import '../../../../constants.dart';
 
 class ChatCard extends StatefulWidget {
@@ -22,184 +25,129 @@ class ChatCard extends StatefulWidget {
 }
 
 class _ChatCardState extends State<ChatCard> {
-  final ChatService chatService = ChatService();
-  ChatMessageModel? latestMessage;
+  final ChatService2 chatService = ChatService2();
   String _displayName = "";
-  String _profileImage = ""; // Initially empty
+  String _profileImage = "";
   String? userId;
+  int unreadMessagesCount = 0;
+  ChatMessageModel? latestMessage;
 
   @override
   void initState() {
     super.initState();
-    _initializeUserId(); // Initialize userId
-    _fetchLatestMessage();
-  }
-
-  Future<void> _initializeUserId() async {
-    // Fetch and store userId once
-    userId = await chatService.getUserId();
-  }
-
-  Future<void> _fetchLatestMessage() async {
-    final message = await chatService.getLatestMessage(widget.chat.uid);
-
-    // Determine the other user in the chat and set the name and image dynamically
-    if (userId != null) {
-      if (widget.chat.user1 == userId) {
-        setState(() {
-          _displayName = widget.chat.name2;
-          _profileImage = widget.chat.image2.isNotEmpty
-              ? widget.chat.image2
-              : 'assets/images/user.png';
-        });
-      } else {
-        setState(() {
-          _displayName = widget.chat.name1;
-          _profileImage = widget.chat.image1.isNotEmpty
-              ? widget.chat.image1
-              : 'assets/images/user.png';
-        });
-      }
-    } else {
-      setState(() {
-        _displayName = widget.chat.name1; // fallback to default
-        _profileImage = widget.chat.image1.isNotEmpty
-            ? widget.chat.image1
-            : 'assets/images/user.png'; // fallback image
-      });
-    }
-
-    setState(() {
-      latestMessage = message;
-    });
+    _initializeChatDetails();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Show a loading indicator while fetching data
     if (_profileImage.isEmpty || _displayName.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: kDefaultPadding, vertical: kDefaultPadding * 0.75),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 24,
-              backgroundColor: Colors.grey, // Placeholder color
-            ),
-            Expanded(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: kDefaultPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      height: 16,
-                      width: 100, // Placeholder width
-                      color: Colors.grey, // Placeholder color
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      height: 14,
-                      width: 150, // Placeholder width
-                      color: Colors.grey, // Placeholder color
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const Opacity(
-              opacity: 0.64,
-              child: Text("..."), // Placeholder for timestamp
-            ),
-          ],
-        ),
-      );
+      return const PlaceholderWidget(); // Loads mock data when user details are not available
     }
 
-    return InkWell(
-      onTap: () async {
-        await Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) =>
-              MessagesScreen(chat: widget.chat), // Pass the entire Chat object
-        ));
-        _fetchLatestMessage(); // Refresh when returning
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: kDefaultPadding, vertical: kDefaultPadding * 0.75),
-        child: Row(
-          children: [
-            Stack(
-              children: [
-                CircleAvatar(
-                  radius: 24,
-                  backgroundImage: AssetImage(_profileImage),
-                ),
-                if (widget.chat.isActive)
-                  Positioned(
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      height: 16,
-                      width: 16,
-                      decoration: BoxDecoration(
-                        color: kPrimaryColor,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                            color: Theme.of(context).scaffoldBackgroundColor,
-                            width: 3),
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: 90),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: Color(0xFFB4B3B3)),
+          ),
+        ),
+        child: InkWell(
+            onTap: () async {
+              // Navegar a la nueva pantalla sin barra de navegación
+              await Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => MessagesScreen(chat: widget.chat),
+                fullscreenDialog: true, // Esto oculta la barra de navegación
+              ));
+
+              // Marcar el chat como leído después de la navegación
+              await chatService.markChatAsRead(widget.chat.uid, userId!);
+
+              // Actualizar el contador de mensajes no leídos si el widget sigue montado
+              if (mounted) {
+                setState(() {
+                  unreadMessagesCount =
+                      0; // Reset unread count when chat is opened
+                });
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(
+                  left: 15), // Padding de 15 a la izquierda
+              child: Row(
+                children: [
+                  ProfileImage(profileImage: _profileImage),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: kDefaultPadding),
+                      child: StreamBuilder<ChatMessageModel?>(
+                        stream: chatService.fetchLatestMessage(widget.chat.uid),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          }
+                          latestMessage = snapshot.data;
+                          return ChatDetails(
+                            displayName: _displayName,
+                            latestMessage: latestMessage,
+                            unreadMessagesCount: unreadMessagesCount,
+                          );
+                        },
                       ),
                     ),
-                  )
-              ],
-            ),
-            Expanded(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: kDefaultPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _displayName,
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w500),
-                    ),
-                    const SizedBox(height: 8),
-                    Opacity(
-                      opacity: 0.64,
-                      child: latestMessage?.type ==
-                              ChatMessageType.exchangeNotification
-                          ? ExchangeNotification(
-                              exchange: latestMessage,
-                              isClickable: false,
-                              receiver: widget.chat.user1 == userId
-                                  ? widget.chat.user2
-                                  : widget.chat.user1,
-                            )
-                          : Text(
-                              latestMessage?.content ?? "No messages",
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                    ),
-                  ],
-                ),
+                  ),
+                  msg_status.MessageStatus(
+                    unreadMessagesCount: unreadMessagesCount,
+                    latestMessage: latestMessage,
+                  ),
+                ],
               ),
-            ),
-            Opacity(
-              opacity: 0.64,
-              child: Text(
-                latestMessage != null
-                    ? DateFormat.jm().format(latestMessage!.timestamp)
-                    : "",
-              ),
-            ),
-          ],
-        ),
+            )),
       ),
     );
+  }
+
+  // ----------------------------------  HELPER METHODS ----------------------------------------------
+
+  Future<void> _initializeChatDetails() async {
+    userId = await chatService.getUserId();
+
+    if (userId != null && mounted) {
+      setState(() {
+        _setUserDetails();
+      });
+    }
+
+    await _fetchUnreadMessagesCount();
+  }
+
+  void _setUserDetails() {
+    if (widget.chat.user1 == userId) {
+      _displayName = widget.chat.name2;
+      _profileImage = widget.chat.image2.isNotEmpty
+          ? widget.chat.image2
+          : 'assets/images/user.png';
+    } else {
+      _displayName = widget.chat.name1;
+      _profileImage = widget.chat.image1.isNotEmpty
+          ? widget.chat.image1
+          : 'assets/images/user.png';
+    }
+  }
+
+  Future<void> _fetchUnreadMessagesCount() async {
+    try {
+      final unreadCount =
+          await chatService.getUnreadMessagesCount(widget.chat.uid);
+      if (mounted) {
+        setState(() {
+          unreadMessagesCount = unreadCount;
+        });
+      }
+    } catch (e) {
+      print("Error fetching unread messages count: $e");
+    }
   }
 }

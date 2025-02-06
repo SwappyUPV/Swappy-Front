@@ -20,14 +20,31 @@ class Characteristics extends StatelessWidget {
               children: [
                 const Text(
                   "Talla",
-                  style: TextStyle(color: kTextColor),
+                  style: TextStyle(
+                      color: kTextColor, fontSize: 14), // Reducido a 12
                 ),
                 Text(
-                  "${product.size}",
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge!
-                      .copyWith(fontWeight: FontWeight.bold),
+                  product.size,
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14), // Reducido a 12
+                ),
+              ],
+            ),
+          ),
+          Center(
+            child: Column(
+              children: [
+                const Text(
+                  "Calidad",
+                  style: TextStyle(
+                      color: kTextColor, fontSize: 14), // Reducido a 12
+                ),
+                Text(
+                  product.quality,
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14), // Reducido a 12
                 ),
               ],
             ),
@@ -36,32 +53,15 @@ class Characteristics extends StatelessWidget {
             child: Column(
               children: [
                 const Text(
-                  "Tela",
-                  style: TextStyle(color: kTextColor),
+                  "Estilo",
+                  style: TextStyle(
+                      color: kTextColor, fontSize: 14), // Reducido a 12
                 ),
                 Text(
-                  "Lino",
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge!
-                      .copyWith(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                const Text(
-                  "Categoría",
-                  style: TextStyle(color: kTextColor),
-                ),
-                Text(
-                  "Vintage",
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge!
-                      .copyWith(fontWeight: FontWeight.bold),
+                  product.styles.isEmpty ? "Varios" : product.styles.first,
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14), // Reducido a 12
                 ),
               ],
             ),

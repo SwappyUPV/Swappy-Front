@@ -1,100 +1,55 @@
 import 'package:flutter/material.dart';
-import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart'; // Use this Chat model
-import 'package:pin/core/services/chat_service.dart';
-import '../../../components/filled_outline_button.dart';
-import '../../../../constants.dart';
-import '../../messages/message_screen.dart';
+import 'package:pin/core/services/chat_service_2.dart';
+import 'package:pin/features/chat/presentation/screens/chats/model/Chat.dart';
 import 'chat_card.dart';
 
-class Body extends StatefulWidget {
+class Body extends StatelessWidget {
   final String searchQuery;
-  const Body({super.key, required this.searchQuery});
+  final Function(String) onDeleteChat;
 
-  @override
-  _BodyState createState() => _BodyState();
-}
+  const Body({
+    Key? key,
+    required this.searchQuery,
+    required this.onDeleteChat,
+  }) : super(key: key);
 
-class _BodyState extends State<Body> {
-  bool showActive = false;
-  bool showRecent = true; // Start with recent chats selected by default
-  final ChatService _chatService = ChatService();
-
-  Stream<List<Chat>> _getChatStream() {
-    if (showRecent) {
-      return _chatService.fetchChats(showRecent: true);
-    } else if (showActive) {
-      return _chatService.fetchChats(showActive: true);
-    } else {
-      // Default to an empty stream if neither flag is set (should not happen)
-      return Stream.value([]);
-    }
-  }
-
-  void _toggleChats(bool recent) {
-    setState(() {
-      showRecent = recent;
-      showActive = !recent;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.fromLTRB(
-              kDefaultPadding, 0, kDefaultPadding, kDefaultPadding),
-          color: kPrimaryColor,
-          child: Row(
-            children: [
-              FillOutlineButton(
-                press: () => _toggleChats(true), // Set to recent chats
-                text: "Recent Message",
-                isFilled: showRecent,
+    return StreamBuilder<List<Chat>>(
+      stream: ChatService2().fetchChats(),
+      builder: (context, snapshot) {
+        //print("StreamBuilder snapshot: ${snapshot.connectionState}");
+        if (!snapshot.hasData) {
+          //print("No data in snapshot");
+          return Center(child: CircularProgressIndicator());
+        }
+        final chats = snapshot.data!;
+       //print("Number of chats: ${chats.length}");
+        return ListView.builder(
+          itemCount: chats.length,
+          itemBuilder: (context, index) {
+            final chat = chats[index];
+            return Dismissible(
+              key: Key(chat.uid),
+              direction: DismissDirection.endToStart,
+              onDismissed: (direction) {
+                onDeleteChat(chat.uid);
+              },
+              background: Container(
+                color: Colors.red,
+                alignment: Alignment.centerRight,
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Icon(Icons.delete, color: Colors.white),
               ),
-              const SizedBox(width: kDefaultPadding),
-              FillOutlineButton(
-                press: () => _toggleChats(false), // Set to active chats
-                text: "Active",
-                isFilled: showActive,
+              child: ChatCard(
+                chat: chat,
+                press: () {},
               ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: StreamBuilder<List<Chat>>(
-            stream: _getChatStream(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(child: Text("No chats found"));
-              }
-
-              final filteredChats = snapshot.data!
-                  .where((chat) => chat.name1
-                      .toLowerCase()
-                      .contains(widget.searchQuery.toLowerCase()))
-                  .toList();
-
-              return ListView.builder(
-                itemCount: filteredChats.length,
-                itemBuilder: (context, index) => ChatCard(
-                  chat: filteredChats[index],
-                  press: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          MessagesScreen(chat: filteredChats[index]),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
+            );
+          },
+        );
+      },
     );
   }
 }

@@ -35,13 +35,13 @@ class LoginAndSignupBtn extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (context) {
-                  return const SignUp();
+                  return const SignUpScreen();
                 },
               ),
             );
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: kPrimaryLightColor,
+            backgroundColor: SecondaryColor,
             elevation: 0,
           ),
           child: Text(

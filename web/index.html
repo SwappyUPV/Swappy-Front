@@ -5,7 +5,7 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="google-signin-client_id" content="799045641014-lvds42ll87p593sf3edpc716q7hfc26s.apps.googleusercontent.com"> <!-- Replace with your Client ID -->
+  <meta name="google-signin-client_id" content="799045641014-lvds42ll87p593sf3edpc716q7hfc26s.apps.googleusercontent.com">
   <meta name="description" content="New Flutter pin project">
 
   <!-- iOS meta tags & icons -->
@@ -22,24 +22,14 @@
 </head>
 <body>
 <!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
 <script>
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyDpaf-MLgf4Maa2S8ptTBF_WZaJhrcb5oE",
-    authDomain: "swappy-pin.firebaseapp.com",
-    databaseURL: "https://swappy-pin-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "swappy-pin",
-    storageBucket: "swappy-pin.appspot.com",
-    messagingSenderId: "799045641014",
-    appId: "1:799045641014:web:af8379f1aa6b7a4f378997",
-    measurementId: "G-H92NZEGF3Q"
-  };
-
-  // Initialize Firebase
-  const app = firebase.initializeApp(firebaseConfig);
+  // Firebase SDKs are loaded but not initialized in JavaScript.
+  // Initialization happens in Flutter's main.dart using the firebase_core plugin.
 </script>
 
 <script src="flutter_bootstrap.js" async></script>

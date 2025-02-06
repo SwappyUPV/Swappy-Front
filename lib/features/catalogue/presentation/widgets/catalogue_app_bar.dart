@@ -9,21 +9,11 @@ class CatalogueAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       title: Row(
         children: [
-          // FutureBuilder(
-          //   future: FirebaseStorage.instance.ref('swappy.png').getDownloadURL(),
-          //   builder: (context, snapshot) {
-          //     if (snapshot.connectionState == ConnectionState.done &&
-          //         snapshot.hasData) {
-          //       return Image.network(
-          //         snapshot.data as String,
-          //         height: 30,
-          //       );
-          //     }
-          //     return CircularProgressIndicator(); // Muestra un indicador de carga mientras se obtiene la URL
-          //   },
-          // ),
-          SizedBox(width: 10),
-          Text('Catálogo', style: TextStyle(color: Colors.black)),
+          Image.asset(
+            'assets/icons/logo.png',
+            width: 10,
+            height: 10,
+          ),
         ],
       ),
       actions: [

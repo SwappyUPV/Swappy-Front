@@ -30,29 +30,37 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  get: ^4.6.5  # O la versión más reciente
-  image_picker: ^0.8.4+4
+  get: ^4.6.6  # O la versión más reciente
+  image_picker: ^1.1.2
   universal_html: ^2.2.4
+  http: ^1.2.0  # Agregando la dependencia de http
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  flutter_bloc: ^8.1.6
-  equatable: ^2.0.3
+  flutter_bloc: ^9.0.0
+  equatable: ^2.0.7
   provider: ^6.1.2
-  flutter_svg: ^2.0.10+1
-  firebase_core: ^3.5.0
-  firebase_auth: ^5.3.0
-  cloud_firestore: ^5.4.2
-  google_sign_in: ^6.2.1
-  font_awesome_flutter: ^10.1.0
-  shared_preferences: ^2.0.0
-  window_manager: ^0.4.2
-  firebase_storage: ^12.3.1
-  flutter_image_compress: ^2.0.0  # Añade esta línea
+  flutter_svg: ^2.0.16
+  google_sign_in: ^6.2.2
+  font_awesome_flutter: ^10.8.0
+  shared_preferences: ^2.3.3
+  window_manager: ^0.4.3
+  firebase_storage: ^12.3.7
+  flutter_image_compress: ^2.1.0
   iconsax: ^0.0.8  # O la versión más reciente
-  intl: ^0.17.0
+  intl: ^0.20.1
   cached_network_image: ^3.4.1
-
+  google_fonts: ^6.2.1
+  firebase_core: ^3.8.1
+  firebase_database: ^11.2.0
+  firebase_auth: ^5.3.4
+  cloud_firestore: ^5.5.1
+  multi_select_flutter: ^4.1.3
+  multi_dropdown: ^3.0.0
+  reaction_askany: ^0.1.2
+  image: ^4.1.3
+  dio: ^5.0.0
+  file_picker: ^8.3.1
 
 dev_dependencies:
   flutter_test:
@@ -64,8 +72,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
-  build_runner: ^2.4.0
-  build_web_compilers: ^4.0.4
+  build_runner: ^2.4.13
+  build_web_compilers: ^4.0.11
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -84,6 +92,11 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/icons/navBar/
+    - assets/images/portadas/
+    - assets/images/wardrobe/
+    - assets/images/users/
+    - assets/images/Mascota_Swappy.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -96,12 +109,23 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
+  fonts:
+    - family: UrbaneMedium
+      fonts:
+        - asset: assets/fonts/Urbane-Medium.ttf
+    - family: UrbaneBold
+      fonts:
+        - asset: assets/fonts/Urbane-Bold.ttf
+    - family: UrbaneLight
+      fonts:
+        - asset: assets/fonts/Urbane-Light.ttf
+    - family: OpenSans
+      fonts:
+        - asset: assets/fonts/OpenSans-Regular.ttf
+        - asset: assets/fonts/OpenSans-Bold.ttf
+          weight: 700
+
+
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf

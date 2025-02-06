@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:multi_dropdown/multi_dropdown.dart';
+import 'package:pin/core/services/create_user_service.dart';
+import 'package:pin/features/profile/presentation/services/user_update_service.dart';
+import 'package:pin/features/profile/presentation/widgets/edit_birthday_dialog.dart';
 import '../../screens/login_screen.dart';
-import 'package:pin/core/services/authentication_service.dart'; // Your AuthMethod class
+import 'package:pin/features/auth/presentation/widgets/components/image_picker_widget.dart';
 
 class SignUpForm extends StatefulWidget {
   const SignUpForm({super.key});
@@ -12,29 +16,295 @@ class SignUpForm extends StatefulWidget {
 class _SignUpFormState extends State<SignUpForm> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _pointsController = TextEditingController();
-  final AuthMethod _authMethod = AuthMethod();
+  final CreateUserService _createUserService = CreateUserService();
   final _formKey = GlobalKey<FormState>();
 
+  final List<String> allSizes = ['XS', 'S', 'M', 'L', 'XL'];
+  final MultiSelectController<String> _multiSelectController =
+      MultiSelectController();
+
   DateTime? _selectedBirthday;
-  String? _selectedGender;
+  String? _selectedGender = 'Hombre';
   List<String> preferredSizes = [];
   bool _showPassword = false;
   bool _showConfirmPassword = false;
+  dynamic _pickedImage;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(width: 10),
+                ImagePickerWidget(
+                  pickedImage: _pickedImage,
+                  onImagePicked: (image) {
+                    setState(() {
+                      _pickedImage = image;
+                    });
+                  },
+                ),
+              ],
+            ),
+            const Divider(height: 30, thickness: 2),
+            const Text(
+              'Información Personal',
+              style: TextStyle(
+                fontFamily: 'UrbaneMedium',
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: _nameController,
+              style: TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                hintText: "Nombre de usuario",
+                prefixIcon: Icon(Icons.person),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              style: TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                hintText: "Correo electrónico",
+                prefixIcon: Icon(Icons.email),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const Divider(height: 30, thickness: 2),
+            const Text(
+              'Contraseña',
+              style: TextStyle(
+                fontFamily: 'UrbaneMedium',
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: !_showPassword,
+              style: TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                hintText: "Introducir contraseña",
+                prefixIcon: const Icon(Icons.lock),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                      _showPassword ? Icons.visibility : Icons.visibility_off),
+                  onPressed: () {
+                    setState(() {
+                      _showPassword = !_showPassword;
+                    });
+                  },
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: _confirmPasswordController,
+              obscureText: !_showConfirmPassword,
+              style: TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                hintText: "Confirmar contraseña",
+                prefixIcon: const Icon(Icons.lock),
+                suffixIcon: IconButton(
+                  icon: Icon(_showConfirmPassword
+                      ? Icons.visibility
+                      : Icons.visibility_off),
+                  onPressed: () {
+                    setState(() {
+                      _showConfirmPassword = !_showConfirmPassword;
+                    });
+                  },
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const Divider(height: 30, thickness: 2),
+            const Text(
+              'Detalles Adicionales',
+              style: TextStyle(
+                fontFamily: 'UrbaneMedium',
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: _addressController,
+              style: TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                hintText: "Localidad",
+                prefixIcon: Icon(Icons.home),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            DropdownButtonFormField<String>(
+              value: _selectedGender,
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.person),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              style: TextStyle(
+                  fontSize: 14,
+                  fontFamily: 'UrbaneMedium',
+                  color: Colors.black87),
+              items: ['Hombre', 'Mujer', 'Otro']
+                  .map((gender) => DropdownMenuItem(
+                        value: gender,
+                        child: Text(gender),
+                      ))
+                  .toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedGender = newValue;
+                });
+              },
+            ),
+            SizedBox(height: 10),
+            TextFormField(
+              readOnly: true,
+              onTap: _pickBirthday,
+              decoration: InputDecoration(
+                hintText: _selectedBirthday == null
+                    ? "Fecha de Nacimiento"
+                    : "${_selectedBirthday!.day}/${_selectedBirthday!.month}/${_selectedBirthday!.year}",
+                prefixIcon: Icon(Icons.calendar_today),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                suffixIcon: Icon(Icons.arrow_drop_down),
+              ),
+              style: TextStyle(fontSize: 14, color: Colors.black87),
+            ),
+            const SizedBox(height: 10),
+            MultiDropdown<String>(
+              items: allSizes
+                  .map((size) => DropdownItem<String>(label: size, value: size))
+                  .toList(),
+              controller: _multiSelectController,
+              enabled: true,
+              searchEnabled: false, // Disable the search bar
+              chipDecoration: const ChipDecoration(
+                backgroundColor: Colors.black,
+                labelStyle: TextStyle(color: Colors.white),
+                wrap: false,
+                runSpacing: 0,
+                spacing: 5, // Reduce spacing
+              ),
+              fieldDecoration: const FieldDecoration(
+                hintText: 'Selecciona tallas',
+                hintStyle: TextStyle(color: Colors.black87),
+                showClearIcon: false,
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
+              ),
+              dropdownDecoration: const DropdownDecoration(
+                marginTop: 10, // Display content underneath
+                maxHeight: 500,
+                borderRadius:
+                    BorderRadius.all(Radius.circular(10)), // Rounded borders
+              ),
+              dropdownItemDecoration: DropdownItemDecoration(
+                selectedIcon: const Icon(Icons.check_box, color: Colors.black),
+                disabledIcon: Icon(Icons.lock, color: Colors.grey.shade300),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Selecciona tallas';
+                }
+                return null;
+              },
+              onSelectionChange: (selectedItems) {
+                setState(() {
+                  preferredSizes = selectedItems.map((item) => item).toList();
+                });
+              },
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => signUpUser(context),
+              child: const Text(
+                "Registrarse",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _nameController.dispose();
+    _addressController.dispose();
+    super.dispose();
+  }
 
   void _pickBirthday() async {
-    DateTime? pickedDate = await showDatePicker(
+    DateTime? selectedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Colors.black,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+            dialogBackgroundColor: Colors.white,
+          ),
+          child: child!,
+        );
+      },
     );
-    if (pickedDate != null) {
+    if (selectedDate != null) {
       setState(() {
-        _selectedBirthday = pickedDate;
+        _selectedBirthday = selectedDate;
       });
     }
   }
@@ -62,7 +332,13 @@ class _SignUpFormState extends State<SignUpForm> {
         return;
       }
 
-      String res = await _authMethod.signupUser(
+      // Use default image URL if no image is picked
+      if (_pickedImage == null) {
+        _pickedImage =
+            "https://firebasestorage.googleapis.com/v0/b/swappy-pin.appspot.com/o/profile_images%2Fdefault_user.png?alt=media&token=92bbfc56-8927-41a0-b81c-2394b90bf38c";
+      }
+
+      String res = await _createUserService.createUser(
         email: _emailController.text,
         password: _passwordController.text,
         additionalData: {
@@ -70,20 +346,23 @@ class _SignUpFormState extends State<SignUpForm> {
           'address': _addressController.text,
           'birthday': _selectedBirthday,
           'gender': _selectedGender,
-          'points': _pointsController.text,
+          'points': 0,
           'preferredSizes': preferredSizes,
-          'profilePicture': "assets/images/user_3.png",
+          'followers': 0,
+          'following': 0,
+          'exchanges': 0,
+          'bio': 'Sin biografía',
         },
+        profileImage: _pickedImage,
       );
-      print("Sign Up Response: $res");
 
       if (res == "success") {
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: const Text("Success"),
-              content: const Text("Successfully Signed Up!"),
+              title: const Text("Éxito"),
+              content: const Text("Registrado con éxito!"),
               actions: <Widget>[
                 TextButton(
                   onPressed: () {
@@ -121,161 +400,5 @@ class _SignUpFormState extends State<SignUpForm> {
         );
       }
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          TextFormField(
-            controller: _nameController,
-            decoration: const InputDecoration(
-              hintText: "Your name",
-              prefixIcon: Icon(Icons.person),
-            ),
-          ),
-          const SizedBox(height: 10),
-          TextFormField(
-            controller: _emailController,
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-              hintText: "Your email",
-              prefixIcon: Icon(Icons.email),
-            ),
-          ),
-          const SizedBox(height: 10),
-          TextFormField(
-            controller: _passwordController,
-            obscureText: !_showPassword,
-            decoration: InputDecoration(
-              hintText: "Your password",
-              prefixIcon: const Icon(Icons.lock),
-              suffixIcon: IconButton(
-                icon: Icon(_showPassword ? Icons.visibility : Icons.visibility_off),
-                onPressed: () {
-                  setState(() {
-                    _showPassword = !_showPassword;
-                  });
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          TextFormField(
-            controller: _confirmPasswordController,
-            obscureText: !_showConfirmPassword,
-            decoration: InputDecoration(
-              hintText: "Confirm password",
-              prefixIcon: const Icon(Icons.lock),
-              suffixIcon: IconButton(
-                icon: Icon(_showConfirmPassword ? Icons.visibility : Icons.visibility_off),
-                onPressed: () {
-                  setState(() {
-                    _showConfirmPassword = !_showConfirmPassword;
-                  });
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          TextFormField(
-            controller: _addressController,
-            decoration: const InputDecoration(
-              hintText: "Your address",
-              prefixIcon: Icon(Icons.home),
-            ),
-          ),
-          const SizedBox(height: 10),
-          TextFormField(
-            controller: _pointsController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              hintText: "Points",
-              prefixIcon: Icon(Icons.score),
-            ),
-          ),
-          const SizedBox(height: 10),
-          DropdownButtonFormField<String>(
-            value: _selectedGender,
-            decoration: const InputDecoration(
-              hintText: "Gender",
-              prefixIcon: Icon(Icons.person),
-            ),
-            items: ['Male', 'Female', 'Other']
-                .map((gender) => DropdownMenuItem(
-              value: gender,
-              child: Text(gender),
-            ))
-                .toList(),
-            onChanged: (String? newValue) {
-              setState(() {
-                _selectedGender = newValue;
-              });
-            },
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              const Text("Birthday: "),
-              TextButton(
-                onPressed: _pickBirthday,
-                child: Text(_selectedBirthday == null
-                    ? "Select Date"
-                    : "${_selectedBirthday!.toLocal()}".split(' ')[0]),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              const Text("Preferred Sizes: "),
-              Checkbox(
-                value: preferredSizes.contains("M"),
-                onChanged: (bool? value) {
-                  setState(() {
-                    if (value == true) {
-                      preferredSizes.add("M");
-                    } else {
-                      preferredSizes.remove("M");
-                    }
-                  });
-                },
-              ),
-              const Text("M"),
-              Checkbox(
-                value: preferredSizes.contains("L"),
-                onChanged: (bool? value) {
-                  setState(() {
-                    if (value == true) {
-                      preferredSizes.add("L");
-                    } else {
-                      preferredSizes.remove("L");
-                    }
-                  });
-                },
-              ),
-              const Text("L"),
-            ],
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () => signUpUser(context),
-            child: Text("Sign Up".toUpperCase()),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    _nameController.dispose();
-    _addressController.dispose();
-    _pointsController.dispose();
-    super.dispose();
   }
 }

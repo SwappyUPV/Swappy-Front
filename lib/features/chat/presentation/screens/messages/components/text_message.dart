@@ -6,32 +6,61 @@ import '../../../models/chat_message.dart';
 class TextMessage extends StatelessWidget {
   const TextMessage({
     super.key,
-    this.message,
+    required this.message,
+    required this.isSender,
   });
 
-  final ChatMessage? message;
+  final ChatMessage message;
+  final bool isSender;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      // color: MediaQuery.of(context).platformBrightness == Brightness.dark
-      //     ? Colors.white
-      //     : Colors.black,
-      padding: const EdgeInsets.symmetric(
-        horizontal: kDefaultPadding * 0.75,
-        vertical: kDefaultPadding / 2,
-      ),
-      decoration: BoxDecoration(
-        color: kPrimaryColor.withOpacity(message!.isSender ? 1 : 0.1),
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: Text(
-        message!.messageContent,
-        style: TextStyle(
-          color: message!.isSender
-              ? Colors.white
-              : Theme.of(context).textTheme.bodyLarge!.color,
-        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment:
+        isSender ? MainAxisAlignment.end : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Column(
+            crossAxisAlignment:
+            isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: isSender ? Colors.black : Colors.grey[200],
+                  borderRadius: BorderRadius.only(
+                    topLeft: const Radius.circular(16),
+                    topRight: const Radius.circular(16),
+                    bottomLeft:
+                    isSender ? const Radius.circular(16) : Radius.zero,
+                    bottomRight:
+                    isSender ? Radius.zero : const Radius.circular(16),
+                  ),
+                ),
+                child: Text(
+                  message.messageContent,
+                  style: TextStyle(
+                    color: isSender ? Colors.white : Colors.black,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                message.timestamp.toString(),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

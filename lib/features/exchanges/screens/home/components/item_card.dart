@@ -37,7 +37,7 @@ class ItemCard extends StatelessWidget {
                   child: Hero(
                     tag: "${product.id}",
                     child: Center(
-                      child: Image.asset(
+                      child: Image.network(
                         product.image,
                         fit: BoxFit.contain,
                       ),
