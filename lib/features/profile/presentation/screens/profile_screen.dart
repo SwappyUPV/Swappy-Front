@@ -13,8 +13,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 //todo: 3. Allow user to share their profile publicly with a generated web link from firebase (allow other users profile viewing)
 //todo: 4. Allow filtering of clothes by category, type... etc
 
-
-
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
@@ -50,6 +48,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  // Función para mostrar el popup de "Funcionalidad no implementada"
+  void _showUnderConstructionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Buscador de perfiles'),
+        content: Text('Esta funcionalidad aún no está disponible.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Cierra el diálogo
+            },
+            child: Text('Cerrar'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,6 +85,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         actions: [
+          // Botón de búsqueda
+          IconButton(
+            icon: const Icon(Icons.search, color: Colors.white),
+            onPressed: _showUnderConstructionDialog, // Mostrar popup al presionar
+          ),
+          // Botón de menú
           IconButton(
             icon: const Icon(Icons.menu, color: Colors.white),
             onPressed: () async {
@@ -98,7 +121,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 19, vertical: 20),
-
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

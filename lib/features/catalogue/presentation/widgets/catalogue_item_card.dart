@@ -28,20 +28,22 @@ class _CatalogueItemCardState extends State<CatalogueItemCard> {
   String? userName;
   bool isLoading = true;
   Timer? _timer;
-
+  String? userProfilePicture;
+  
   @override
   void initState() {
     super.initState();
     isLoading = true;
-    loadUserName(widget.product.userId);
+    loadUserData(widget.product.userId);
   }
 
-  Future<void> loadUserName(String? userId) async {
+  Future<void> loadUserData(String? userId) async {
     try {
       final user = await getUserById(userId);
       if (mounted) {
         setState(() {
           userName = user?.name ?? "Usuario desconocido";
+          userProfilePicture = user?.profilePicture;
           isLoading = false;
         });
       }
@@ -49,6 +51,7 @@ class _CatalogueItemCardState extends State<CatalogueItemCard> {
       if (mounted) {
         setState(() {
           userName = "Error al cargar";
+          userProfilePicture = null;
           isLoading = false;
         });
       }
@@ -103,7 +106,10 @@ class _CatalogueItemCardState extends State<CatalogueItemCard> {
               child: Row(
                 children: [
                   CircleAvatar(
-                    backgroundImage: AssetImage('assets/images/user_2.png'),
+                    backgroundImage: userProfilePicture != null
+                        ? NetworkImage(userProfilePicture!)
+                        : AssetImage('assets/images/user_2.png')
+                            as ImageProvider,
                     radius: 20,
                   ),
                   SizedBox(width: 8),

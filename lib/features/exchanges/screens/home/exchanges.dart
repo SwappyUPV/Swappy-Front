@@ -269,9 +269,9 @@ class ExchangesState extends State<Exchanges> {
     );
 
     if (newExchange != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      /* ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Intercambio creado con éxito")),
-      );
+      ) */;
       setState(() {
         // Actualizar el estado si es necesario
         isNewExchange = false; // Ahora ya no es un intercambio nuevo
@@ -284,9 +284,9 @@ class ExchangesState extends State<Exchanges> {
           .getExchangeById(widget.exchangeId!)
           .then((dataExchange) async {
         if (dataExchange != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
+         /*  ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Intercambio obtenido con éxito")),
-          );
+          ); */
           setState(() {
             // Actualizar el estado con los datos del intercambio
           });
