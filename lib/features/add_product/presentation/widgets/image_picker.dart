@@ -28,10 +28,10 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
   XFile? _tempImage;
 
   // Dimensiones de visualización
-  static const double DISPLAY_WIDTH = 250.0;
-  static const double DISPLAY_HEIGHT = 400.0;
+  static const double DISPLAY_WIDTH = 1000.0;
+  static const double DISPLAY_HEIGHT = 1600.0;
   static const double MARGIN_PERCENTAGE = 0.1;
-  static const int IMAGE_QUALITY = 85;
+  static const int IMAGE_QUALITY = 100;
 
   Future<void> _processImageInBackground(XFile originalImage) async {
     setState(() => _isProcessing = true);
@@ -90,7 +90,7 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
       originalImage,
       width: targetWidth,
       height: targetHeight,
-      interpolation: img.Interpolation.linear,
+      interpolation: img.Interpolation.cubic,
     );
 
     // Codificar directamente la imagen redimensionada como PNG

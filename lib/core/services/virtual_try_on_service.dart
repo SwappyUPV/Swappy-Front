@@ -1,25 +1,13 @@
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart'; // Necesario para kIsWeb
 import 'package:image/image.dart' as img;
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart'; // Para realizar solicitudes multipart
 import 'dart:io'; // Para trabajar con archivos de imagen
 import 'package:image_picker/image_picker.dart'; // Si usas image_picker para seleccionar la imagen
-import 'dart:html' as html;
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'dart:io';
-import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'dart:typed_data';
-import 'package:http/http.dart' as http;
-import 'package:file_picker/file_picker.dart';
-import 'dart:io';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:html' as html;
-import 'package:image/image.dart' as img;
+import 'package:file_picker/file_picker.dart'; // Usado para seleccionar archivos en Web
 
 class VirtualTryOnService {
   static const String _apiUrl = 'https://yisol-idm-vton.hf.space/api/predict';
@@ -169,5 +157,24 @@ class VirtualTryOnService {
       print("Error al realizar la petición para obtener la imagen: $e");
       return null;
     }
+  }
+
+  // Función para seleccionar imagen de la galería en web y móvil
+  static Future<Uint8List?> pickImage() async {
+    if (kIsWeb) {
+      // En Web, usar FilePicker para seleccionar imágenes
+      FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.image);
+      if (result != null) {
+        return result.files.single.bytes; // Devuelve la imagen seleccionada
+      }
+    } else {
+      // En dispositivos móviles, usar ImagePicker
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        return await pickedFile.readAsBytes(); // Devuelve la imagen seleccionada
+      }
+    }
+    return null; // Si no se selecciona ninguna imagen
   }
 }
