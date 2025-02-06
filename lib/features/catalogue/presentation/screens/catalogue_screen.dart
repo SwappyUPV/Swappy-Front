@@ -6,6 +6,7 @@ import '../widgets/search_bar.dart' as CustomWidgets;
 import '../widgets/category_filter.dart';
 import '../widgets/catalogue_grid.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CatalogueScreen extends StatefulWidget {
   const CatalogueScreen({super.key});
@@ -23,6 +24,7 @@ class _CatalogueScreenState extends State<CatalogueScreen> {
   Set<String> _styles = {};
   bool _isLoading = true;
   Set<Product> favoriteProducts = {};
+  final String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
   final CatalogService _catalogService = CatalogService();
 
@@ -38,7 +40,6 @@ class _CatalogueScreenState extends State<CatalogueScreen> {
     });
 
     try {
-      // Cargar categorías, estilos y productos
       final categories = await _catalogService.getCategories();
       final styles = await _catalogService.getStyles();
       final clothes = await _catalogService.getClothes();
@@ -48,7 +49,10 @@ class _CatalogueScreenState extends State<CatalogueScreen> {
       setState(() {
         _categories = categories;
         _styles = styles;
-        catalogoRopa = clothes;
+        // Filtrar los productos para excluir los del usuario actual
+        catalogoRopa = clothes
+            .where((product) => product.userId != currentUserId)
+            .toList();
         _isLoading = false;
       });
     } catch (e) {
@@ -61,6 +65,11 @@ class _CatalogueScreenState extends State<CatalogueScreen> {
 
   List<Product> get filteredCatalogo {
     return catalogoRopa.where((item) {
+      // Excluir productos del usuario actual
+      if (item.userId == currentUserId) {
+        return false;
+      }
+
       bool matchesFilter = true;
 
       if (_selectedStyle != null && _selectedStyle!.isNotEmpty) {
