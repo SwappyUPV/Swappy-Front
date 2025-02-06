@@ -7,6 +7,7 @@ import '../widgets/category_filter.dart';
 import '../widgets/catalogue_grid.dart';
 import 'package:pin/features/exchanges/models/Product.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pin/features/rewards/rewards.dart';
 
 class CatalogueScreen extends StatefulWidget {
   const CatalogueScreen({super.key});
@@ -142,21 +143,38 @@ class _CatalogueScreenState extends State<CatalogueScreen> {
                           child: Padding(
                             padding:
                                 const EdgeInsets.only(top: 10.0, right: 8.0),
-                            child: IconButton(
-                              icon: Icon(Icons.favorite_border,
-                                  color: Colors.white),
-                              iconSize: 30.0,
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => FavoritesScreen(
-                                      favoriteProducts:
-                                          favoriteProducts.toList(),
-                                    ),
-                                  ),
-                                );
-                              },
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.store, color: Colors.white),
+                                  iconSize: 30.0,
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const Rewards(),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.favorite_border,
+                                      color: Colors.white),
+                                  iconSize: 30.0,
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => FavoritesScreen(
+                                          favoriteProducts:
+                                              favoriteProducts.toList(),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           ),
                         ),
