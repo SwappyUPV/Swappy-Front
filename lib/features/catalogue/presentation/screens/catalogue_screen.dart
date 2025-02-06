@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pin/features/catalogue/presentation/screens/easter_egg.dart';
 import 'package:pin/features/catalogue/presentation/screens/favorites.dart';
 import 'package:pin/features/catalogue/presentation/widgets/header.dart';
 import '../../../../core/services/catalogue.dart';
@@ -158,11 +159,21 @@ class _CatalogueScreenState extends State<CatalogueScreen> {
                                     );
                                   },
                                 ),
-                                IconButton(
-                                  icon: Icon(Icons.favorite_border,
-                                      color: Colors.white),
-                                  iconSize: 30.0,
-                                  onPressed: () {
+                                GestureDetector(
+                                  onLongPress: () {
+                                    // Navegar a la pantalla de easter egg
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => const EasterEggScreen(
+                                          title: 'Swappy',
+                                          description: 'La mejor mascota del mundo.',
+                                          image: 'assets/images/Mascota_Swappy.png',
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  onTap: () {
+                                    // Navegar a la pantalla de favoritos
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -173,6 +184,11 @@ class _CatalogueScreenState extends State<CatalogueScreen> {
                                       ),
                                     );
                                   },
+                                  child: Icon(
+                                    Icons.favorite_border,
+                                    color: Colors.white,
+                                    size: 30.0,
+                                  ),
                                 ),
                               ],
                             ),
