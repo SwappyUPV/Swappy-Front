@@ -15,65 +15,70 @@ class CatalogueScreen extends StatefulWidget {
 }
 
 class _CatalogueScreenState extends State<CatalogueScreen> {
-  String _selectedCategory = 'Streetwear';
+  String? _selectedCategory;
+  String? _selectedStyle;
   String _searchQuery = '';
   List<Product> catalogoRopa = [];
-  Set<String> _categories = {
-    'Streetwear',
-    'Grunge',
-    'Motorsport',
-    'Y2K',
-    'Coquette',
-    'Glam'
-  };
+  Set<String> _categories = {};
+  Set<String> _styles = {};
   bool _isLoading = true;
-  Set<Product> favoriteProducts = {}; // Set para favoritos
+  Set<Product> favoriteProducts = {};
 
   final CatalogService _catalogService = CatalogService();
 
   @override
   void initState() {
     super.initState();
-    _loadClothes();
+    _loadData();
   }
 
-  Future<void> _loadClothes() async {
+  Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
     });
-    List<Product> clothes = await _catalogService.getClothes();
-    Set<String> categories = {
-      'Streetwear',
-      'Grunge',
-      'Motorsport',
-      'Y2K',
-      'Coquette',
-      'Glam'
-    };
 
-    for (var item in clothes) {
-      categories.add(item.category);
+    try {
+      // Cargar categorías, estilos y productos
+      final categories = await _catalogService.getCategories();
+      final styles = await _catalogService.getStyles();
+      final clothes = await _catalogService.getClothes();
+
+      if (!mounted) return;
+
+      setState(() {
+        _categories = categories;
+        _styles = styles;
+        catalogoRopa = clothes;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading data: $e');
+      setState(() {
+        _isLoading = false;
+      });
     }
-
-    if (!mounted) return;
-
-    setState(() {
-      catalogoRopa = clothes;
-      _categories = categories;
-      _isLoading = false;
-    });
   }
 
   List<Product> get filteredCatalogo {
     return catalogoRopa.where((item) {
-      final matchesCategory = _selectedCategory == 'Streetwear' ||
-          item.category == _selectedCategory;
-      final matchesSearch = item.title
-              .toLowerCase()
-              .contains(_searchQuery.toLowerCase()) ||
-          item.styles.any(
-              (tag) => tag.toLowerCase().contains(_searchQuery.toLowerCase()));
-      return matchesCategory && matchesSearch;
+      bool matchesFilter = true;
+
+      if (_selectedStyle != null && _selectedStyle!.isNotEmpty) {
+        // Primero verificar si es una categoría
+        if (CategoryFilter.categoryImages.containsKey(_selectedStyle)) {
+          matchesFilter = item.category == _selectedStyle;
+        } else {
+          // Si no es una categoría, es un estilo
+          matchesFilter = item.styles.contains(_selectedStyle);
+        }
+      }
+
+      final matchesSearch =
+          item.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+              item.styles.any((style) =>
+                  style.toLowerCase().contains(_searchQuery.toLowerCase()));
+
+      return matchesFilter && matchesSearch;
     }).toList();
   }
 
@@ -129,10 +134,8 @@ class _CatalogueScreenState extends State<CatalogueScreen> {
                             padding:
                                 const EdgeInsets.only(top: 10.0, right: 8.0),
                             child: IconButton(
-                              icon: Icon(
-                                Icons.favorite_border,
-                                color: Colors.white,
-                              ),
+                              icon: Icon(Icons.favorite_border,
+                                  color: Colors.white),
                               iconSize: 30.0,
                               onPressed: () {
                                 Navigator.push(
@@ -210,18 +213,19 @@ class _CatalogueScreenState extends State<CatalogueScreen> {
               ),
             ]),
             SizedBox(height: 20),
+            // Filtro de estilos
             CategoryFilter(
-              categories: _categories.toList(),
-              selectedCategory: _selectedCategory,
-              onCategorySelected: (category) {
+              categories: _styles.toList(),
+              selectedCategory: _selectedStyle,
+              onCategorySelected: (style) {
                 setState(() {
-                  _selectedCategory = category;
+                  _selectedStyle = style;
                 });
               },
             ),
             SizedBox(height: 25),
             Header(
-                title: 'Newsfeed',
+                title: 'Catálogo',
                 subtitle: 'Descubre lo que ofrecen otros usuarios'),
             _isLoading
                 ? Padding(

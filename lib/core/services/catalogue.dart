@@ -27,14 +27,52 @@ class CatalogService {
           createdAt: doc['createdAt'] ?? Timestamp.now(),
           isPublic: data['isPublic'] ?? false,
           inCloset: data['enCloset'] ?? false,
-
         );
       }).toList();
 
       return clothes;
     } catch (e) {
-      print('Error al obtener la ropa: $e');
-      rethrow;
+      print('Error getting clothes: $e');
+      return [];
+    }
+  }
+
+  Future<Set<String>> getCategories() async {
+    try {
+      // Lista fija de categorías de prendas
+      final List<String> clothingCategories = [
+        'Accesorios',
+        'Camisetas',
+        'Pantalones',
+        'Zapatos'
+      ];
+
+      return Set<String>.from(clothingCategories);
+    } catch (e) {
+      print('Error getting categories: $e');
+      return {};
+    }
+  }
+
+  Future<Set<String>> getStyles() async {
+    try {
+      QuerySnapshot querySnapshot = await _firestore.collection('styles').get();
+      Set<String> styles = {};
+
+      // Convertir los documentos a una lista y tomar los primeros 5
+      final docs = querySnapshot.docs.take(5);
+
+      for (var doc in docs) {
+        String name = doc['name'] ?? '';
+        if (name.isNotEmpty) {
+          styles.add(name);
+        }
+      }
+
+      return styles;
+    } catch (e) {
+      print('Error getting styles: $e');
+      return {};
     }
   }
 
